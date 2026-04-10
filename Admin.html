@@ -1,0 +1,2284 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <title>Administrador - PAVYPre</title>
+    <link rel="stylesheet" href="css/style.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        .modal-overlay { display: none; }
+        .modal-overlay.active { display: flex; }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+        .sub-tab-content { display: none; }
+        .sub-tab-content.active { display: block; }
+
+        /* ── Grid de tarjetas proveedores ── */
+        .grid-proveedores {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+            gap: 1rem;
+        }
+        .card-proveedor {
+            background: #fff;
+            border: 1px solid #e5e7eb;
+            border-radius: .75rem;
+            padding: 1rem 1.25rem;
+            box-shadow: 0 1px 3px rgba(0,0,0,.06);
+            transition: box-shadow .15s;
+            cursor: pointer;
+        }
+        .card-proveedor:hover { box-shadow: 0 4px 14px rgba(0,0,0,.1); }
+        .card-proveedor-nombre {
+            display: block;
+            font-weight: 600;
+            font-size: .95rem;
+            color: #111;
+            margin-bottom: .45rem;
+        }
+        .card-proveedor-stats {
+            font-size: .78rem;
+            color: #6b7280;
+            display: flex;
+            flex-wrap: wrap;
+            gap: .3rem;
+            align-items: center;
+        }
+        .card-proveedor-stats .sep { color: #d1d5db; }
+    </style>
+    <link rel="icon" type="image/png" sizes="16x16" href="img/logo-16x16.png">
+
+</head>
+<body class="bg-gray-50 min-h-screen">
+
+<!-- HEADER -->
+<header class="bg-black text-white shadow-lg fixed top-0 left-0 right-0 z-40">
+    <div class="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
+        <div class="flex items-center gap-4">
+            <img src="img/logo.png" alt="PAVYPRE" class="h-12 w-auto object-contain" onerror="this.style.display='none'"/>
+            <div>
+                <h1 class="text-2xl font-bold"><span class="text-[#FFC107]">PAVY</span>Pre</h1>
+                <p class="text-sm text-gray-400">Panel de Administración</p>
+            </div>
+        </div>
+        <div class="flex items-center gap-4">
+            <span class="text-[#FFC107] text-sm hidden md:block">admin@pavypre.com</span>
+            <a href="php/salir.php" class="bg-[#FFC107] text-black px-6 py-2 rounded hover:bg-yellow-500 transition-colors font-semibold text-sm">
+                Cerrar Sesión
+            </a>
+        </div>
+    </div>
+</header>
+
+<!-- NAV TABS -->
+<nav class="bg-white border-b border-gray-200 shadow-sm fixed top-[85px] left-0 right-0 z-30">
+    <div class="max-w-7xl mx-auto px-6">
+        <div class="flex gap-1 overflow-x-auto">
+            <button onclick="switchTab('obras')" id="tab-obras"
+                class="tab-btn flex items-center gap-2 px-6 py-4 border-b-2 border-[#FFC107] text-black font-semibold transition-colors whitespace-nowrap text-sm">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-2 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/></svg>
+                Obras
+            </button>
+            <button onclick="switchTab('empleados')" id="tab-empleados"
+                class="tab-btn flex items-center gap-2 px-6 py-4 border-b-2 border-transparent text-gray-500 hover:text-black transition-colors whitespace-nowrap text-sm">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                Empleados
+            </button>
+            <button onclick="switchTab('clientes')" id="tab-clientes"
+                class="tab-btn flex items-center gap-2 px-6 py-4 border-b-2 border-transparent text-gray-500 hover:text-black transition-colors whitespace-nowrap text-sm">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0M12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
+                Clientes
+            </button>
+            <button onclick="switchTab('proveedores')" id="tab-proveedores"
+                class="tab-btn flex items-center gap-2 px-6 py-4 border-b-2 border-transparent text-gray-500 hover:text-black transition-colors whitespace-nowrap text-sm">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/></svg>
+                Proveedores
+            </button>
+        </div>
+    </div>
+</nav>
+
+<!-- ======================================================
+     MAIN CONTENT
+     ====================================================== -->
+<main class="max-w-7xl mx-auto px-6 pt-[170px] pb-12">
+
+    <!-- ==================== OBRAS TAB ==================== -->
+    <div id="tab-content-obras" class="tab-content active">
+
+        <!-- Vista de lista de obras -->
+        <div id="obras-list-view">
+            <div class="flex items-start justify-between mb-6 flex-wrap gap-3">
+                <div>
+                    <h2 class="text-3xl font-bold text-black">Obras</h2>
+                    <p class="text-gray-500 text-sm mt-1">Gestión completa de obras </p>
+                </div>
+                <div class="flex gap-3 flex-wrap">
+                    <button onclick="openReporte()"
+                        class="flex items-center gap-2 bg-gray-800 text-white px-5 py-2 rounded hover:bg-gray-700 transition-colors font-semibold text-sm">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
+                        Reporte Estadístico
+                    </button>
+                    <button onclick="resetObraForm(); openModal('obra-modal')"
+                        class="flex items-center gap-2 bg-[#FFC107] text-black px-5 py-2 rounded hover:bg-yellow-500 transition-colors font-semibold text-sm">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                        Agregar Obra
+                    </button>
+                </div>
+            </div>
+
+            <!-- FILTROS DE OBRAS: búsqueda por nombre + filtro por estado -->
+            <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-4 mb-5 flex flex-wrap gap-3 items-center">
+                <div class="flex-1 min-w-[200px]">
+                    <input id="obras-search" type="text" placeholder="Buscar obra por nombre..."
+                        oninput="filtrarObras()"
+                        class="w-full border-2 border-gray-200 rounded-lg px-4 py-2 text-sm focus:outline-none focus:border-[#FFC107]">
+                </div>
+                <!-- Hay que mejorar la visualización del select -->
+                
+                
+                <button onclick="limpiarFiltrosObras()"
+                    class="text-sm text-gray-400 hover:text-black transition-colors px-2 py-2">
+                    Limpiar filtros
+                </button>
+            </div>
+
+            <div id="obras-container" class="space-y-4"></div>
+        </div>
+
+        <!-- Vista de detalle de una obra específica -->
+        <div id="obra-detail-view" style="display:none">
+            <button onclick="closeObraDetail()" class="mb-6 flex items-center gap-2 text-gray-600 hover:text-black transition-colors text-sm font-medium">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
+                Volver a Obras
+            </button>
+            <div id="obra-detail-content"></div>
+        </div>
+    </div>
+
+    <!-- ==================== EMPLEADOS TAB ==================== -->
+    <div id="tab-content-empleados" class="tab-content">
+        <div class="flex items-center justify-between mb-6 flex-wrap gap-3">
+            <div>
+                <h2 class="text-3xl font-bold text-black">Empleados</h2>
+                <p class="text-gray-500 text-sm mt-1">Directorio de colaboradores</p>
+            </div>
+            <button onclick="resetEmpleadoForm(); openModal('empleado-modal')"
+                class="flex items-center gap-2 bg-[#FFC107] text-black px-5 py-2 rounded hover:bg-yellow-500 transition-colors font-semibold text-sm">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                Nuevo Empleado
+            </button>
+        </div>
+
+        <!-- FILTROS DE EMPLEADOS: búsqueda por nombre -->
+        <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-4 mb-5 flex flex-wrap gap-3 items-center">
+            <div class="flex-1 min-w-[200px]">
+                <input id="empleados-search" type="text" placeholder="Buscar empleado por nombre..."
+                    oninput="filtrarEmpleados()"
+                    class="w-full border-2 border-gray-200 rounded-lg px-4 py-2 text-sm focus:outline-none focus:border-[#FFC107]">
+            </div>
+            <button onclick="limpiarFiltrosEmpleados()"
+                class="text-sm text-gray-400 hover:text-black transition-colors px-2 py-2">
+                Limpiar filtros
+            </button>
+        </div>
+
+        <div class="bg-white rounded-xl shadow-md overflow-hidden">
+            <div class="overflow-x-auto">
+                <table class="w-full">
+                    <thead class="bg-black text-white text-sm">
+                        <tr>
+                            <th class="px-4 py-3 text-left">Nombre</th>
+                            <th class="px-4 py-3 text-left">Puesto</th>
+                            <th class="px-4 py-3 text-left">Teléfono</th>
+                            <th class="px-4 py-3 text-left">Email</th>
+                            <th class="px-4 py-3 text-right">Salario Semanal</th>
+                            <th class="px-4 py-3 text-center">Editar</th>
+                        </tr>
+                    </thead>
+                    <tbody id="empleados-tbody"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== CLIENTES TAB ==================== -->
+    <div id="tab-content-clientes" class="tab-content">
+        <div class="flex items-center justify-between mb-6 flex-wrap gap-3">
+            <div>
+                <h2 class="text-3xl font-bold text-black">Clientes</h2>
+                <p class="text-gray-500 text-sm mt-1">Directorio de clientes</p>
+            </div>
+            <button onclick="resetClienteForm(); openModal('cliente-modal')"
+                class="flex items-center gap-2 bg-[#FFC107] text-black px-5 py-2 rounded hover:bg-yellow-500 transition-colors font-semibold text-sm">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                Nuevo Cliente
+            </button>
+        </div>
+
+        <!-- FILTRO DE CLIENTES: búsqueda por nombre -->
+        <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-4 mb-5 flex flex-wrap gap-3 items-center">
+            <div class="flex-1 min-w-[200px]">
+                <input id="clientes-search" type="text" placeholder="Buscar cliente por nombre..."
+                    oninput="filtrarClientes()"
+                    class="w-full border-2 border-gray-200 rounded-lg px-4 py-2 text-sm focus:outline-none focus:border-[#FFC107]">
+            </div>
+            <button onclick="limpiarFiltrosClientes()"
+                class="text-sm text-gray-400 hover:text-black transition-colors px-2 py-2">
+                Limpiar filtros
+            </button>
+        </div>
+
+        <div class="bg-white rounded-xl shadow-md overflow-hidden">
+            <div class="overflow-x-auto">
+                <table class="w-full">
+                    <thead class="bg-black text-white text-sm">
+                        <tr>
+                            <th class="px-4 py-3 text-left">Nombre</th>
+                            <th class="px-4 py-3 text-left">Teléfono</th>
+                            <th class="px-4 py-3 text-left">Email</th>
+                            <th class="px-4 py-3 text-center">Editar</th>
+                        </tr>
+                    </thead>
+                    <tbody id="clientes-tbody"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== PROVEEDORES TAB ==================== -->
+    <div id="tab-content-proveedores" class="tab-content">
+        <!-- Sección: Proveedores -->
+        <div class="flex items-center justify-between mb-6 flex-wrap gap-3">
+            <div>
+                <h2 class="text-3xl font-bold text-black">Proveedores, Insumos y Herramientas</h2>
+                <p class="text-gray-500 text-sm mt-1">Directorio de proveedores, insumos/servicios y herramientas disponibles</p>
+            </div>
+        </div>
+
+        <!-- Proveedores — acceso por modal -->
+        <div class="flex items-center justify-between mb-10 flex-wrap gap-3">
+            <h3 class="text-xl font-bold text-black">Proveedores</h3>
+            <div class="flex items-center gap-2">
+                <button onclick="openModal('lista-proveedores-modal')"
+                    class="flex items-center gap-2 bg-black text-white px-5 py-2 rounded hover:bg-gray-800 transition-colors font-semibold text-sm">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16"/></svg>
+                    Ver Proveedores
+                </button>
+                <button onclick="resetProveedorForm(); openModal('proveedor-modal')"
+                    class="flex items-center gap-2 bg-[#FFC107] text-black px-5 py-2 rounded hover:bg-yellow-500 transition-colors font-semibold text-sm">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                    Nuevo Proveedor
+                </button>
+            </div>
+        </div>
+
+        <!-- Tabla Insumos/Servicios -->
+        <div class="flex items-center justify-between mb-3 flex-wrap gap-3">
+            <h3 class="text-xl font-bold text-black">Insumos y Servicios</h3>
+            <button onclick="resetInsumoForm(); openModal('insumo-modal')"
+                class="flex items-center gap-2 bg-[#FFC107] text-black px-5 py-2 rounded hover:bg-yellow-500 transition-colors font-semibold text-sm">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                Nuevo Insumo / Servicio
+            </button>
+        </div>
+        <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-4 mb-4 flex flex-wrap gap-3 items-center">
+            <div class="flex-1 min-w-[200px]">
+                <input id="insumos-search" type="text" placeholder="Buscar insumo o servicio..."
+                    oninput="filtrarInsumos()"
+                    class="w-full border-2 border-gray-200 rounded-lg px-4 py-2 text-sm focus:outline-none focus:border-[#FFC107]">
+            </div>
+            <button onclick="limpiarFiltrosInsumos()"
+                class="text-sm text-gray-400 hover:text-black transition-colors px-2 py-2">Limpiar filtros</button>
+        </div>
+        <div class="bg-white rounded-xl shadow-md overflow-hidden">
+            <div class="overflow-x-auto">
+                <table class="w-full">
+                    <thead class="bg-black text-white text-sm">
+                        <tr>
+                            <th class="px-4 py-3 text-left">Nombre</th>
+                            <th class="px-4 py-3 text-left">Tipo</th>
+                            <th class="px-4 py-3 text-left">Proveedor</th>
+                            <th class="px-4 py-3 text-right">Costo Unitario</th>
+                            <th class="px-4 py-3 text-center">Editar</th>
+                        </tr>
+                    </thead>
+                    <tbody id="insumos-tbody"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Tabla Herramientas -->
+        <div class="flex items-center justify-between mt-10 mb-3 flex-wrap gap-3">
+            <h3 class="text-xl font-bold text-black">Herramientas</h3>
+            <button onclick="resetHerramientaForm(); openModal('herramienta-modal')"
+                class="flex items-center gap-2 bg-[#FFC107] text-black px-5 py-2 rounded hover:bg-yellow-500 transition-colors font-semibold text-sm">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                Nueva Herramienta
+            </button>
+        </div>
+        <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-4 mb-4 flex flex-wrap gap-3 items-center">
+            <div class="flex-1 min-w-[200px]">
+                <input id="herramientas-search" type="text" placeholder="Buscar herramienta..."
+                    oninput="filtrarHerramientas()"
+                    class="w-full border-2 border-gray-200 rounded-lg px-4 py-2 text-sm focus:outline-none focus:border-[#FFC107]">
+            </div>
+            <button onclick="limpiarFiltrosHerramientas()"
+                class="text-sm text-gray-400 hover:text-black transition-colors px-2 py-2">Limpiar filtros</button>
+        </div>
+        <div class="bg-white rounded-xl shadow-md overflow-hidden">
+            <div class="overflow-x-auto">
+                <table class="w-full">
+                    <thead class="bg-black text-white text-sm">
+                        <tr>
+                            <th class="px-4 py-3 text-left">Imagen</th>
+                            <th class="px-4 py-3 text-left">Nombre</th>
+                            <th class="px-4 py-3 text-left">Proveedor</th>
+                            <th class="px-4 py-3 text-right">Renta por Semana</th>
+                            <th class="px-4 py-3 text-center">Editar</th>
+                        </tr>
+                    </thead>
+                    <tbody id="herramientas-tbody"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+
+</main>
+
+<!-- ======================================================
+     MODALS PRINCIPALES (Obra, Empleado, Cliente, Proveedor)
+     Los formularios apuntan a sus respectivos archivos PHP.
+     Cuando se conecte la BD, solo hay que completar esos PHP.
+     ====================================================== -->
+
+<!-- Modal: Nueva / Editar Obra -->
+<div id="obra-modal" class="modal-overlay fixed inset-0 z-50 items-center justify-center bg-black bg-opacity-60 p-4">
+    <div class="bg-white rounded-xl shadow-2xl w-full max-w-md max-h-[90vh] overflow-y-auto">
+        <div class="bg-black text-white px-6 py-4 rounded-t-xl flex items-center justify-between sticky top-0">
+            <h3 id="obra-modal-title" class="text-lg font-bold">Nueva Obra</h3>
+            <button onclick="closeModal('obra-modal')" class="text-gray-400 hover:text-white text-2xl leading-none">&times;</button>
+        </div>
+        <!--
+            action="php/guardar_obra.php"
+            Cuando se conecte la BD este formulario enviará los datos
+            por POST a guardar_obra.php, que hará el INSERT o UPDATE.
+            Por ahora el submit lo intercepta JavaScript.
+        -->
+        <form id="obra-form" action="php/guardar_obra.php" method="POST" class="p-6 space-y-4" novalidate>
+            <input type="hidden" id="obra-id" name="id">
+            <div>
+                <label class="block text-sm font-semibold text-gray-700 mb-1">Nombre de la Obra *</label>
+                <input id="obra-nombre" name="nombre" type="text" required
+                    class="w-full border-2 border-gray-200 rounded-lg px-4 py-2 focus:outline-none focus:border-[#FFC107] text-sm"
+                    placeholder="Ej. Pavimentación Av. Reforma">
+                <p id="obra-nombre-err" class="hidden text-red-500 text-xs mt-1">El nombre de la obra es obligatorio.</p>
+            </div>
+            <div class="grid grid-cols-2 gap-4 hide-on-edit">
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700 mb-1">Fecha de Inicio *</label>
+                    <input id="obra-fechaInicio" name="fecha_inicio" type="date" required
+                        class="w-full border-2 border-gray-200 rounded-lg px-4 py-2 focus:outline-none focus:border-[#FFC107] text-sm">
+                    <p id="obra-fechaInicio-err" class="hidden text-red-500 text-xs mt-1">La fecha de inicio es obligatoria.</p>
+                </div>
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700 mb-1">Fecha de Término *</label>
+                    <input id="obra-fechaTermino" name="fecha_termino" type="date" required
+                        class="w-full border-2 border-gray-200 rounded-lg px-4 py-2 focus:outline-none focus:border-[#FFC107] text-sm">
+                    <p id="obra-fechaTermino-err" class="hidden text-red-500 text-xs mt-1">La fecha de término es obligatoria.</p>
+                </div>
+            </div>
+            <div class="hide-on-edit">
+                <label class="block text-sm font-semibold text-gray-700 mb-1">Presupuesto Inicial (MXN) *</label>
+                <input id="obra-presupuesto" name="presupuesto_inicial" type="number" min="0" placeholder="0" required
+                    class="w-full border-2 border-gray-200 rounded-lg px-4 py-2 focus:outline-none focus:border-[#FFC107] text-sm">
+                <p id="obra-presupuesto-err" class="hidden text-red-500 text-xs mt-1">El presupuesto inicial es obligatorio.</p>
+            </div>
+            <div class="hide-on-edit">
+                <label class="block text-sm font-semibold text-gray-700 mb-1">Cliente *</label>
+                <select id="obra-cliente" name="cliente_id"
+                    class="w-full border-2 border-gray-200 rounded-lg px-4 py-2 focus:outline-none focus:border-[#FFC107] text-sm">
+                    <option value="">Seleccionar cliente...</option>
+                </select>
+                <p id="obra-cliente-err" class="hidden text-red-500 text-xs mt-1">El cliente es obligatorio.</p>
+            </div>
+            <div class="flex gap-3 pt-2">
+                <button type="submit" class="flex-1 bg-[#FFC107] text-black py-3 rounded-lg hover:bg-yellow-500 font-bold text-sm">Guardar</button>
+                <button type="button" onclick="closeModal('obra-modal')" class="flex-1 bg-gray-100 text-gray-700 py-3 rounded-lg hover:bg-gray-200 font-semibold text-sm">Cancelar</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Modal: Nuevo / Editar Empleado -->
+<div id="empleado-modal" class="modal-overlay fixed inset-0 z-50 items-center justify-center bg-black bg-opacity-60 p-4">
+    <div class="bg-white rounded-xl shadow-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto">
+        <div class="bg-black text-white px-6 py-4 rounded-t-xl flex items-center justify-between sticky top-0">
+            <h3 id="empleado-modal-title" class="text-lg font-bold">Nuevo Empleado</h3>
+            <button onclick="closeModal('empleado-modal')" class="text-gray-400 hover:text-white text-2xl leading-none">&times;</button>
+        </div>
+        <!-- action="php/guardar_empleado.php" -->
+        <form id="empleado-form" action="php/guardar_empleado.php" method="POST" class="p-6 space-y-4">
+            <input type="hidden" id="empleado-id" name="id">
+            <div>
+                <label class="block text-sm font-semibold text-gray-700 mb-1">Nombre Completo *</label>
+                <input id="empleado-nombre" name="nombre" type="text"
+                    class="w-full border-2 border-gray-200 rounded-lg px-4 py-2 focus:outline-none focus:border-[#FFC107] text-sm">
+                <p id="empleado-nombre-err" class="hidden text-red-500 text-xs mt-1">El nombre del empleado es obligatorio.</p>
+            </div>
+            <div class="grid grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700 mb-1">Puesto *</label>
+                    <input id="empleado-puesto" name="puesto" type="text"
+                        class="w-full border-2 border-gray-200 rounded-lg px-4 py-2 focus:outline-none focus:border-[#FFC107] text-sm">
+                    <p id="empleado-puesto-err" class="hidden text-red-500 text-xs mt-1">El puesto es obligatorio.</p>
+                </div>
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700 mb-1">Salario Semanal (MXN)</label>
+                    <input id="empleado-salario" name="salario" type="number" min="0"
+                        class="w-full border-2 border-gray-200 rounded-lg px-4 py-2 focus:outline-none focus:border-[#FFC107] text-sm">
+                </div>
+            </div>
+            <div>
+                <label class="block text-sm font-semibold text-gray-700 mb-1">Teléfono</label>
+                <input id="empleado-telefono" name="telefono" type="text" placeholder="(222) 000-0000"
+                    class="w-full border-2 border-gray-200 rounded-lg px-4 py-2 focus:outline-none focus:border-[#FFC107] text-sm">
+            </div>
+            <div>
+                <label class="block text-sm font-semibold text-gray-700 mb-1">Email *</label>
+                <input id="empleado-email" name="email" type="email"
+                    class="w-full border-2 border-gray-200 rounded-lg px-4 py-2 focus:outline-none focus:border-[#FFC107] text-sm">
+                <p id="empleado-email-err" class="hidden text-red-500 text-xs mt-1">El email es obligatorio.</p>
+            </div>
+            <div>
+                <label class="block text-sm font-semibold text-gray-700 mb-1">Dirección</label>
+                <input id="empleado-direccion" name="direccion" type="text"
+                    class="w-full border-2 border-gray-200 rounded-lg px-4 py-2 focus:outline-none focus:border-[#FFC107] text-sm">
+            </div>
+            <div class="hide-on-edit">
+                <label class="block text-sm font-semibold text-gray-700 mb-1">Contraseña *</label>
+                <div class="flex gap-2">
+                    <input id="empleado-contrasena" name="contrasena" type="text" autocomplete="new-password"
+                        placeholder="Mínimo 8 caracteres"
+                        class="flex-1 border-2 border-gray-200 rounded-lg px-4 py-2 focus:outline-none focus:border-[#FFC107] text-sm font-mono">
+                    <button type="button" onclick="generarContrasena('empleado-contrasena', 'empleado-contrasena-err')"
+                        class="shrink-0 bg-gray-100 hover:bg-gray-200 text-gray-700 px-3 py-2 rounded-lg text-xs font-semibold transition-colors whitespace-nowrap">
+                        Generar
+                    </button>
+                </div>
+                <p id="empleado-contrasena-err" class="hidden text-red-500 text-xs mt-1">La contraseña es obligatoria (mínimo 8 caracteres).</p>
+            </div>
+            <div class="flex gap-3 pt-2">
+                <button type="submit" class="flex-1 bg-[#FFC107] text-black py-3 rounded-lg hover:bg-yellow-500 font-bold text-sm">Guardar</button>
+                <button type="button" onclick="closeModal('empleado-modal')" class="flex-1 bg-gray-100 text-gray-700 py-3 rounded-lg hover:bg-gray-200 font-semibold text-sm">Cancelar</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Modal: Nuevo / Editar Cliente -->
+<div id="cliente-modal" class="modal-overlay fixed inset-0 z-50 items-center justify-center bg-black bg-opacity-60 p-4">
+    <div class="bg-white rounded-xl shadow-2xl w-full max-w-lg">
+        <div class="bg-black text-white px-6 py-4 rounded-t-xl flex items-center justify-between">
+            <h3 id="cliente-modal-title" class="text-lg font-bold">Nuevo Cliente</h3>
+            <button onclick="closeModal('cliente-modal')" class="text-gray-400 hover:text-white text-2xl leading-none">&times;</button>
+        </div>
+        <!-- action="php/guardar_cliente.php" -->
+        <form id="cliente-form" action="php/guardar_cliente.php" method="POST" class="p-6 space-y-4">
+            <input type="hidden" id="cliente-id" name="id">
+            <div>
+                <label class="block text-sm font-semibold text-gray-700 mb-1">Nombre *</label>
+                <input id="cliente-nombre" name="nombre" type="text"
+                    class="w-full border-2 border-gray-200 rounded-lg px-4 py-2 focus:outline-none focus:border-[#FFC107] text-sm">
+                <p id="cliente-nombre-err" class="hidden text-red-500 text-xs mt-1">El nombre del cliente es obligatorio.</p>
+            </div>
+            <div>
+                <label class="block text-sm font-semibold text-gray-700 mb-1">Teléfono</label>
+                <input id="cliente-telefono" name="telefono" type="text"
+                    class="w-full border-2 border-gray-200 rounded-lg px-4 py-2 focus:outline-none focus:border-[#FFC107] text-sm">
+            </div>
+            <div>
+                <label class="block text-sm font-semibold text-gray-700 mb-1">Email *</label>
+                <input id="cliente-email" name="email" type="email"
+                    class="w-full border-2 border-gray-200 rounded-lg px-4 py-2 focus:outline-none focus:border-[#FFC107] text-sm">
+                <p id="cliente-email-err" class="hidden text-red-500 text-xs mt-1">El email es obligatorio.</p>
+            </div>
+            <div class="hide-on-edit">
+                <label class="block text-sm font-semibold text-gray-700 mb-1">Contraseña *</label>
+                <div class="flex gap-2">
+                    <input id="cliente-contrasena" name="contrasena" type="text" autocomplete="new-password"
+                        placeholder="Mínimo 8 caracteres"
+                        class="flex-1 border-2 border-gray-200 rounded-lg px-4 py-2 focus:outline-none focus:border-[#FFC107] text-sm font-mono">
+                    <button type="button" onclick="generarContrasena('cliente-contrasena', 'cliente-contrasena-err')"
+                        class="shrink-0 bg-gray-100 hover:bg-gray-200 text-gray-700 px-3 py-2 rounded-lg text-xs font-semibold transition-colors whitespace-nowrap">
+                        Generar
+                    </button>
+                </div>
+                <p id="cliente-contrasena-err" class="hidden text-red-500 text-xs mt-1">La contraseña es obligatoria (mínimo 8 caracteres).</p>
+            </div>
+            <div class="flex gap-3 pt-2">
+                <button type="submit" class="flex-1 bg-[#FFC107] text-black py-3 rounded-lg hover:bg-yellow-500 font-bold text-sm">Guardar</button>
+                <button type="button" onclick="closeModal('cliente-modal')" class="flex-1 bg-gray-100 text-gray-700 py-3 rounded-lg hover:bg-gray-200 font-semibold text-sm">Cancelar</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Modal: Lista de Proveedores -->
+<div id="lista-proveedores-modal" class="modal-overlay fixed inset-0 z-50 items-center justify-center bg-black bg-opacity-60 p-4">
+    <div class="bg-white rounded-xl shadow-2xl w-full max-w-3xl max-h-[80vh] flex flex-col">
+        <div class="bg-black text-white px-6 py-4 rounded-t-xl flex items-center justify-between flex-shrink-0">
+            <h3 class="text-lg font-bold">Proveedores</h3>
+            <button onclick="closeModal('lista-proveedores-modal')" class="text-gray-400 hover:text-white text-2xl leading-none">&times;</button>
+        </div>
+        <div class="p-6 overflow-y-auto">
+            <div id="grid-proveedores" class="grid-proveedores"></div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal: Nuevo / Editar Proveedor -->
+<div id="proveedor-modal" class="modal-overlay fixed inset-0 z-50 items-center justify-center bg-black bg-opacity-60 p-4">
+    <div class="bg-white rounded-xl shadow-2xl w-full max-w-lg">
+        <div class="bg-black text-white px-6 py-4 rounded-t-xl flex items-center justify-between">
+            <h3 id="proveedor-modal-title" class="text-lg font-bold">Nuevo Proveedor</h3>
+            <button onclick="closeModal('proveedor-modal')" class="text-gray-400 hover:text-white text-2xl leading-none">&times;</button>
+        </div>
+        <!-- action="php/guardar_proveedor.php" -->
+        <form id="proveedor-form" action="php/guardar_proveedor.php" method="POST" class="p-6 space-y-4">
+            <input type="hidden" id="proveedor-id" name="id">
+            <input type="hidden" id="proveedor-telefono" name="telefono" value="">
+            <input type="hidden" id="proveedor-email"    name="email"    value="">
+            <div>
+                <label class="block text-sm font-semibold text-gray-700 mb-1">Nombre *</label>
+                <input id="proveedor-nombre" name="nombre" type="text"
+                    class="w-full border-2 border-gray-200 rounded-lg px-4 py-2 focus:outline-none focus:border-[#FFC107] text-sm">
+                <p id="proveedor-nombre-err" class="hidden text-red-500 text-xs mt-1">El nombre del proveedor es obligatorio.</p>
+            </div>
+            <div class="flex gap-3 pt-2">
+                <button type="submit" class="flex-1 bg-[#FFC107] text-black py-3 rounded-lg hover:bg-yellow-500 font-bold text-sm">Guardar</button>
+                <button type="button" onclick="closeModal('proveedor-modal')" class="flex-1 bg-gray-100 text-gray-700 py-3 rounded-lg hover:bg-gray-200 font-semibold text-sm">Cancelar</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Modal: Nuevo / Editar Insumo / Servicio -->
+<div id="insumo-modal" class="modal-overlay fixed inset-0 z-50 items-center justify-center bg-black bg-opacity-60 p-4">
+    <div class="bg-white rounded-xl shadow-2xl w-full max-w-lg">
+        <div class="bg-black text-white px-6 py-4 rounded-t-xl flex items-center justify-between">
+            <h3 id="insumo-modal-title" class="text-lg font-bold">Nuevo Insumo / Servicio</h3>
+            <button onclick="closeModal('insumo-modal')" class="text-gray-400 hover:text-white text-2xl leading-none">&times;</button>
+        </div>
+        <!-- action="php/guardar_insumo.php" -->
+        <form id="insumo-form" action="php/guardar_insumo.php" method="POST" class="p-6 space-y-4">
+            <input type="hidden" id="insumo-id" name="id">
+            <div>
+                <label class="block text-sm font-semibold text-gray-700 mb-1">Nombre *</label>
+                <input id="insumo-nombre" name="nombre" type="text"
+                    class="w-full border-2 border-gray-200 rounded-lg px-4 py-2 focus:outline-none focus:border-[#FFC107] text-sm">
+                <p id="insumo-nombre-err" class="hidden text-red-500 text-xs mt-1">El nombre es obligatorio.</p>
+            </div>
+            <div>
+                <label class="block text-sm font-semibold text-gray-700 mb-1">Tipo *</label>
+                <select id="insumo-tipo" name="tipo"
+                    class="w-full border-2 border-gray-200 rounded-lg px-4 py-2 focus:outline-none focus:border-[#FFC107] text-sm bg-white">
+                    <option value="Insumo">Insumo</option>
+                    <option value="Servicio">Servicio</option>
+                </select>
+            </div>
+            <div>
+                <label class="block text-sm font-semibold text-gray-700 mb-1">Proveedor *</label>
+                <select id="insumo-proveedor" name="proveedor"
+                    class="w-full border-2 border-gray-200 rounded-lg px-4 py-2 focus:outline-none focus:border-[#FFC107] text-sm bg-white">
+                </select>
+                <p id="insumo-proveedor-err" class="hidden text-red-500 text-xs mt-1">Selecciona un proveedor.</p>
+            </div>
+            <div>
+                <label class="block text-sm font-semibold text-gray-700 mb-1">Costo Unitario (MXN)</label>
+                <input id="insumo-costo" name="costo_unitario" type="number" min="0" step="0.01" placeholder="0.00"
+                    class="w-full border-2 border-gray-200 rounded-lg px-4 py-2 focus:outline-none focus:border-[#FFC107] text-sm">
+            </div>
+            <div class="flex gap-3 pt-2">
+                <button type="submit" class="flex-1 bg-[#FFC107] text-black py-3 rounded-lg hover:bg-yellow-500 font-bold text-sm">Guardar</button>
+                <button type="button" onclick="closeModal('insumo-modal')" class="flex-1 bg-gray-100 text-gray-700 py-3 rounded-lg hover:bg-gray-200 font-semibold text-sm">Cancelar</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Modal: Nueva / Editar Herramienta -->
+<div id="herramienta-modal" class="modal-overlay fixed inset-0 z-50 items-center justify-center bg-black bg-opacity-60 p-4">
+    <div class="bg-white rounded-xl shadow-2xl w-full max-w-lg">
+        <div class="bg-black text-white px-6 py-4 rounded-t-xl flex items-center justify-between">
+            <h3 id="herramienta-modal-title" class="text-lg font-bold">Nueva Herramienta</h3>
+            <button onclick="closeModal('herramienta-modal')" class="text-gray-400 hover:text-white text-2xl leading-none">&times;</button>
+        </div>
+        <!-- action="php/guardar_herramienta.php" -->
+        <form id="herramienta-form" action="php/guardar_herramienta.php" method="POST" enctype="multipart/form-data" class="p-6 space-y-4">
+            <input type="hidden" id="herramienta-id" name="id">
+            <div>
+                <label class="block text-sm font-semibold text-gray-700 mb-1">Nombre *</label>
+                <input id="herramienta-nombre" name="nombre" type="text"
+                    class="w-full border-2 border-gray-200 rounded-lg px-4 py-2 focus:outline-none focus:border-[#FFC107] text-sm">
+                <p id="herramienta-nombre-err" class="hidden text-red-500 text-xs mt-1">El nombre es obligatorio.</p>
+            </div>
+            <div>
+                <label class="block text-sm font-semibold text-gray-700 mb-1">Proveedor *</label>
+                <select id="herramienta-proveedor" name="proveedor"
+                    class="w-full border-2 border-gray-200 rounded-lg px-4 py-2 focus:outline-none focus:border-[#FFC107] text-sm bg-white">
+                </select>
+                <p id="herramienta-proveedor-err" class="hidden text-red-500 text-xs mt-1">El proveedor es obligatorio.</p>
+            </div>
+            <div>
+                <label class="block text-sm font-semibold text-gray-700 mb-1">Costo de Renta por Semana (MXN)</label>
+                <input id="herramienta-renta" name="renta_semanal" type="number" min="0" step="0.01" placeholder="0.00"
+                    class="w-full border-2 border-gray-200 rounded-lg px-4 py-2 focus:outline-none focus:border-[#FFC107] text-sm">
+            </div>
+            <div>
+                <label class="block text-sm font-semibold text-gray-700 mb-1">Imagen</label>
+                <input id="herramienta-imagen" name="imagen" type="file" accept="image/*"
+                    class="w-full border-2 border-gray-200 rounded-lg px-4 py-2 focus:outline-none focus:border-[#FFC107] text-sm">
+                <p id="herramienta-imagen-preview-label" class="hidden text-xs text-gray-500 mt-1"></p>
+            </div>
+            <div class="flex gap-3 pt-2">
+                <button type="submit" class="flex-1 bg-[#FFC107] text-black py-3 rounded-lg hover:bg-yellow-500 font-bold text-sm">Guardar</button>
+                <button type="button" onclick="closeModal('herramienta-modal')" class="flex-1 bg-gray-100 text-gray-700 py-3 rounded-lg hover:bg-gray-200 font-semibold text-sm">Cancelar</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- ======================================================
+     SUB-MODALS (dentro del desglose de una obra)
+     ====================================================== -->
+
+<!-- Sub-modal: Empleado en Obra -->
+<div id="sub-empleado-modal" class="modal-overlay fixed inset-0 z-50 items-center justify-center bg-black bg-opacity-60 p-4">
+    <div class="bg-white rounded-xl shadow-2xl w-full max-w-md max-h-[90vh] overflow-y-auto">
+        <div class="bg-black text-white px-6 py-4 rounded-t-xl flex items-center justify-between sticky top-0">
+            <h3 id="sub-empleado-modal-title" class="text-lg font-bold">Agregar Empleado a Obra</h3>
+            <button onclick="closeModal('sub-empleado-modal')" class="text-gray-400 hover:text-white text-2xl leading-none">&times;</button>
+        </div>
+        <!-- action="php/guardar_empleado_obra.php" -->
+        <form id="sub-empleado-form" action="php/guardar_empleado_obra.php" method="POST" class="p-6 space-y-4">
+            <input type="hidden" id="sub-empleado-obra-id" name="obra_id">
+            <input type="hidden" id="sub-empleado-id-empleado" name="id_empleado">
+            <!-- Búsqueda de empleado con autocomplete -->
+            <div>
+                <label class="block text-sm font-semibold text-gray-700 mb-1">Empleado *</label>
+                <div class="relative">
+                    <input type="text" id="sub-empleado-busqueda" autocomplete="off"
+                        oninput="filtrarSugerenciasEmpleado()"
+                        onfocus="filtrarSugerenciasEmpleado()"
+                        onblur="cerrarSugerenciasEmpleado()"
+                        placeholder="Escribe nombre o ID del empleado..."
+                        class="w-full border-2 border-gray-200 rounded-lg px-4 py-2 focus:outline-none focus:border-[#FFC107] text-sm">
+                    <ul id="sub-empleado-sugerencias"
+                        class="hidden absolute z-20 w-full bg-white border border-gray-200 rounded-lg shadow-lg mt-1 max-h-48 overflow-y-auto">
+                    </ul>
+                </div>
+                <p id="sub-empleado-busqueda-err" class="hidden text-red-500 text-xs mt-1">Selecciona un empleado válido de la lista.</p>
+            </div>
+            <!-- Tarjeta de confirmación del empleado seleccionado -->
+            <div id="sub-empleado-preview" class="hidden opacity-0 transition-opacity duration-200 bg-yellow-50 border border-yellow-200 rounded-lg p-3">
+                <div class="flex items-start justify-between gap-2">
+                    <div class="text-sm">
+                        <p class="font-semibold text-black" id="sub-empleado-preview-nombre"></p>
+                        <p class="text-gray-600 mt-0.5" id="sub-empleado-preview-puesto"></p>
+                        <p class="text-gray-400 text-xs mt-0.5">ID: <span id="sub-empleado-preview-id" class="font-mono"></span></p>
+                    </div>
+                    <button type="button" onclick="clearSubEmpleadoSelection()"
+                        class="text-xs text-gray-400 hover:text-red-500 transition-colors whitespace-nowrap font-medium">
+                        ✕ Cambiar
+                    </button>
+                </div>
+            </div>
+            <div class="grid grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700 mb-1">Fecha Inicio</label>
+                    <input id="sub-empleado-fechaInicio" name="fecha_inicio" type="date"
+                        class="w-full border-2 border-gray-200 rounded-lg px-4 py-2 focus:outline-none focus:border-[#FFC107] text-sm">
+                </div>
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700 mb-1">Fecha Término</label>
+                    <input id="sub-empleado-fechaTermino" name="fecha_termino" type="date"
+                        class="w-full border-2 border-gray-200 rounded-lg px-4 py-2 focus:outline-none focus:border-[#FFC107] text-sm">
+                </div>
+            </div>
+            <div class="flex gap-3 pt-2">
+                <button type="submit" class="flex-1 bg-[#FFC107] text-black py-3 rounded-lg hover:bg-yellow-500 font-bold text-sm">Guardar</button>
+                <button type="button" onclick="closeModal('sub-empleado-modal')" class="flex-1 bg-gray-100 py-3 rounded-lg font-semibold text-sm">Cancelar</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Sub-modal: Recurso en Obra -->
+<div id="sub-recurso-modal" class="modal-overlay fixed inset-0 z-50 items-center justify-center bg-black bg-opacity-60 p-4">
+    <div class="bg-white rounded-xl shadow-2xl w-full max-w-md max-h-[90vh] overflow-y-auto">
+        <div class="bg-black text-white px-6 py-4 rounded-t-xl flex items-center justify-between sticky top-0">
+            <h3 class="text-lg font-bold">Agregar Recurso</h3>
+            <button onclick="closeModal('sub-recurso-modal')" class="text-gray-400 hover:text-white text-2xl leading-none">&times;</button>
+        </div>
+        <form id="sub-recurso-form" action="php/guardar_recurso_obra.php" method="POST" class="p-6 space-y-4">
+            <input type="hidden" id="sub-recurso-obra-id" name="obra_id">
+            <!-- Tipo -->
+            <div>
+                <label class="block text-sm font-semibold text-gray-700 mb-1">Tipo de Recurso</label>
+                <select id="sub-recurso-tipo" name="tipo_recurso" onchange="switchSubRecursoTipo()"
+                    class="w-full border-2 border-gray-200 rounded-lg px-4 py-2 focus:outline-none focus:border-[#FFC107] text-sm">
+                    <option value="Insumo">Insumo</option>
+                    <option value="Servicio">Servicio</option>
+                    <option value="Herramienta">Herramienta</option>
+                </select>
+            </div>
+            <!-- Nombre (siempre visible) -->
+            <div>
+                <label class="block text-sm font-semibold text-gray-700 mb-1">Nombre del Recurso *</label>
+                <input id="sub-recurso-nombre" name="nombre_recurso" type="text"
+                    class="w-full border-2 border-gray-200 rounded-lg px-4 py-2 focus:outline-none focus:border-[#FFC107] text-sm">
+                <p id="sub-recurso-nombre-err" class="hidden text-red-500 text-xs mt-1">El nombre del recurso es obligatorio.</p>
+            </div>
+            <!-- Campos: Insumo -->
+            <div id="sub-recurso-campos-insumo">
+                <label class="block text-sm font-semibold text-gray-700 mb-1">Cantidad (unidades)</label>
+                <input id="sub-recurso-cantidad" name="cantidad_total" type="number" min="0" placeholder="0"
+                    class="w-full border-2 border-gray-200 rounded-lg px-4 py-2 focus:outline-none focus:border-[#FFC107] text-sm">
+            </div>
+            <!-- Campos: Servicio -->
+            <div id="sub-recurso-campos-servicio" style="display:none">
+                <label class="block text-sm font-semibold text-gray-700 mb-1">Kilometraje</label>
+                <input id="sub-recurso-kilometraje" name="kilometraje" type="number" min="0" step="0.01" placeholder="0"
+                    class="w-full border-2 border-gray-200 rounded-lg px-4 py-2 focus:outline-none focus:border-[#FFC107] text-sm">
+            </div>
+            <!-- Campos: Herramienta -->
+            <div id="sub-recurso-campos-herramienta" style="display:none" class="space-y-4">
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-1">Fecha Inicio</label>
+                        <input id="sub-recurso-fecha-inicio" name="fecha_inicio" type="date"
+                            class="w-full border-2 border-gray-200 rounded-lg px-4 py-2 focus:outline-none focus:border-[#FFC107] text-sm">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-1">Fecha Término</label>
+                        <input id="sub-recurso-fecha-termino" name="fecha_termino" type="date"
+                            class="w-full border-2 border-gray-200 rounded-lg px-4 py-2 focus:outline-none focus:border-[#FFC107] text-sm">
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700 mb-1">Cantidad de unidades</label>
+                    <input id="sub-recurso-cantidad-herr" name="cantidad_herr" type="number" min="1" value="1"
+                        class="w-full border-2 border-gray-200 rounded-lg px-4 py-2 focus:outline-none focus:border-[#FFC107] text-sm">
+                </div>
+            </div>
+            <div class="flex gap-3 pt-2">
+                <button type="submit" id="sub-recurso-submit-btn" class="flex-1 bg-[#FFC107] text-black py-3 rounded-lg hover:bg-yellow-500 font-bold text-sm">Guardar</button>
+                <button type="button" onclick="closeModal('sub-recurso-modal')" class="flex-1 bg-gray-100 py-3 rounded-lg font-semibold text-sm">Cancelar</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Sub-modal: Pago en Obra -->
+<div id="sub-pago-modal" class="modal-overlay fixed inset-0 z-50 items-center justify-center bg-black bg-opacity-60 p-4">
+    <div class="bg-white rounded-xl shadow-2xl w-full max-w-md">
+        <div class="bg-black text-white px-6 py-4 rounded-t-xl flex items-center justify-between">
+            <h3 id="sub-pago-modal-title" class="text-lg font-bold">Registrar Pago</h3>
+            <button onclick="closeModal('sub-pago-modal')" class="text-gray-400 hover:text-white text-2xl leading-none">&times;</button>
+        </div>
+        <!-- action="php/guardar_pago_obra.php" -->
+        <form id="sub-pago-form" action="php/guardar_pago_obra.php" method="POST" class="p-6 space-y-4">
+            <input type="hidden" id="sub-pago-id" name="id">
+            <input type="hidden" id="sub-pago-obra-id" name="obra_id">
+            <div>
+                <label class="block text-sm font-semibold text-gray-700 mb-1">Fecha de Pago *</label>
+                <input id="sub-pago-fecha" name="fecha_pago" type="date"
+                    class="w-full border-2 border-gray-200 rounded-lg px-4 py-2 focus:outline-none focus:border-[#FFC107] text-sm">
+                <p id="sub-pago-fecha-err" class="hidden text-red-500 text-xs mt-1">La fecha de pago es obligatoria.</p>
+            </div>
+            <div>
+                <label class="block text-sm font-semibold text-gray-700 mb-1">Tipo de Pago</label>
+                <select id="sub-pago-tipo" name="tipo_pago"
+                    class="w-full border-2 border-gray-200 rounded-lg px-4 py-2 focus:outline-none focus:border-[#FFC107] text-sm">
+                    <option value="Transferencia">Transferencia</option>
+                    <option value="Efectivo">Efectivo</option>
+                    <option value="Cheque">Cheque</option>
+                </select>
+            </div>
+            <div>
+                <label class="block text-sm font-semibold text-gray-700 mb-1">Monto (MXN) *</label>
+                <input id="sub-pago-monto" name="monto" type="number" min="0" step="0.01"
+                    class="w-full border-2 border-gray-200 rounded-lg px-4 py-2 focus:outline-none focus:border-[#FFC107] text-sm">
+                <p id="sub-pago-monto-err" class="hidden text-red-500 text-xs mt-1">El monto es obligatorio y debe ser mayor a 0.</p>
+            </div>
+            <div class="flex gap-3 pt-2">
+                <button type="submit" class="flex-1 bg-[#FFC107] text-black py-3 rounded-lg hover:bg-yellow-500 font-bold text-sm">Guardar</button>
+                <button type="button" onclick="closeModal('sub-pago-modal')" class="flex-1 bg-gray-100 py-3 rounded-lg font-semibold text-sm">Cancelar</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Modal: Reporte Estadístico -->
+<div id="reporte-modal" class="modal-overlay fixed inset-0 z-50 items-center justify-center bg-black bg-opacity-60 p-4">
+    <div class="bg-white rounded-xl shadow-2xl w-full max-w-5xl max-h-[90vh] overflow-y-auto">
+        <div class="flex items-center justify-between px-6 py-4 border-b border-gray-200 sticky top-0 bg-white z-10">
+            <h3 class="text-2xl font-bold text-black">Reporte Estadístico de Obras</h3>
+            <button onclick="closeModal('reporte-modal')" class="text-gray-400 hover:text-black text-2xl leading-none">&times;</button>
+        </div>
+        <div class="p-6 space-y-8" id="reporte-content"></div>
+    </div>
+</div>
+
+<!-- ======================================================
+     JAVASCRIPT
+     ====================================================== -->
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
+
+// ============================================================
+// MOCK DATA
+// ============================================================
+// Datos cargados desde la BD vía fetch en la inicialización.
+// ============================================================
+let nextId = { obras: 0, empleados: 0, clientes: 0, proveedores: 0, insumos: 0, herramientas: 0 };
+
+let obras       = [];
+let empleados   = [];
+let clientes    = [];
+let proveedores = [];
+let insumos     = [];
+
+// Los datos de herramientas se cargan desde php/get_herramientas.php
+// Campos que devuelve: id_herramienta, nombre, proveedor, renta_semanal, imagen
+let herramientas = [];
+
+let currentObraId = null;
+let reporteChart  = null;
+
+// ============================================================
+// UTILS
+// ============================================================
+const fmt     = (n) => new Intl.NumberFormat('es-MX', { style: 'currency', currency: 'MXN' }).format(n);
+const fmtDate = (d) => { if (!d) return 'Pendiente'; return new Date(d + 'T12:00:00').toLocaleDateString('es-MX', { year: 'numeric', month: 'short', day: 'numeric' }); };
+const editIcon = `<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/></svg>`;
+
+const estadoBadge = (e) => {
+    const map = { 'Completada': 'bg-green-100 text-green-800', 'En proceso': 'bg-yellow-100 text-yellow-800', 'Suspendida': 'bg-red-100 text-red-800' };
+    return `<span class="px-2 py-1 rounded-full text-xs font-semibold ${map[e] || 'bg-gray-100 text-gray-700'}">${e}</span>`;
+};
+
+// ============================================================
+// VALIDACIÓN PERSONALIZADA (Opción 1: al momento del submit)
+// marcarError(): pone borde rojo y muestra el mensaje de error.
+// limpiarError(): restaura el borde gris y oculta el mensaje.
+// ============================================================
+function marcarError(inputId, errId) {
+    const input = document.getElementById(inputId);
+    const err   = document.getElementById(errId);
+    input.classList.remove('border-gray-200');
+    input.classList.add('border-red-400');
+    err.classList.remove('hidden');
+}
+
+function limpiarError(inputId, errId) {
+    const input = document.getElementById(inputId);
+    const err   = document.getElementById(errId);
+    input.classList.remove('border-red-400');
+    input.classList.add('border-gray-200');
+    err.classList.add('hidden');
+}
+
+// Limpia todos los errores de un formulario al abrirlo o resetearlo
+function limpiarErroresForm(pares) {
+    pares.forEach(([inputId, errId]) => limpiarError(inputId, errId));
+}
+
+
+function switchTab(t) {
+    document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+    document.querySelectorAll('.tab-btn').forEach(el => {
+        el.classList.remove('border-[#FFC107]', 'text-black', 'font-semibold');
+        el.classList.add('border-transparent', 'text-gray-500');
+    });
+    document.getElementById('tab-content-' + t).classList.add('active');
+    const btn = document.getElementById('tab-' + t);
+    btn.classList.add('border-[#FFC107]', 'text-black', 'font-semibold');
+    btn.classList.remove('border-transparent', 'text-gray-500');
+    if (t !== 'obras') closeObraDetail();
+}
+
+// ============================================================
+// MODALS
+// ============================================================
+function openModal(id)  { document.getElementById(id).classList.add('active'); }
+function closeModal(id) { document.getElementById(id).classList.remove('active'); }
+
+// ============================================================
+// RESETS DE FORMULARIOS
+// ============================================================
+function resetObraForm() {
+    document.getElementById('obra-id').value = '';
+    document.getElementById('obra-form').reset();
+    document.getElementById('obra-modal-title').textContent = 'Nueva Obra';
+    limpiarErroresForm([['obra-nombre', 'obra-nombre-err'], ['obra-fechaInicio', 'obra-fechaInicio-err'], ['obra-fechaTermino', 'obra-fechaTermino-err'], ['obra-presupuesto', 'obra-presupuesto-err'], ['obra-cliente', 'obra-cliente-err']]);
+    updateClientesSelect();
+    document.getElementById('obra-form').querySelectorAll('.hide-on-edit').forEach(el => {
+        el.style.display = '';
+    });
+    document.getElementById('obra-fechaInicio').setAttribute('required', 'true');
+    document.getElementById('obra-fechaTermino').setAttribute('required', 'true');
+    document.getElementById('obra-presupuesto').setAttribute('required', 'true');
+}
+function resetEmpleadoForm() {
+    document.getElementById('empleado-id').value = '';
+    document.getElementById('empleado-form').reset();
+    document.getElementById('empleado-modal-title').textContent = 'Nuevo Empleado';
+    document.getElementById('empleado-form').querySelectorAll('.hide-on-edit').forEach(el => { el.style.display = ''; });
+    limpiarErroresForm([
+        ['empleado-nombre',     'empleado-nombre-err'],
+        ['empleado-puesto',     'empleado-puesto-err'],
+        ['empleado-email',      'empleado-email-err'],
+        ['empleado-contrasena', 'empleado-contrasena-err'],
+    ]);
+}
+function resetClienteForm() {
+    document.getElementById('cliente-id').value = '';
+    document.getElementById('cliente-form').reset();
+    document.getElementById('cliente-modal-title').textContent = 'Nuevo Cliente';
+    document.getElementById('cliente-form').querySelectorAll('.hide-on-edit').forEach(el => { el.style.display = ''; });
+    limpiarErroresForm([
+        ['cliente-nombre',     'cliente-nombre-err'],
+        ['cliente-email',      'cliente-email-err'],
+        ['cliente-contrasena', 'cliente-contrasena-err'],
+    ]);
+}
+function resetProveedorForm() {
+    document.getElementById('proveedor-id').value = '';
+    document.getElementById('proveedor-form').reset();
+    document.getElementById('proveedor-modal-title').textContent = 'Nuevo Proveedor';
+    limpiarErroresForm([['proveedor-nombre', 'proveedor-nombre-err']]);
+}
+function resetInsumoForm() {
+    document.getElementById('insumo-id').value = '';
+    document.getElementById('insumo-form').reset();
+    document.getElementById('insumo-modal-title').textContent = 'Nuevo Insumo / Servicio';
+    limpiarErroresForm([['insumo-nombre', 'insumo-nombre-err'], ['insumo-proveedor', 'insumo-proveedor-err']]);
+    updateProveedoresSelect('insumo-proveedor');
+}
+function resetHerramientaForm() {
+    document.getElementById('herramienta-id').value = '';
+    document.getElementById('herramienta-form').reset();
+    document.getElementById('herramienta-modal-title').textContent = 'Nueva Herramienta';
+    document.getElementById('herramienta-imagen-preview-label').classList.add('hidden');
+    limpiarErroresForm([['herramienta-nombre', 'herramienta-nombre-err'], ['herramienta-proveedor', 'herramienta-proveedor-err']]);
+    updateProveedoresSelectNombre('herramienta-proveedor');
+}
+
+// ============================================================
+// FILTRO AUXILIAR 
+// ============================================================
+
+function sinAcentos(texto){
+    return texto.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+}
+
+// ============================================================
+// FILTROS DE OBRAS
+// Filtra el array de obras por nombre (búsqueda parcial)
+// y por estado, luego re-renderiza solo los resultados.
+// ============================================================
+function filtrarObras() {
+    const texto  = document.getElementById('obras-search').value.toLowerCase().trim();
+   // const estado = document.getElementById('obras-estado-filter').value;
+
+    const resultado = obras.filter(o => {
+        const coincideNombre = sinAcentos(o.nombre.toLowerCase()).includes(sinAcentos(texto));
+        // const coincideEstado = estado === '' || o.estado === estado;
+        return coincideNombre // && coincideEstado;
+    });
+
+    renderObrasConDatos(resultado);
+}
+
+function limpiarFiltrosObras() {
+    document.getElementById('obras-search').value = '';
+    // document.getElementById('obras-estado-filter').value = '';
+    filtrarObras();
+}
+
+// ============================================================
+// FILTROS DE EMPLEADOS
+// Filtra por nombre (búsqueda parcial).
+// ============================================================
+function filtrarEmpleados() {
+    const texto = document.getElementById('empleados-search').value.toLowerCase().trim();
+
+    const resultado = empleados.filter(e =>
+        sinAcentos(e.nombre.toLowerCase()).includes(sinAcentos(texto))
+    );
+
+    renderEmpleadosConDatos(resultado);
+}
+
+function limpiarFiltrosEmpleados() {
+    document.getElementById('empleados-search').value = '';
+    filtrarEmpleados();
+}
+
+// ============================================================
+// FILTROS DE CLIENTES
+// ============================================================
+function filtrarClientes() {
+    const texto = document.getElementById('clientes-search').value.toLowerCase().trim();
+    const resultado = clientes.filter(c => sinAcentos(c.nombre.toLowerCase()).includes(sinAcentos(texto)));
+    renderClientesConDatos(resultado);
+}
+
+function limpiarFiltrosClientes() {
+    document.getElementById('clientes-search').value = '';
+    filtrarClientes();
+}
+
+// ============================================================
+// FILTROS DE PROVEEDORES
+// ============================================================
+function filtrarProveedores() {
+    renderProveedoresConDatos(proveedores);
+}
+
+// ============================================================
+// FILTROS DE INSUMOS
+// ============================================================
+function filtrarInsumos() {
+    const texto = document.getElementById('insumos-search').value.toLowerCase().trim();
+    const resultado = insumos.filter(i => sinAcentos(i.nombre.toLowerCase()).includes(sinAcentos(texto)));
+    renderInsumosConDatos(resultado);
+}
+
+function limpiarFiltrosInsumos() {
+    document.getElementById('insumos-search').value = '';
+    filtrarInsumos();
+}
+
+// ============================================================
+// FILTROS DE HERRAMIENTAS
+// ============================================================
+function filtrarHerramientas() {
+    const texto = document.getElementById('herramientas-search').value.toLowerCase().trim();
+    const resultado = herramientas.filter(h => sinAcentos(h.nombre.toLowerCase()).includes(sinAcentos(texto)));
+    renderHerramientasConDatos(resultado);
+}
+
+function limpiarFiltrosHerramientas() {
+    document.getElementById('herramientas-search').value = '';
+    filtrarHerramientas();
+}
+
+// ============================================================
+// RENDER DE OBRAS
+// renderObras() llama a filtrarObras() para respetar los filtros activos.
+// renderObrasConDatos() recibe el array ya filtrado y pinta las tarjetas.
+// ============================================================
+function renderObras() { filtrarObras(); }
+
+function renderObrasConDatos(lista) {
+    const c = document.getElementById('obras-container');
+    if (!lista.length) {
+        c.innerHTML = '<p class="text-gray-400 py-8 text-center">No se encontraron obras con esos criterios.</p>';
+        return;
+    }
+    c.innerHTML = lista.map(o => `
+        <div class="bg-white rounded-xl shadow-md overflow-hidden hover:shadow-lg transition-shadow">
+            <div class="p-6 bg-gradient-to-r from-gray-50 to-white">
+                <div class="flex items-start justify-between gap-4 flex-wrap mb-4">
+                    <div>
+                        <h3 class="text-xl font-semibold text-black mb-2">${o.nombre}</h3>
+                        <!-- ${estadoBadge(o.estado)} -->
+                    </div>
+                    <button onclick="editObra('${o.id}')" title="Editar"
+                        class="p-2 text-gray-400 hover:text-black hover:bg-gray-100 rounded-lg transition-colors">
+                        ${editIcon}
+                    </button>
+                </div>
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
+                    <div><p class="text-xs text-gray-500 mb-1">Fecha de Inicio</p><p class="font-medium text-sm">${fmtDate(o.fechaInicio)}</p></div>
+                    <div><p class="text-xs text-gray-500 mb-1">Fecha de Término</p><p class="font-medium text-sm">${o.fechaTermino ? fmtDate(o.fechaTermino) : '<span class="text-yellow-600">En curso</span>'}</p></div>
+                    <div><p class="text-xs text-gray-500 mb-1">Presupuesto Inicial</p><p class="font-medium text-sm">${fmt(o.presupuestoInicial)}</p></div>
+                    <div><p class="text-xs text-gray-500 mb-1">Costo Final</p><p class="font-semibold text-sm text-[#FFC107]">${fmt(o.costoFinal)}</p></div>
+                </div>
+                <button onclick="openObraDetail('${o.id}')"
+                    class="flex items-center gap-2 text-black hover:text-[#FFC107] transition-colors text-sm font-medium">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                    Desglose de Obra
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+                </button>
+            </div>
+        </div>`).join('');
+}
+
+// ============================================================
+// DETALLE DE OBRA
+// ============================================================
+function openObraDetail(id) {
+    currentObraId = id;
+    document.getElementById('obras-list-view').style.display = 'none';
+    document.getElementById('obra-detail-view').style.display = 'block';
+    renderObraDetail(obras.find(o => String(o.id) === String(id)));
+    switchSubTab('sub-empleados');
+}
+
+function closeObraDetail() {
+    currentObraId = null;
+    document.getElementById('obras-list-view').style.display = '';
+    document.getElementById('obra-detail-view').style.display = 'none';
+}
+
+function renderObraDetail(obra) {
+    document.getElementById('obra-detail-content').innerHTML = `
+        <div class="mb-6">
+            <div class="flex items-center gap-3 flex-wrap mb-4">
+                <h2 class="text-2xl font-bold text-black">${obra.nombre}</h2>
+                
+            </div>
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 bg-white rounded-xl shadow p-5 mb-6">
+                <div><p class="text-xs text-gray-500 mb-1">Fecha Inicio</p><p class="font-semibold text-sm">${fmtDate(obra.fechaInicio)}</p></div>
+                <div><p class="text-xs text-gray-500 mb-1">Fecha Término</p><p class="font-semibold text-sm">${fmtDate(obra.fechaTermino)}</p></div>
+                <div><p class="text-xs text-gray-500 mb-1">Presupuesto Inicial</p><p class="font-semibold text-sm">${fmt(obra.presupuestoInicial)}</p></div>
+                <div><p class="text-xs text-gray-500 mb-1">Costo Final</p><p class="font-semibold text-sm text-[#FFC107]">${fmt(obra.costoFinal)}</p></div>
+            </div>
+        </div>
+        <div class="bg-white rounded-xl shadow-md overflow-hidden">
+            <div class="flex border-b border-gray-200 overflow-x-auto">
+                <button onclick="switchSubTab('sub-empleados')" id="subtab-sub-empleados"
+                    class="subtab-btn flex-1 py-3 px-4 text-sm font-semibold border-b-2 border-[#FFC107] text-black whitespace-nowrap ">
+                     Empleados <span class="bg-gray-100 text-gray-600 px-1.5 py-0.5 rounded-full text-xs ml-1">${obra.empleados.length}</span>
+                </button>
+                <button onclick="switchSubTab('sub-recursos')" id="subtab-sub-recursos"
+                    class="subtab-btn flex-1 py-3 px-4 text-sm font-semibold border-b-2 border-transparent text-gray-500 hover:text-black whitespace-nowrap ">
+                     Recursos <span class="bg-gray-100 text-gray-600 px-1.5 py-0.5 rounded-full text-xs ml-1">${obra.herramientas.length + obra.insumos.length + obra.servicios.length}</span>
+                </button>
+                <button onclick="switchSubTab('sub-pagos')" id="subtab-sub-pagos"
+                    class="subtab-btn flex-1 py-3 px-4 text-sm font-semibold border-b-2 border-transparent text-gray-500 hover:text-black whitespace-nowrap ">
+                    Pagos <span class="bg-gray-100 text-gray-600 px-1.5 py-0.5 rounded-full text-xs ml-1">${obra.pagos.length}</span>
+                </button>
+            </div>
+            <div class="p-6">
+                <div id="sub-empleados" class="sub-tab-content active">
+                    <div class="flex justify-between items-center mb-4">
+                        <h4 class="font-bold text-black text-sm">Empleados asignados</h4>
+                        <button onclick="openSubModal('sub-empleado-modal', null)"
+                            class="bg-[#FFC107] text-black px-4 py-2 rounded hover:bg-yellow-500 text-xs font-semibold">+ Agregar</button>
+                    </div>
+                    ${renderSubEmpleados(obra)}
+                </div>
+                <div id="sub-recursos" class="sub-tab-content">
+                    <div class="flex justify-between items-center mb-4">
+                        <h4 class="font-bold text-black text-sm">Recursos utilizados</h4>
+                        <button onclick="openSubModal('sub-recurso-modal', null)"
+                            class="bg-[#FFC107] text-black px-4 py-2 rounded hover:bg-yellow-500 text-xs font-semibold">+ Agregar</button>
+                    </div>
+                    ${renderSubRecursos(obra)}
+                </div>
+                <div id="sub-pagos" class="sub-tab-content">
+                    <div class="flex justify-between items-center mb-4">
+                        <h4 class="font-bold text-black text-sm">Historial de pagos</h4>
+                        <button onclick="openSubModal('sub-pago-modal', null)"
+                            class="bg-[#FFC107] text-black px-4 py-2 rounded hover:bg-yellow-500 text-xs font-semibold">+ Registrar</button>
+                    </div>
+                    ${renderSubPagos(obra)}
+                </div>
+            </div>
+        </div>`;
+}
+
+// ============================================================
+// RENDER DE SUB-TABLAS CON TOTALES
+// ============================================================
+
+function renderSubEmpleados(obra) {
+    if (!obra.empleados.length) return '<p class="text-gray-400 text-sm py-4 text-center">Sin empleados registrados.</p>';
+    // Total Gastos: suma de costos calculados (salario semanal × semanas trabajadas)
+    const totalGastos = obra.empleados.reduce((s, e) => s + e.costoTotal, 0);
+    return `<div class="overflow-x-auto">
+        <table class="w-full text-sm">
+            <thead><tr class="bg-gray-50 text-xs text-gray-500 uppercase">
+                <th class="px-3 py-2 text-left">Nombre</th>
+                <th class="px-3 py-2 text-left">Fecha Inicio</th>
+                <th class="px-3 py-2 text-left">Fecha Término</th>
+                <th class="px-3 py-2 text-left">Puesto</th>
+            </tr></thead>
+            <tbody>
+                ${obra.empleados.map(e => `<tr class="border-b border-gray-100 hover:bg-gray-50">
+                    <td class="px-3 py-3 font-medium">${e.nombreEmpleado}</td>
+                    <td class="px-3 py-3 text-gray-500">${fmtDate(e.fechaInicio)}</td>
+                    <td class="px-3 py-3 text-gray-500">${fmtDate(e.fechaTermino)}</td>
+                    <td class="px-3 py-3 text-gray-500">${e.puesto}</td>
+                </tr>`).join('')}
+                <!-- Fila de total: Total Gastos Empleados -->
+                <tr class="bg-gray-50 border-t-2 border-gray-200">
+                    <td colspan="3" class="px-3 py-3 text-left text-sm font-bold text-gray-700">Total Gastos Empleados:</td>
+                    <td class="px-3 py-3 text-right font-bold text-black">${fmt(totalGastos)}</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>`;
+}
+
+function renderSubRecursos(obra) {
+    const totalHerr = obra.herramientas.reduce((s, h) => s + h.subtotal, 0);
+    const totalIns  = obra.insumos.reduce((s, r) => s + r.subtotal, 0);
+    const totalSrv  = obra.servicios.reduce((s, r) => s + r.subtotal, 0);
+    const grandTotal = totalHerr + totalIns + totalSrv;
+
+    if (!obra.herramientas.length && !obra.insumos.length && !obra.servicios.length) {
+        return '<p class="text-gray-400 text-sm py-4 text-center">Sin recursos registrados.</p>';
+    }
+
+    let html = '<div class="space-y-6">';
+
+    // ── Herramientas ─────────────────────────────────────────
+    if (obra.herramientas.length) {
+        html += `
+        <div>
+            <p class="text-xs font-bold text-gray-500 uppercase tracking-wide mb-2">Herramientas</p>
+            <div class="overflow-x-auto">
+            <table class="w-full text-sm">
+                <thead><tr class="bg-gray-50 text-xs text-gray-500 uppercase">
+                    <th class="px-3 py-2 text-left">Nombre</th>
+                    <th class="px-3 py-2 text-left">Proveedor</th>
+                    <th class="px-3 py-2 text-right">Renta/Sem.</th>
+                    <th class="px-3 py-2 text-left">F. Inicio</th>
+                    <th class="px-3 py-2 text-left">F. Término</th>
+                    <th class="px-3 py-2 text-right">Días</th>
+                    <th class="px-3 py-2 text-right">Uds.</th>
+                </tr></thead>
+                <tbody>
+                    ${obra.herramientas.map(h => `<tr class="border-b border-gray-100 hover:bg-gray-50">
+                        <td class="px-3 py-3 font-medium">${h.nombre}</td>
+                        <td class="px-3 py-3 text-gray-500">${h.proveedor}</td>
+                        <td class="px-3 py-3 text-right text-gray-600">${fmt(h.rentaSemanal)}</td>
+                        <td class="px-3 py-3 text-gray-500">${h.fechaInicio ? fmtDate(h.fechaInicio) : '—'}</td>
+                        <td class="px-3 py-3 text-gray-500">${h.fechaTermino ? fmtDate(h.fechaTermino) : 'Activa'}</td>
+                        <td class="px-3 py-3 text-right">${h.dias}</td>
+                        <td class="px-3 py-3 text-right">${h.cantidadUnidades}</td>
+                    </tr>`).join('')}
+                    <tr class="bg-gray-50 border-t-2 border-gray-200">
+                        <td colspan="6" class="px-3 py-3 text-left text-sm font-bold text-gray-700">Total Herramientas:</td>
+                        <td class="px-3 py-3 text-right font-bold text-black">${fmt(totalHerr)}</td>
+                    </tr>
+                </tbody>
+            </table>
+            </div>
+        </div>`;
+    }
+
+    // ── Insumos ───────────────────────────────────────────────
+    if (obra.insumos.length) {
+        html += `
+        <div>
+            <p class="text-xs font-bold text-gray-500 uppercase tracking-wide mb-2">Insumos</p>
+            <div class="overflow-x-auto">
+            <table class="w-full text-sm">
+                <thead><tr class="bg-gray-50 text-xs text-gray-500 uppercase">
+                    <th class="px-3 py-2 text-left">Material</th>
+                    <th class="px-3 py-2 text-left">Proveedor</th>
+                    <th class="px-3 py-2 text-right">Costo Unit.</th>
+                    <th class="px-3 py-2 text-right">Cantidad</th>
+                </tr></thead>
+                <tbody>
+                    ${obra.insumos.map(r => `<tr class="border-b border-gray-100 hover:bg-gray-50">
+                        <td class="px-3 py-3 font-medium">${r.nombre}</td>
+                        <td class="px-3 py-3 text-gray-500">${r.proveedor}</td>
+                        <td class="px-3 py-3 text-right text-gray-600">${fmt(r.costoUnitario)}</td>
+                        <td class="px-3 py-3 text-right">${r.cantidadTotal}</td>
+                    </tr>`).join('')}
+                    <tr class="bg-gray-50 border-t-2 border-gray-200">
+                        <td colspan="3" class="px-3 py-3 text-left text-sm font-bold text-gray-700">Total Insumos:</td>
+                        <td class="px-3 py-3 text-right font-bold text-black">${fmt(totalIns)}</td>
+                    </tr>
+                </tbody>
+            </table>
+            </div>
+        </div>`;
+    }
+
+    // ── Servicios ─────────────────────────────────────────────
+    if (obra.servicios.length) {
+        html += `
+        <div>
+            <p class="text-xs font-bold text-gray-500 uppercase tracking-wide mb-2">Servicios</p>
+            <div class="overflow-x-auto">
+            <table class="w-full text-sm">
+                <thead><tr class="bg-gray-50 text-xs text-gray-500 uppercase">
+                    <th class="px-3 py-2 text-left">Traslado</th>
+                    <th class="px-3 py-2 text-left">Proveedor</th>
+                    <th class="px-3 py-2 text-right">Costo/km</th>
+                    <th class="px-3 py-2 text-right">km Totales</th>
+                </tr></thead>
+                <tbody>
+                    ${obra.servicios.map(r => `<tr class="border-b border-gray-100 hover:bg-gray-50">
+                        <td class="px-3 py-3 font-medium">${r.nombre}</td>
+                        <td class="px-3 py-3 text-gray-500">${r.proveedor}</td>
+                        <td class="px-3 py-3 text-right text-gray-600">${fmt(r.costoKm)}</td>
+                        <td class="px-3 py-3 text-right">${r.kilometrajeTotal}</td>
+                    </tr>`).join('')}
+                    <tr class="bg-gray-50 border-t-2 border-gray-200">
+                        <td colspan="3" class="px-3 py-3 text-left text-sm font-bold text-gray-700">Total Servicios:</td>
+                        <td class="px-3 py-3 text-right font-bold text-black">${fmt(totalSrv)}</td>
+                    </tr>
+                </tbody>
+            </table>
+            </div>
+        </div>`;
+    }
+
+    // ── Grand total ───────────────────────────────────────────
+    html += `
+        <div class="border-t-2 border-gray-300 pt-3 flex justify-end">
+            <span class="text-sm font-bold text-gray-700 mr-4">Total Gastos de Recursos:</span>
+            <span class="font-bold text-black">${fmt(grandTotal)}</span>
+        </div>
+    </div>`;
+
+    return html;
+}
+
+function renderSubPagos(obra) {
+    if (!obra.pagos.length) return '<p class="text-gray-400 text-sm py-4 text-center">Sin pagos registrados.</p>';
+    // Total Pagos: suma de todos los montos
+    const totalPagos = obra.pagos.reduce((s, p) => s + p.monto, 0);
+    return `<div class="overflow-x-auto">
+        <table class="w-full text-sm">
+            <thead><tr class="bg-gray-50 text-xs text-gray-500 uppercase">
+                <th class="px-3 py-2 text-left">Fecha</th>
+                <th class="px-3 py-2 text-left">Tipo de Pago</th>
+                <th class="px-3 py-2 text-right">Monto</th>
+            </tr></thead>
+            <tbody>
+                ${obra.pagos.map(p => `<tr class="border-b border-gray-100 hover:bg-gray-50">
+                    <td class="px-3 py-3">${fmtDate(p.fechaPago)}</td>
+                    <td class="px-3 py-3 text-gray-500">${p.tipoPago}</td>
+                    <td class="px-3 py-3 text-right text-[#FFC107] font-semibold">${fmt(p.monto)}</td>
+                </tr>`).join('')}
+                <!-- Fila de total: Total Pagos Realizados -->
+                <tr class="bg-gray-50 border-t-2 border-gray-200">
+                    <td colspan="2" class="px-3 py-3 text-right text-sm font-bold text-gray-700">Total Pagos Realizados:</td>
+                    <td class="px-3 py-3 text-right font-bold text-black">${fmt(totalPagos)}</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>`;
+}
+
+function switchSubTab(t) {
+    document.querySelectorAll('.sub-tab-content').forEach(el => el.classList.remove('active'));
+    document.querySelectorAll('.subtab-btn').forEach(el => {
+        el.classList.remove('border-[#FFC107]', 'text-black');
+        el.classList.add('border-transparent', 'text-gray-500');
+    });
+    const c = document.getElementById(t);
+    const b = document.getElementById('subtab-' + t);
+    if (c) c.classList.add('active');
+    if (b) { b.classList.add('border-[#FFC107]', 'text-black'); b.classList.remove('border-transparent', 'text-gray-500'); }
+}
+
+// ============================================================
+// REPORTE ESTADÍSTICO
+// ============================================================
+function openReporte() {
+    if (!obras.length) {
+        document.getElementById('reporte-content').innerHTML = '<p class="text-center text-gray-500 py-12">No hay obras para generar el reporte.</p>';
+        openModal('reporte-modal');
+        return;
+    }
+    const costos     = obras.map(o => o.costoFinal);
+    const promedio   = costos.reduce((a, b) => a + b, 0) / costos.length;
+    const desviacion = Math.sqrt(costos.reduce((s, c) => s + Math.pow(c - promedio, 2), 0) / costos.length);
+    const sorted     = [...obras].sort((a, b) => b.costoFinal - a.costoFinal);
+    const totalInv   = costos.reduce((a, b) => a + b, 0);
+
+    document.getElementById('reporte-content').innerHTML = `
+        <div class="grid md:grid-cols-3 gap-4">
+            <div class="bg-gradient-to-br from-[#FFC107] to-yellow-400 text-black p-6 rounded-xl shadow">
+                <p class="text-sm font-medium mb-2 opacity-80">Promedio de Costo</p>
+                <p class="text-2xl font-bold">${fmt(promedio)}</p>
+            </div>
+            <div class="bg-gradient-to-br from-gray-800 to-gray-700 text-white p-6 rounded-xl shadow">
+                <p class="text-sm font-medium mb-2 opacity-70">Desviación Estándar</p>
+                <p class="text-2xl font-bold">${fmt(desviacion)}</p>
+            </div>
+            <div class="bg-gradient-to-br from-gray-100 to-gray-200 text-black p-6 rounded-xl shadow">
+                <p class="text-sm font-medium mb-2 opacity-70">Total Invertido</p>
+                <p class="text-2xl font-bold">${fmt(totalInv)}</p>
+                <p class="text-xs opacity-60 mt-1">${obras.length} obras en total</p>
+            </div>
+        </div>
+        <div class="bg-gray-50 p-6 rounded-xl border border-gray-200">
+            <h4 class="text-lg font-bold text-black mb-4">Comparación de Costos por Obra</h4>
+            <div style="position:relative; height:340px"><canvas id="reporte-chart"></canvas></div>
+        </div>
+        <div>
+            <h4 class="text-lg font-bold text-black mb-4">Obras Ordenadas por Costo (Mayor a Menor)</h4>
+            <div class="overflow-x-auto rounded-xl border border-gray-200">
+                <table class="w-full text-sm">
+                    <thead class="bg-black text-white"><tr>
+                        <th class="px-5 py-3 text-left">#</th>
+                        <th class="px-5 py-3 text-left">Nombre de la Obra</th>
+                        <th class="px-5 py-3 text-right">Presupuesto Inicial</th>
+                        <th class="px-5 py-3 text-right">Costo Final</th>
+                        <th class="px-5 py-3 text-right">Diferencia</th>
+                    </tr></thead>
+                    <tbody>
+                        ${sorted.map((o, i) => {
+                            const d = o.costoFinal - o.presupuestoInicial;
+                            return `<tr class="border-b border-gray-100 ${i % 2 === 0 ? '' : 'bg-gray-50'}">
+                                <td class="px-5 py-4 text-gray-400 font-bold">${i + 1}</td>
+                                <td class="px-5 py-4 font-semibold text-black">${o.nombre}</td>
+                                <td class="px-5 py-4 text-right text-gray-600">${fmt(o.presupuestoInicial)}</td>
+                                <td class="px-5 py-4 text-right font-semibold text-[#FFC107]">${fmt(o.costoFinal)}</td>
+                                <td class="px-5 py-4 text-right font-semibold ${d > 0 ? 'text-red-600' : 'text-green-600'}">${d > 0 ? '+' : ''}${fmt(d)}</td>
+                            </tr>`;
+                        }).join('')}
+                    </tbody>
+                </table>
+            </div>
+        </div>`;
+
+    openModal('reporte-modal');
+
+    setTimeout(() => {
+        if (reporteChart) { reporteChart.destroy(); reporteChart = null; }
+        const ctx = document.getElementById('reporte-chart');
+        if (!ctx) return;
+        reporteChart = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: sorted.map(o => o.nombre.length > 28 ? o.nombre.substring(0, 28) + '…' : o.nombre),
+                datasets: [
+                    { label: 'Presupuesto Inicial', data: sorted.map(o => o.presupuestoInicial), backgroundColor: '#888', borderRadius: 4 },
+                    { label: 'Costo Final',          data: sorted.map(o => o.costoFinal),         backgroundColor: '#FFC107', borderRadius: 4 }
+                ]
+            },
+            options: {
+                responsive: true, maintainAspectRatio: false,
+                plugins: {
+                    legend: { position: 'top' },
+                    tooltip: { callbacks: { label: c => c.dataset.label + ': ' + fmt(c.parsed.y) } }
+                },
+                scales: {
+                    y: { ticks: { callback: v => '$' + (v / 1000000).toFixed(1) + 'M' }, grid: { color: '#f0f0f0' } },
+                    x: { grid: { display: false } }
+                }
+            }
+        });
+    }, 50);
+}
+
+// ============================================================
+// RENDER DE EMPLEADOS, CLIENTES Y PROVEEDORES
+// Cada render() llama al filtro para respetar búsquedas activas.
+// ============================================================
+function renderEmpleados() { filtrarEmpleados(); }
+
+function renderEmpleadosConDatos(lista) {
+    const tbody = document.getElementById('empleados-tbody');
+    if (!lista.length) {
+        tbody.innerHTML = '<tr><td colspan="6" class="px-4 py-8 text-center text-gray-400">No se encontraron empleados.</td></tr>';
+        return;
+    }
+    tbody.innerHTML = lista.map(e => {
+        return `<tr class="border-b border-gray-100 hover:bg-gray-50 text-sm">
+            <td class="px-4 py-3 font-semibold text-black">${e.nombre}</td>
+            <td class="px-4 py-3 text-gray-500">${e.puesto}</td>
+            <td class="px-4 py-3 text-gray-500">${e.telefono}</td>
+            <td class="px-4 py-3 text-gray-500">${e.email}</td>
+            <td class="px-4 py-3 text-right text-[#FFC107] font-semibold">${fmt(e.salario)}</td>
+            <td class="px-4 py-3 text-center">
+                <button onclick="editEmpleado('${e.id}')" class="p-1.5 text-gray-400 hover:text-black hover:bg-gray-100 rounded-lg transition-colors">${editIcon}</button>
+            </td>
+        </tr>`;
+    }).join('');
+}
+
+function renderClientes() { filtrarClientes(); }
+
+function renderClientesConDatos(lista) {
+    const tbody = document.getElementById('clientes-tbody');
+    if (!lista.length) {
+        tbody.innerHTML = '<tr><td colspan="4" class="px-4 py-8 text-center text-gray-400">No se encontraron clientes.</td></tr>';
+        return;
+    }
+    tbody.innerHTML = lista.map(c => `<tr class="border-b border-gray-100 hover:bg-gray-50 text-sm">
+        <td class="px-4 py-3 font-semibold text-black">${c.nombre}</td>
+        <td class="px-4 py-3 text-gray-500">${c.telefono}</td>
+        <td class="px-4 py-3 text-gray-500">${c.email}</td>
+        <td class="px-4 py-3 text-center">
+            <button onclick="editCliente('${c.id}')" class="p-1.5 text-gray-400 hover:text-black hover:bg-gray-100 rounded-lg transition-colors">${editIcon}</button>
+        </td>
+    </tr>`).join('');
+}
+
+function renderProveedores() { filtrarProveedores(); }
+
+function renderProveedoresConDatos(lista) {
+    const grid = document.getElementById('grid-proveedores');
+    if (!lista.length) {
+        grid.innerHTML = '<p class="text-gray-400 text-sm py-8 text-center col-span-full">No se encontraron proveedores.</p>';
+        return;
+    }
+    grid.innerHTML = lista.map(p => `
+        <div class="card-proveedor" onclick="editProveedor('${p.id}')" title="Editar proveedor">
+            <span class="card-proveedor-nombre">${p.nombre}</span>
+            <div class="card-proveedor-stats">
+                <span>${p.totalInsumos ?? 0} Insumos</span>
+                <span class="sep">|</span>
+                <span>${p.totalServicios ?? 0} Servicios</span>
+                <span class="sep">|</span>
+                <span>${p.totalHerramientas ?? 0} Herramientas</span>
+            </div>
+        </div>`).join('');
+}
+
+function renderInsumos() { filtrarInsumos(); }
+
+function renderInsumosConDatos(lista) {
+    const tbody = document.getElementById('insumos-tbody');
+    if (!lista.length) {
+        tbody.innerHTML = '<tr><td colspan="5" class="px-4 py-8 text-center text-gray-400">No se encontraron insumos.</td></tr>';
+        return;
+    }
+    tbody.innerHTML = lista.map(i => {
+        // insumos cargados de BD llevan i.proveedor directamente (VARCHAR)
+        const provNombre = i.proveedor ?? (proveedores.find(p => p.id === i.proveedorId)?.nombre ?? '—');
+        return `<tr class="border-b border-gray-100 hover:bg-gray-50 text-sm">
+            <td class="px-4 py-3 font-semibold text-black">${i.nombre}</td>
+            <td class="px-4 py-3 text-gray-500">${i.tipo}</td>
+            <td class="px-4 py-3 text-gray-500">${provNombre}</td>
+            <td class="px-4 py-3 text-right font-semibold text-[#FFC107]">${fmt(i.costoUnitario)}</td>
+            <td class="px-4 py-3 text-center">
+                <button onclick="editInsumo('${i.id}')" class="p-1.5 text-gray-400 hover:text-black hover:bg-gray-100 rounded-lg transition-colors">${editIcon}</button>
+            </td>
+        </tr>`;
+    }).join('');
+}
+
+function renderHerramientas() { filtrarHerramientas(); }
+
+function renderHerramientasConDatos(lista) {
+    const tbody = document.getElementById('herramientas-tbody');
+    if (!lista.length) {
+        tbody.innerHTML = '<tr><td colspan="5" class="px-4 py-8 text-center text-gray-400">No se encontraron herramientas.</td></tr>';
+        return;
+    }
+    tbody.innerHTML = lista.map(h => {
+        // Soporta datos de BD (id_herramienta / proveedor / renta_semanal)
+        const idHra      = h.id_herramienta ?? h.id;
+        const provNombre = h.proveedor ?? (proveedores.find(p => p.id === h.proveedorId)?.nombre ?? '—');
+        const renta      = h.renta_semanal ?? h.rentaSemanal ?? 0;
+        const imgSrc     = h.imagen;
+        const imgHtml    = imgSrc
+            ? `<img src="${imgSrc}" alt="${h.nombre}"
+                    class="w-20 h-20 object-cover rounded-lg border border-gray-200 shadow-sm"
+                    onerror="this.replaceWith(document.querySelector('#hra-img-placeholder').content.cloneNode(true))">`
+            : `<div class="w-20 h-20 bg-gray-100 rounded-lg flex items-center justify-center text-gray-300">
+                 <svg class="w-9 h-9" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                     d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828
+                        0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                 </svg>
+               </div>`;
+        return `<tr class="border-b border-gray-100 hover:bg-gray-50 text-sm">
+            <td class="px-4 py-3">${imgHtml}</td>
+            <td class="px-4 py-3 font-semibold text-black">${h.nombre}</td>
+            <td class="px-4 py-3 text-gray-500">${provNombre}</td>
+            <td class="px-4 py-3 text-right font-semibold text-[#FFC107]">${fmt(renta)}</td>
+            <td class="px-4 py-3 text-center">
+                <button onclick="editHerramienta('${idHra}')"
+                    class="p-1.5 text-gray-400 hover:text-black hover:bg-gray-100 rounded-lg transition-colors">${editIcon}</button>
+            </td>
+        </tr>`;
+    }).join('');
+}
+
+// ============================================================
+// SUBMIT DE FORMULARIOS
+// Por ahora los submit son interceptados por JavaScript para
+// actualizar el mock data. Cuando se conecte la BD, se elimina
+// el preventDefault() y el form enviará los datos al PHP indicado
+// en el atributo action="" del formulario.
+// ============================================================
+document.getElementById('obra-form').addEventListener('submit', function(e) {
+    e.preventDefault();
+    const nombre       = document.getElementById('obra-nombre').value.trim();
+    const fechaInicio  = document.getElementById('obra-fechaInicio').value;
+    const fechaTermino = document.getElementById('obra-fechaTermino').value;
+    const presupuesto  = document.getElementById('obra-presupuesto').value;
+    const clienteId    = document.getElementById('obra-cliente').value;
+    const id           = document.getElementById('obra-id').value;
+    let valido = true;
+
+    if (!nombre) { marcarError('obra-nombre', 'obra-nombre-err'); valido = false; }
+    else          { limpiarError('obra-nombre', 'obra-nombre-err'); }
+    if (!id && !fechaInicio)  { marcarError('obra-fechaInicio',  'obra-fechaInicio-err');  valido = false; }
+    else                       { limpiarError('obra-fechaInicio',  'obra-fechaInicio-err'); }
+    if (!id && !fechaTermino) { marcarError('obra-fechaTermino', 'obra-fechaTermino-err'); valido = false; }
+    else                       { limpiarError('obra-fechaTermino', 'obra-fechaTermino-err'); }
+    if (!id && !presupuesto)  { marcarError('obra-presupuesto',  'obra-presupuesto-err');  valido = false; }
+    else                       { limpiarError('obra-presupuesto',  'obra-presupuesto-err'); }
+    if (!id && !clienteId)    { marcarError('obra-cliente',      'obra-cliente-err');      valido = false; }
+    else                       { limpiarError('obra-cliente',      'obra-cliente-err'); }
+    if (!valido) return;
+
+    fetch('php/guardar_obra.php', { method: 'POST', body: new FormData(this) })
+        .then(r => r.json())
+        .then(res => {
+            if (res.error) { alert(res.error); return; }
+            closeModal('obra-modal');
+            recargarObras();
+        })
+        .catch(() => alert('Error de conexión al guardar la obra.'));
+});
+
+document.getElementById('empleado-form').addEventListener('submit', function(e) {
+    e.preventDefault();
+    const id         = document.getElementById('empleado-id').value;
+    const nombre     = document.getElementById('empleado-nombre').value.trim();
+    const puesto     = document.getElementById('empleado-puesto').value.trim();
+    const email      = document.getElementById('empleado-email').value.trim();
+    const contrasena = document.getElementById('empleado-contrasena').value.trim();
+    let valido = true;
+
+    if (!nombre) { marcarError('empleado-nombre', 'empleado-nombre-err'); valido = false; }
+    else          { limpiarError('empleado-nombre', 'empleado-nombre-err'); }
+    if (!puesto) { marcarError('empleado-puesto', 'empleado-puesto-err'); valido = false; }
+    else          { limpiarError('empleado-puesto', 'empleado-puesto-err'); }
+    if (!email)  { marcarError('empleado-email',  'empleado-email-err');  valido = false; }
+    else          { limpiarError('empleado-email',  'empleado-email-err'); }
+    if (!id) {
+        if (!contrasena || contrasena.length < 8) { marcarError('empleado-contrasena', 'empleado-contrasena-err'); valido = false; }
+        else                                       { limpiarError('empleado-contrasena', 'empleado-contrasena-err'); }
+    }
+    if (!valido) return;
+
+    fetch('php/guardar_empleado.php', { method: 'POST', body: new FormData(this) })
+        .then(r => r.json())
+        .then(res => {
+            if (res.error) { alert(res.error); return; }
+            closeModal('empleado-modal');
+            recargarEmpleados();
+        })
+        .catch(() => alert('Error de conexión al guardar el empleado.'));
+});
+
+document.getElementById('cliente-form').addEventListener('submit', function(e) {
+    e.preventDefault();
+    const id         = document.getElementById('cliente-id').value;
+    const nombre     = document.getElementById('cliente-nombre').value.trim();
+    const email      = document.getElementById('cliente-email').value.trim();
+    const contrasena = document.getElementById('cliente-contrasena').value.trim();
+    let valido = true;
+
+    if (!nombre) { marcarError('cliente-nombre', 'cliente-nombre-err'); valido = false; }
+    else          { limpiarError('cliente-nombre', 'cliente-nombre-err'); }
+    if (!email)  { marcarError('cliente-email',  'cliente-email-err');  valido = false; }
+    else          { limpiarError('cliente-email',  'cliente-email-err'); }
+    if (!id) {
+        if (!contrasena || contrasena.length < 8) { marcarError('cliente-contrasena', 'cliente-contrasena-err'); valido = false; }
+        else                                       { limpiarError('cliente-contrasena', 'cliente-contrasena-err'); }
+    }
+    if (!valido) return;
+
+    fetch('php/guardar_cliente.php', { method: 'POST', body: new FormData(this) })
+        .then(r => r.json())
+        .then(res => {
+            if (res.error) { alert(res.error); return; }
+            closeModal('cliente-modal');
+            recargarClientes();
+        })
+        .catch(() => alert('Error de conexión al guardar el cliente.'));
+});
+
+document.getElementById('proveedor-form').addEventListener('submit', function(e) {
+    e.preventDefault();
+    const nombre = document.getElementById('proveedor-nombre').value.trim();
+    let valido = true;
+
+    if (!nombre) { marcarError('proveedor-nombre', 'proveedor-nombre-err'); valido = false; }
+    else          { limpiarError('proveedor-nombre', 'proveedor-nombre-err'); }
+    if (!valido) return;
+
+    fetch('php/guardar_proveedor.php', { method: 'POST', body: new FormData(this) })
+        .then(r => r.json())
+        .then(res => {
+            if (res.error) { alert(res.error); return; }
+            closeModal('proveedor-modal');
+            recargarProveedores();
+        })
+        .catch(() => alert('Error de conexión al guardar el proveedor.'));
+});
+
+document.getElementById('insumo-form').addEventListener('submit', function(e) {
+    e.preventDefault();
+    const nombre    = document.getElementById('insumo-nombre').value.trim();
+    const proveedor = document.getElementById('insumo-proveedor').value.trim();
+    let valido = true;
+
+    if (!nombre)    { marcarError('insumo-nombre',    'insumo-nombre-err');    valido = false; }
+    else             { limpiarError('insumo-nombre',    'insumo-nombre-err'); }
+    if (!proveedor) { marcarError('insumo-proveedor', 'insumo-proveedor-err'); valido = false; }
+    else             { limpiarError('insumo-proveedor', 'insumo-proveedor-err'); }
+    if (!valido) return;
+
+    fetch('php/guardar_insumo.php', { method: 'POST', body: new FormData(this) })
+        .then(r => r.json())
+        .then(res => {
+            if (res.error) { alert(res.error); return; }
+            closeModal('insumo-modal');
+            recargarInsumos();
+            recargarProveedores();
+        })
+        .catch(() => alert('Error de conexión al guardar el insumo.'));
+});
+
+document.getElementById('herramienta-form').addEventListener('submit', function(e) {
+    e.preventDefault();
+    const nombre    = document.getElementById('herramienta-nombre').value.trim();
+    const proveedor = document.getElementById('herramienta-proveedor').value.trim();
+    let valido = true;
+
+    if (!nombre)    { marcarError('herramienta-nombre',    'herramienta-nombre-err');    valido = false; }
+    else             { limpiarError('herramienta-nombre',    'herramienta-nombre-err'); }
+    if (!proveedor) { marcarError('herramienta-proveedor', 'herramienta-proveedor-err'); valido = false; }
+    else             { limpiarError('herramienta-proveedor', 'herramienta-proveedor-err'); }
+    if (!valido) return;
+
+    fetch('php/guardar_herramienta.php', { method: 'POST', body: new FormData(this) })
+        .then(r => r.json())
+        .then(res => {
+            if (res.error) { alert(res.error); return; }
+            closeModal('herramienta-modal');
+            recargarHerramientas();
+            recargarProveedores();
+        })
+        .catch(() => alert('Error de conexión al guardar la herramienta.'));
+});
+
+// ============================================================
+// FUNCIONES DE EDITAR
+// ============================================================
+function editObra(id) {
+    const o = obras.find(ob => String(ob.id) === String(id));
+    document.getElementById('obra-id').value           = o.id;
+    document.getElementById('obra-nombre').value       = o.nombre;
+    document.getElementById('obra-modal-title').textContent = 'Editar Obra';
+    document.getElementById('obra-form').querySelectorAll('.hide-on-edit').forEach(el => {
+        el.style.display = 'none';
+        el.querySelectorAll('input').forEach(input => input.removeAttribute('required'));
+    });
+    openModal('obra-modal');
+}
+
+function editEmpleado(id) {
+    const e = empleados.find(em => String(em.id) === String(id));
+    document.getElementById('empleado-id').value        = e.id;
+    document.getElementById('empleado-nombre').value    = e.nombre;
+    document.getElementById('empleado-puesto').value    = e.puesto;
+    document.getElementById('empleado-salario').value   = e.salario;
+    document.getElementById('empleado-telefono').value  = e.telefono;
+    document.getElementById('empleado-email').value     = e.email;
+    document.getElementById('empleado-direccion').value = e.direccion;
+    document.getElementById('empleado-modal-title').textContent = 'Editar Empleado';
+    document.getElementById('empleado-form').querySelectorAll('.hide-on-edit').forEach(el => { el.style.display = 'none'; });
+    openModal('empleado-modal');
+}
+
+function editCliente(id) {
+    const c = clientes.find(cl => String(cl.id) === String(id));
+    document.getElementById('cliente-id').value       = c.id;
+    document.getElementById('cliente-nombre').value   = c.nombre;
+    document.getElementById('cliente-telefono').value = c.telefono;
+    document.getElementById('cliente-email').value    = c.email;
+    document.getElementById('cliente-modal-title').textContent = 'Editar Cliente';
+    document.getElementById('cliente-form').querySelectorAll('.hide-on-edit').forEach(el => { el.style.display = 'none'; });
+    openModal('cliente-modal');
+}
+
+function editProveedor(id) {
+    const p = proveedores.find(pr => String(pr.id) === String(id));
+    document.getElementById('proveedor-id').value       = p.id;
+    document.getElementById('proveedor-nombre').value   = p.nombre;
+    document.getElementById('proveedor-telefono').value = p.telefono;
+    document.getElementById('proveedor-email').value    = p.email;
+    document.getElementById('proveedor-modal-title').textContent = 'Editar Proveedor';
+    openModal('proveedor-modal');
+}
+
+function editInsumo(id) {
+    const i = insumos.find(ins => String(ins.id) === String(id));
+    updateProveedoresSelectNombre('insumo-proveedor', i.proveedor ?? '');
+    document.getElementById('insumo-id').value       = i.id;
+    document.getElementById('insumo-nombre').value   = i.nombre;
+    document.getElementById('insumo-tipo').value     = i.tipo;
+    document.getElementById('insumo-costo').value    = i.costoUnitario;
+    document.getElementById('insumo-modal-title').textContent = 'Editar Insumo / Servicio';
+    limpiarErroresForm([['insumo-nombre', 'insumo-nombre-err'], ['insumo-proveedor', 'insumo-proveedor-err']]);
+    openModal('insumo-modal');
+}
+
+function editHerramienta(id) {
+    const h = herramientas.find(hr => (hr.id_herramienta ?? hr.id) == id);
+    if (!h) return;
+    document.getElementById('herramienta-id').value     = h.id_herramienta ?? h.id;
+    document.getElementById('herramienta-nombre').value  = h.nombre;
+    document.getElementById('herramienta-renta').value   = h.renta_semanal ?? h.rentaSemanal ?? 0;
+    updateProveedoresSelectNombre('herramienta-proveedor', h.proveedor ?? '');
+    if (h.imagen) {
+        const lbl = document.getElementById('herramienta-imagen-preview-label');
+        lbl.textContent = 'Imagen actual guardada. Sube una nueva para reemplazarla.';
+        lbl.classList.remove('hidden');
+    }
+    document.getElementById('herramienta-modal-title').textContent = 'Editar Herramienta';
+    limpiarErroresForm([['herramienta-nombre', 'herramienta-nombre-err'], ['herramienta-proveedor', 'herramienta-proveedor-err']]);
+    openModal('herramienta-modal');
+}
+
+// ============================================================
+// SUB-MODALS (empleados, recursos y pagos dentro de una obra)
+// ============================================================
+function openSubModal(modalId, id) {
+    // Inyectamos el obra_id en el campo oculto del formulario
+    if (modalId === 'sub-empleado-modal') {
+        document.getElementById('sub-empleado-form').reset();
+        document.getElementById('sub-empleado-obra-id').value = currentObraId;
+        document.getElementById('sub-empleado-id-empleado').value = '';
+        document.getElementById('sub-empleado-busqueda').value    = '';
+        _hideSubEmpleadoPreview(true);
+        document.getElementById('sub-empleado-sugerencias').classList.add('hidden');
+        limpiarErroresForm([['sub-empleado-busqueda', 'sub-empleado-busqueda-err']]);
+        document.getElementById('sub-empleado-modal-title').textContent = 'Agregar Empleado a Obra';
+    } else if (modalId === 'sub-recurso-modal') {
+        document.getElementById('sub-recurso-obra-id').value = currentObraId;
+        document.getElementById('sub-recurso-form').reset();
+        limpiarErroresForm([['sub-recurso-nombre', 'sub-recurso-nombre-err']]);
+        // Mostrar campos del tipo por defecto (Insumo)
+        document.getElementById('sub-recurso-tipo').value = 'Insumo';
+        switchSubRecursoTipo();
+    } else if (modalId === 'sub-pago-modal') {
+        document.getElementById('sub-pago-obra-id').value = currentObraId;
+        document.getElementById('sub-pago-form').reset();
+        document.getElementById('sub-pago-id').value = '';
+        document.getElementById('sub-pago-obra-id').value = currentObraId;
+        limpiarErroresForm([['sub-pago-fecha', 'sub-pago-fecha-err'], ['sub-pago-monto', 'sub-pago-monto-err']]);
+        if (id !== null) {
+            const obra = obras.find(o => o.id === currentObraId);
+            const p    = obra.pagos.find(pg => pg.id === id);
+            document.getElementById('sub-pago-id').value    = p.id;
+            document.getElementById('sub-pago-fecha').value = p.fechaPago;
+            document.getElementById('sub-pago-tipo').value  = p.tipoPago;
+            document.getElementById('sub-pago-monto').value = p.monto;
+            document.getElementById('sub-pago-modal-title').textContent = 'Editar Pago';
+        } else {
+            document.getElementById('sub-pago-modal-title').textContent = 'Registrar Pago';
+        }
+    }
+    openModal(modalId);
+}
+
+document.getElementById('sub-empleado-form').addEventListener('submit', function(e) {
+    e.preventDefault();
+    const idEmpleado = document.getElementById('sub-empleado-id-empleado').value;
+
+    if (!idEmpleado) {
+        marcarError('sub-empleado-busqueda', 'sub-empleado-busqueda-err');
+        return;
+    }
+    limpiarError('sub-empleado-busqueda', 'sub-empleado-busqueda-err');
+
+    fetch('php/guardar_empleado_obra.php', { method: 'POST', body: new FormData(this) })
+        .then(r => r.json())
+        .then(res => {
+            if (res.error) { alert(res.error); return; }
+            closeModal('sub-empleado-modal');
+            recargarObras(() => {
+                const obra = obras.find(o => String(o.id) === String(currentObraId));
+                if (obra) { renderObraDetail(obra); switchSubTab('sub-empleados'); }
+            });
+        })
+        .catch(() => alert('Error de conexión al agregar el empleado a la obra.'));
+});
+
+document.getElementById('sub-recurso-form').addEventListener('submit', function(e) {
+    e.preventDefault();
+    const nombre = document.getElementById('sub-recurso-nombre').value.trim();
+
+    if (!nombre) { marcarError('sub-recurso-nombre', 'sub-recurso-nombre-err'); return; }
+    limpiarError('sub-recurso-nombre', 'sub-recurso-nombre-err');
+
+    // Copiar campos de herramienta al campo unificado si aplica
+    const tipo = document.getElementById('sub-recurso-tipo').value;
+    if (tipo === 'Herramienta') {
+        // El input cantidad_herr no tiene name=cantidad_total; lo enviamos aparte.
+        // cantidad_total no existe para herramientas pero la PHP espera el nombre cantidad_total.
+        const cantEl = document.getElementById('sub-recurso-cantidad-herr');
+        cantEl.name = 'cantidad_total';
+    }
+
+    const btn = document.getElementById('sub-recurso-submit-btn');
+    btn.disabled = true;
+    btn.textContent = 'Guardando…';
+
+    fetch('php/guardar_recurso_obra.php', { method: 'POST', body: new FormData(this) })
+        .then(r => r.json())
+        .then(res => {
+            if (res.error) { alert(res.error); return; }
+            closeModal('sub-recurso-modal');
+            recargarObras(() => {
+                const obra = obras.find(o => String(o.id) === String(currentObraId));
+                if (obra) { renderObraDetail(obra); switchSubTab('sub-recursos'); }
+            });
+        })
+        .catch(() => alert('Error de conexión al guardar el recurso.'))
+        .finally(() => {
+            btn.disabled = false;
+            btn.textContent = 'Guardar';
+            // Restaurar nombre del input herramienta
+            document.getElementById('sub-recurso-cantidad-herr').name = 'cantidad_herr';
+        });
+});
+
+document.getElementById('sub-pago-form').addEventListener('submit', function(e) {
+    e.preventDefault();
+    const fecha = document.getElementById('sub-pago-fecha').value;
+    const monto = parseFloat(document.getElementById('sub-pago-monto').value);
+    let valido = true;
+
+    if (!fecha)               { marcarError('sub-pago-fecha',  'sub-pago-fecha-err');  valido = false; }
+    else                       { limpiarError('sub-pago-fecha',  'sub-pago-fecha-err'); }
+    if (!monto || monto <= 0) { marcarError('sub-pago-monto', 'sub-pago-monto-err'); valido = false; }
+    else                       { limpiarError('sub-pago-monto', 'sub-pago-monto-err'); }
+    if (!valido) return;
+
+    fetch('php/guardar_pago_obra.php', { method: 'POST', body: new FormData(this) })
+        .then(r => r.json())
+        .then(res => {
+            if (res.error) { alert(res.error); return; }
+            closeModal('sub-pago-modal');
+            recargarObras(() => {
+                const obra = obras.find(o => String(o.id) === String(currentObraId));
+                if (obra) { renderObraDetail(obra); switchSubTab('sub-pagos'); }
+            });
+        })
+        .catch(() => alert('Error de conexión al registrar el pago.'));
+});
+
+// ============================================================
+// AUTOCOMPLETE DE EMPLEADO (sub-modal agregar empleado a obra)
+// ============================================================
+function _showSubEmpleadoPreview() {
+    const el = document.getElementById('sub-empleado-preview');
+    el.classList.remove('hidden');
+    requestAnimationFrame(() => el.classList.remove('opacity-0'));
+}
+
+function _hideSubEmpleadoPreview(instant) {
+    const el = document.getElementById('sub-empleado-preview');
+    if (instant) { el.classList.add('hidden', 'opacity-0'); return; }
+    el.classList.add('opacity-0');
+    setTimeout(() => el.classList.add('hidden'), 200);
+}
+
+function filtrarSugerenciasEmpleado() {
+    const texto = sinAcentos(document.getElementById('sub-empleado-busqueda').value.toLowerCase().trim());
+    const lista = document.getElementById('sub-empleado-sugerencias');
+
+    if (!texto) {
+        lista.classList.add('hidden');
+        const idEl = document.getElementById('sub-empleado-id-empleado');
+        if (idEl.value) { idEl.value = ''; _hideSubEmpleadoPreview(); }
+        return;
+    }
+
+    const coincidencias = empleados.filter(e =>
+        sinAcentos(e.nombre.toLowerCase()).includes(texto) ||
+        e.id.toLowerCase().includes(texto)
+    ).slice(0, 8);
+
+    if (!coincidencias.length) {
+        lista.innerHTML = '<li class="px-4 py-2.5 text-sm text-gray-400 italic">Sin resultados</li>';
+    } else {
+        lista.innerHTML = coincidencias.map(e =>
+            `<li class="px-4 py-2.5 text-sm cursor-pointer hover:bg-yellow-50 flex items-center justify-between gap-3 border-b border-gray-50 last:border-0"
+                onmousedown="seleccionarSubEmpleado('${e.id}')">
+                <span class="font-medium text-black">${e.nombre}</span>
+                <span class="text-xs text-gray-400 shrink-0">${e.puesto}&nbsp;·&nbsp;<span class="font-mono">${e.id}</span></span>
+            </li>`
+        ).join('');
+    }
+    lista.classList.remove('hidden');
+}
+
+function cerrarSugerenciasEmpleado() {
+    setTimeout(() => document.getElementById('sub-empleado-sugerencias').classList.add('hidden'), 150);
+}
+
+function seleccionarSubEmpleado(id) {
+    const e = empleados.find(em => em.id === id);
+    if (!e) return;
+    document.getElementById('sub-empleado-id-empleado').value          = e.id;
+    document.getElementById('sub-empleado-busqueda').value             = e.nombre;
+    document.getElementById('sub-empleado-sugerencias').classList.add('hidden');
+    document.getElementById('sub-empleado-preview-nombre').textContent = e.nombre;
+    document.getElementById('sub-empleado-preview-puesto').textContent = e.puesto;
+    document.getElementById('sub-empleado-preview-id').textContent     = e.id;
+    _showSubEmpleadoPreview();
+    limpiarError('sub-empleado-busqueda', 'sub-empleado-busqueda-err');
+}
+
+function clearSubEmpleadoSelection() {
+    document.getElementById('sub-empleado-id-empleado').value = '';
+    document.getElementById('sub-empleado-busqueda').value    = '';
+    document.getElementById('sub-empleado-sugerencias').classList.add('hidden');
+    _hideSubEmpleadoPreview();
+    document.getElementById('sub-empleado-busqueda').focus();
+}
+
+// ============================================================
+// GENERADOR DE CONTRASEÑA
+// ============================================================
+function generarContrasena(inputId, errId) {
+    const upper   = 'ABCDEFGHJKLMNPQRSTUVWXYZ';
+    const lower   = 'abcdefghjkmnpqrstuvwxyz';
+    const digits  = '23456789';
+    const symbols = '!@#$%&*';
+    const all     = upper + lower + digits + symbols;
+    // Al menos un carácter de cada categoría
+    const pwd = [
+        upper  [Math.floor(Math.random() * upper.length)],
+        lower  [Math.floor(Math.random() * lower.length)],
+        digits [Math.floor(Math.random() * digits.length)],
+        symbols[Math.floor(Math.random() * symbols.length)],
+    ];
+    for (let i = 4; i < 12; i++) pwd.push(all[Math.floor(Math.random() * all.length)]);
+    // Mezclar (Fisher-Yates)
+    for (let i = pwd.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [pwd[i], pwd[j]] = [pwd[j], pwd[i]];
+    }
+    document.getElementById(inputId).value = pwd.join('');
+    limpiarError(inputId, errId);
+}
+
+// ============================================================
+// HELPERS: select de clientes (para modal de obra)
+// ============================================================
+function updateClientesSelect() {
+    const select = document.getElementById('obra-cliente');
+    if (!select) return;
+    select.innerHTML = '<option value="">Seleccionar cliente...</option>' +
+        clientes.map(c => `<option value="${c.id}">${c.nombre}</option>`).join('');
+}
+
+// ============================================================
+// HELPERS: select de obras (para modal de empleado)
+// y select de filtro de empleados por obra
+// ============================================================
+function updateObrasSelect(selectedId) {
+    const select = document.getElementById('empleado-obra');
+    if (!select) return;
+    select.innerHTML = '<option value="">Sin asignación</option>' +
+        obras.map(o => `<option value="${o.id}" ${selectedId == o.id ? 'selected' : ''}>${o.nombre}</option>`).join('');
+}
+
+function updateProveedoresSelect(selectId, selectedId) {
+    const select = document.getElementById(selectId);
+    if (!select) return;
+    select.innerHTML = '<option value="">Selecciona un proveedor</option>' +
+        proveedores.map(p => `<option value="${p.id}" ${selectedId == p.id ? 'selected' : ''}>${p.nombre}</option>`).join('');
+}
+
+// Igual que updateProveedoresSelect pero usa el nombre como value
+// (para herramientas, que almacenan proveedor como VARCHAR)
+function updateProveedoresSelectNombre(selectId, selectedNombre = '') {
+    const select = document.getElementById(selectId);
+    if (!select) return;
+    select.innerHTML = '<option value="">Selecciona un proveedor</option>' +
+        proveedores.map(p => `<option value="${p.nombre}" ${p.nombre === selectedNombre ? 'selected' : ''}>${p.nombre}</option>`).join('');
+}
+
+function updateEmpleadosObraFilter() {
+    const select = document.getElementById('empleados-obra-filter');
+    if (!select) return;
+    const current = select.value;
+    select.innerHTML = '<option value="">Todas las obras</option><option value="sin-asignacion">Sin asignación</option>' +
+        obras.map(o => `<option value="${o.id}" ${current == o.id ? 'selected' : ''}>${o.nombre}</option>`).join('');
+}
+
+// ============================================================
+// ===== INICIALIZACIÓN =====
+
+function cargarDatos() {
+    // Obras — se carga primero para que los selects de obras estén disponibles
+    fetch('php/get_obras_admin.php')
+        .then(r => r.ok ? r.json() : Promise.reject(r.status))
+        .then(data => {
+            obras = data;
+            renderObras();
+            updateObrasSelect();
+            updateEmpleadosObraFilter();
+        })
+        .catch(() => {
+            renderObras();
+            updateObrasSelect();
+            updateEmpleadosObraFilter();
+        });
+
+    // Proveedores — se carga antes que insumos para que el select esté listo
+    fetch('php/get_proveedores.php')
+        .then(r => r.ok ? r.json() : Promise.reject(r.status))
+        .then(data => {
+            proveedores = data;
+            renderProveedores();
+            updateProveedoresSelectNombre('insumo-proveedor');
+            updateProveedoresSelectNombre('herramienta-proveedor');
+        })
+        .catch(() => {
+            renderProveedores();
+        });
+
+    fetch('php/get_empleados.php')
+        .then(r => r.ok ? r.json() : Promise.reject(r.status))
+        .then(data => {
+            empleados = data;
+            renderEmpleados();
+        })
+        .catch(() => renderEmpleados());
+
+    fetch('php/get_clientes.php')
+        .then(r => r.ok ? r.json() : Promise.reject(r.status))
+        .then(data => {
+            clientes = data;
+            renderClientes();
+            updateClientesSelect();
+        })
+        .catch(() => {
+            renderClientes();
+            updateClientesSelect();
+        });
+
+    fetch('php/get_insumos.php')
+        .then(r => r.ok ? r.json() : Promise.reject(r.status))
+        .then(data => {
+            insumos = data;
+            renderInsumos();
+        })
+        .catch(() => renderInsumos());
+
+    fetch('php/get_herramientas.php')
+        .then(r => r.ok ? r.json() : Promise.reject(r.status))
+        .then(data => {
+            herramientas = data;
+            renderHerramientas();
+        })
+        .catch(() => renderHerramientas());
+}
+
+// ============================================================
+// HELPERS: tipo-adaptive modal de recursos + recarga de obras
+// ============================================================
+function switchSubRecursoTipo() {
+    const tipo = document.getElementById('sub-recurso-tipo').value;
+    document.getElementById('sub-recurso-campos-insumo').style.display     = tipo === 'Insumo'      ? '' : 'none';
+    document.getElementById('sub-recurso-campos-servicio').style.display   = tipo === 'Servicio'    ? '' : 'none';
+    document.getElementById('sub-recurso-campos-herramienta').style.display= tipo === 'Herramienta' ? '' : 'none';
+}
+
+function recargarObras(callback) {
+    fetch('php/get_obras_admin.php')
+        .then(r => r.ok ? r.json() : Promise.reject(r.status))
+        .then(data => {
+            obras = data;
+            renderObras();
+            updateObrasSelect();
+            updateEmpleadosObraFilter();
+            if (callback) callback();
+        })
+        .catch(() => { if (callback) callback(); });
+}
+
+function recargarEmpleados(callback) {
+    fetch('php/get_empleados.php')
+        .then(r => r.ok ? r.json() : Promise.reject(r.status))
+        .then(data => {
+            empleados = data;
+            renderEmpleados();
+            updateObrasSelect();
+            updateEmpleadosObraFilter();
+            if (callback) callback();
+        })
+        .catch(() => { renderEmpleados(); if (callback) callback(); });
+}
+
+function recargarClientes(callback) {
+    fetch('php/get_clientes.php')
+        .then(r => r.ok ? r.json() : Promise.reject(r.status))
+        .then(data => {
+            clientes = data;
+            renderClientes();
+            if (callback) callback();
+        })
+        .catch(() => { renderClientes(); if (callback) callback(); });
+}
+
+function recargarProveedores(callback) {
+    fetch('php/get_proveedores.php')
+        .then(r => r.ok ? r.json() : Promise.reject(r.status))
+        .then(data => {
+            proveedores = data;
+            renderProveedores();
+            updateProveedoresSelectNombre('insumo-proveedor');
+            updateProveedoresSelectNombre('herramienta-proveedor');
+            if (callback) callback();
+        })
+        .catch(() => { renderProveedores(); if (callback) callback(); });
+}
+
+function recargarInsumos(callback) {
+    fetch('php/get_insumos.php')
+        .then(r => r.ok ? r.json() : Promise.reject(r.status))
+        .then(data => {
+            insumos = data;
+            renderInsumos();
+            if (callback) callback();
+        })
+        .catch(() => { renderInsumos(); if (callback) callback(); });
+}
+
+function recargarHerramientas(callback) {
+    fetch('php/get_herramientas.php')
+        .then(r => r.ok ? r.json() : Promise.reject(r.status))
+        .then(data => {
+            herramientas = data;
+            renderHerramientas();
+            if (callback) callback();
+        })
+        .catch(() => { renderHerramientas(); if (callback) callback(); });
+}
+
+// Verificar sesión de admin antes de cargar datos
+fetch('php/get_sesion.php')
+    .then(r => r.ok ? r.json() : Promise.reject(r.status))
+    .then(s => {
+        if (s.role !== 'admin') { location.replace('Login.html'); return; }
+        cargarDatos();
+    })
+    .catch(() => location.replace('Login.html'));
+</script>
+</body>
+</html>

@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login</title>
+
+    <!-- CSS-->
+    <link rel="stylesheet" href="css/style.css">
+
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body>
+     <div class="min-h-screen flex">
+    <div class="w-full md:w-1/2 bg-[#FFE082] flex items-center justify-center p-8">
+        <div class="w-full max-w-md">
+            <h1 class="text-5xl mb-12 text-black font-bold">¡Bienvenido!</h1>
+
+            <form id="loginForm" name="loginForm" class="space-y-8" method="POST" action="php/login.php">
+                <div>
+                    <label for="email" class="block text-xl text-black mb-3">
+                        Correo Electrónico
+                    </label>
+                    <input
+                        id="email"
+                        type="email"
+                        name="email"
+                        class="w-full px-6 py-4 bg-[#FFE082] border-2 border-black rounded-xl text-black text-lg focus:outline-none focus:border-black"
+                        placeholder="ejemplo@correo.com"
+                        
+                    />
+                </div>
+
+                <div>
+                    <label for="password" class="block text-xl text-black mb-3">
+                        Contraseña
+                    </label>
+                    <div class="relative">
+                        <input
+                            id="password"
+                            type="password"
+                            name="password"
+                            class="w-full px-6 py-4 bg-[#FFE082] border-2 border-black rounded-xl text-black text-lg focus:outline-none focus:border-black"
+                            placeholder="Ingresa tu contraseña"
+                            
+                        />
+                        <button type="button" id="togglePassword" class="absolute right-4 top-1/2 -translate-y-1/2 text-black">
+                            <img src="img/eye.svg" alt="Mostrar" class="w-6 h-6" >    
+                        </button>
+                    </div>
+                </div>
+
+                <div id="error-message" class="hidden bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
+                    </div>
+
+                <input
+                    type="button"
+                    class="w-full bg-[#FFC107] text-black py-4 rounded-full text-xl hover:bg-yellow-500 transition-colors shadow-lg font-bold"
+                    name="enviar"
+                    value="Ingresar"
+                    onclick="enviarLogin()"
+                >
+
+                <a href="Home.html#inicio" class="block w-full text-center text-black text-lg underline hover:text-gray-700">
+                    Volver al inicio
+                </a>
+            </form>
+
+        </div>
+    </div>
+
+    <div 
+        class="hidden md:block w-1/2 bg-cover bg-center relative"
+        style="background-image: url('https://i.postimg.cc/Y9tkBj7r/bg-Pavypre.jpg');"
+    ></div>
+</div>
+
+<script>
+        function enviarLogin() {
+            // 1. Obtener elementos
+            const email = document.getElementById("email").value;
+            const pass = document.getElementById("password").value;
+            const errorDiv = document.getElementById("error-message");
+
+            // 2. Limpiar errores previos
+            errorDiv.classList.add("hidden");
+            errorDiv.innerHTML = "";
+
+            // 3. Validación de campos vacíos
+            if (email.trim() === "" || pass.trim() === "") {
+                errorDiv.innerHTML = "Por favor, llene todos los campos.";
+                errorDiv.classList.remove("hidden");
+                return; // Detiene la ejecución
+            }
+
+            // 4. Si todo está bien, enviar a PHP
+            document.loginForm.submit();
+        }
+
+        // Esta función se ejecuta apenas carga la página
+        window.onload = function() {
+            // 1. Revisamos si la URL tiene el parámetro "error=auth"
+            const urlParams = new URLSearchParams(window.location.search);
+            
+            if (urlParams.get('error') === 'auth') {
+                // 2. Si existe el error, mostramos el recuadro rojo
+                const errorDiv = document.getElementById("error-message");
+                errorDiv.innerHTML = "El correo o la contraseña son incorrectos. Intente de nuevo.";
+                errorDiv.classList.remove("hidden");
+            }
+        };
+
+        // Extra: Lógica para el botón del ojo (Ver contraseña)
+        document.getElementById('togglePassword').addEventListener('click', function() {
+            const passInput = document.getElementById('password');
+            // Definimos si actualmente es tipo password ANTES de cambiarlo
+            const isPassword = passInput.getAttribute('type') === 'password';
+
+            if (isPassword) {
+                // Cuando se muestra la contraseña (ojo tachado)
+                passInput.setAttribute('type', 'text');
+                this.innerHTML = '<img src="img/closedEye.svg" alt="Ocultar" class="w-6 h-6">';
+            } else {
+                // Cuando es tipo password (ojo abierto)
+                passInput.setAttribute('type', 'password');
+                this.innerHTML = '<img src="img/eye.svg" alt="Mostrar" class="w-6 h-6">';
+            }
+        });
+    </script>
+
+</body>
+</html>

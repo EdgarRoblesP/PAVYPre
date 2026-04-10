@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Portal Colaborador - PAVYPre</title>
+    <link rel="stylesheet" href="css/style.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="icon" type="image/png" sizes="16x16" href="img/logo-16x16.png">
+
+</head>
+<body class="bg-gray-50 min-h-screen">
+
+    <!-- Header -->
+    <header class="bg-black text-white shadow-lg ">
+        <div class="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
+            <div class="flex items-center gap-4">
+                <img src="img/logo.png" alt="PAVYPRE" class="h-12 w-auto object-contain" onerror="this.style.display='none'"/>
+                <div>
+                    <h1 class="text-2xl font-bold"><span class="text-[#FFC107]">PAVY</span>Pre</h1>
+                    <p class="text-sm text-gray-400">Portal del Colaborador</p>
+                </div>
+            </div>
+            <div class="flex items-center gap-8">
+                <div class="text-right ">
+                    <p class="text-sm text-gray-400">Bienvenido</p>
+                    <a href="perfil.html" class="text-[#FFC107] font-semibold text-sm hover:underline" id="nombre-usuario">—</a>
+                </div>
+                <a href="php/salir.php" class="bg-[#FFC107] text-black px-6 py-2 rounded hover:bg-yellow-500 transition-colors font-semibold text-sm">
+                    Cerrar Sesión
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-7xl mx-auto px-6 py-8">
+
+        <!-- Page Title -->
+        <div class="mb-8">
+            <h2 class="text-3xl font-semibold text-black mb-2">Mis Obras</h2>
+            <p class="text-gray-500 text-sm">Historial de proyectos en los que has participado</p>
+        </div>
+
+        <!-- Obras List -->
+        <div id="obras-container" class="space-y-6"></div>
+
+        <!-- Summary Cards -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8" id="summary-cards"></div>
+
+        
+
+    </main>
+
+<script>
+let obras = [];
+
+const fmt = (n) => new Intl.NumberFormat('es-MX', { style: 'currency', currency: 'MXN' }).format(n);
+const fmtDate = (d) => new Date(d + 'T12:00:00').toLocaleDateString('es-MX', { year: 'numeric', month: 'long', day: 'numeric' });
+
+function calcSemanas(inicio, fin) {
+    const ms = new Date(fin) - new Date(inicio);
+    return Math.ceil(ms / (1000 * 60 * 60 * 24 * 7));
+}
+
+function isActive(fechaTermino) {
+    return new Date(fechaTermino) > new Date();
+}
+/*
+// Render summary
+function renderSummary() {
+    const totalObras = obras.length;
+    const obraActual = obras.find(o => isActive(o.fechaTermino));
+    const totalGanado = obras.reduce((sum, o) => sum + calcSemanas(o.fechaInicio, o.fechaTermino) * o.salarioSemanal, 0);
+
+    document.getElementById('summary-cards').innerHTML = `
+        <div class="bg-black text-white rounded-xl p-6 shadow-lg">
+            <p class="text-gray-400 text-sm mb-1">Total de Obras</p>
+            <p class="text-4xl font-bold text-[#FFC107]">${totalObras}</p>
+        </div>
+        <div class="bg-black text-white rounded-xl p-6 shadow-lg">
+            <p class="text-gray-400 text-sm mb-1">Obra Actual</p>
+            <p class="text-base font-semibold mt-1">${obraActual ? obraActual.nombreObra : '<span class="text-gray-400">Sin asignación</span>'}</p>
+            ${obraActual ? `<span class="mt-2 inline-block px-2 py-1 bg-green-500 text-white text-xs rounded-full">En proceso</span>` : ''}
+        </div>
+        <div class="bg-black text-white rounded-xl p-6 shadow-lg">
+            <p class="text-gray-400 text-sm mb-1">Ingresos Totales (Histórico)</p>
+            <p class="text-2xl font-bold text-[#FFC107]">${fmt(totalGanado)}</p>
+        </div>
+    `;
+}
+    */
+
+// Render obras
+function renderObras() {
+    document.getElementById('obras-container').innerHTML = obras.map(o => {
+        const semanas = calcSemanas(o.fechaInicio, o.fechaTermino);
+        const total = semanas * o.salarioSemanal;
+        const active = isActive(o.fechaTermino);
+        return `
+        <div class="bg-white rounded-lg shadow-lg p-6">
+            <div class="flex items-start justify-between flex-wrap gap-3 mb-4">
+                <div>
+                    <h3 class="text-xl font-semibold text-black">${o.nombreObra}</h3>
+                    
+                </div>
+                <!--
+                <span class="px-3 py-1 rounded-full text-xs font-semibold ${active ? 'bg-yellow-100 text-yellow-800' : 'bg-gray-100 text-gray-600'}">
+                    ${active ? '🟡 En proceso' : '✅ Completada'}
+                </span>
+                -->
+            </div>
+            <div class="grid grid-cols-2 md:grid-cols-5 gap-4">
+                <div>
+                    <p class="text-xs text-gray-500 mb-1">Fecha de Inicio</p>
+                    <p class="font-semibold text-sm text-black">${fmtDate(o.fechaInicio)}</p>
+                </div>
+                <div>
+                    <p class="text-xs text-gray-500 mb-1">Fecha de Término</p>
+                    <p class="font-semibold text-sm text-black">${fmtDate(o.fechaTermino)}</p>
+                </div>
+                <div>
+                    <p class="text-xs text-gray-500 mb-1">Puesto</p>
+                    <p class="font-semibold text-sm text-black">${o.puesto}</p>
+                </div>
+                <div>
+                    <p class="text-xs text-gray-500 mb-1">Salario Semanal</p>
+                    <p class="font-semibold text-[#FFC107] text-sm">${fmt(o.salarioSemanal)}</p>
+                </div>
+                <div class="bg-gray-50 rounded p-3 border-l-4 border-[#FFC107]">
+                    <p class="text-xs text-gray-600 mb-1">Total Ganado</p>
+                    <p class="font-semibold text-black">${fmt(total)}</p>
+                    <p class="text-xs text-gray-400 mt-1">${semanas} semanas</p>
+                </div>
+            </div>
+        </div>`;
+    }).join('');
+}
+
+// Verificar sesión activa; redirigir a login si no hay sesión de colaborador
+fetch('php/get_sesion.php')
+    .then(r => r.ok ? r.json() : Promise.reject(r.status))
+    .then(s => {
+        if (s.role !== 'colaborador') { location.replace('Login.html'); return; }
+        if (s.name) document.getElementById('nombre-usuario').textContent = s.name;
+    })
+    .catch(() => location.replace('Login.html'));
+
+// Cargar obras desde BD
+fetch('php/get_obras_colaborador.php')
+    .then(r => {
+        if (!r.ok) throw new Error(r.status);
+        return r.json();
+    })
+    .then(data => {
+        obras = data;
+        renderObras();
+        // renderSummary();
+    })
+    .catch(() => {
+        document.getElementById('obras-container').innerHTML =
+            '<p class="text-center text-gray-500 py-12">No se pudieron cargar los datos. Intenta más tarde.</p>';
+    });
+</script>
+</body>
+</html>
