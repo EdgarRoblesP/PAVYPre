@@ -1,6 +1,6 @@
 <?php
 /**
- * Devuelve PV_INSUMOS y PV_SERVICIOS como un único catálogo.
+ * Devuelve pv_insumos y pv_servicios como un único catálogo.
  * Uso exclusivo del portal Admin.
  */
 session_start();
@@ -21,8 +21,8 @@ $result = mysqli_query($link,
             i.proveedor_id,
             p.nombre         AS proveedor,
             i.costo_unitario AS costoUnitario
-       FROM PV_INSUMOS i
-       JOIN PV_PROVEEDORES p ON i.proveedor_id = p.id
+       FROM pv_insumos i
+       JOIN pv_proveedores p ON i.proveedor_id = p.id
      UNION ALL
      SELECT s.id_servicio,
             s.tipo_traslado,
@@ -30,8 +30,8 @@ $result = mysqli_query($link,
             s.proveedor_id,
             p2.nombre,
             s.costo_kilometro
-       FROM PV_SERVICIOS s
-       JOIN PV_PROVEEDORES p2 ON s.proveedor_id = p2.id
+       FROM pv_servicios s
+       JOIN pv_proveedores p2 ON s.proveedor_id = p2.id
      ORDER BY tipo, nombre'
 );
 $rows = mysqli_fetch_all($result, MYSQLI_ASSOC);

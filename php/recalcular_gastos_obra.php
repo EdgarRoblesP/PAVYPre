@@ -1,6 +1,6 @@
 <?php
 /**
- * Utilidad: recalcula y actualiza las 4 columnas de gasto en PV_OBRAS.
+ * Utilidad: recalcula y actualiza las 4 columnas de gasto en pv_obras.
  * Reglas de negocio aplicadas:
  *   - Para obras con fecha_fin, se usa esa fecha como tope (no NOW()).
  *   - Herramientas: renta_semanal × (días / 7) × cantidad.
@@ -17,9 +17,9 @@ function recalcularGastosObra(mysqli $link, string $obraId): void
                  2
              )
          ), 0)
-           FROM PV_TRABAJOS_EMPLEADOS te
-           JOIN PV_EMPLEADOS e ON te.id_empleado  = e.id_empleado
-           JOIN PV_OBRAS      o ON te.id_obra      = o.id_obra
+           FROM pv_trabajos_empleados te
+           JOIN pv_empleados e ON te.id_empleado  = e.id_empleado
+           JOIN pv_obras      o ON te.id_obra      = o.id_obra
           WHERE te.id_obra = ?'
     );
     mysqli_bind_param($stmt, 's', $obraId);
@@ -29,8 +29,8 @@ function recalcularGastosObra(mysqli $link, string $obraId): void
     // ── Gasto insumos: costo_unitario × cantidad ──────────────
     $stmt = mysqli_prepare($link,
         'SELECT COALESCE(SUM(i.costo_unitario * ei.cantidad), 0)
-           FROM PV_EMPLEOS_INSUMOS ei
-           JOIN PV_INSUMOS i ON ei.id_insumo = i.id_insumo
+           FROM pv_empleos_insumos ei
+           JOIN pv_insumos i ON ei.id_insumo = i.id_insumo
           WHERE ei.id_obra = ?'
     );
     mysqli_bind_param($stmt, 's', $obraId);
@@ -40,8 +40,8 @@ function recalcularGastosObra(mysqli $link, string $obraId): void
     // ── Gasto servicios: costo_km × kilometraje ───────────────
     $stmt = mysqli_prepare($link,
         'SELECT COALESCE(SUM(s.costo_kilometro * rs.kilometraje), 0)
-           FROM PV_REQUERIMIENTOS_SERVICIOS rs
-           JOIN PV_SERVICIOS s ON rs.id_servicio = s.id_servicio
+           FROM pv_requerimientos_servicios rs
+           JOIN pv_servicios s ON rs.id_servicio = s.id_servicio
           WHERE rs.id_obra = ?'
     );
     mysqli_bind_param($stmt, 's', $obraId);
@@ -55,18 +55,18 @@ function recalcularGastosObra(mysqli $link, string $obraId): void
              * GREATEST(DATEDIFF(COALESCE(uh.fecha_termino, o.fecha_fin, NOW()), uh.fecha_adicion) / 7, 0)
              * uh.cantidad
          ), 0)
-           FROM PV_USOS_HERRAMIENTAS uh
-           JOIN PV_HERRAMIENTAS h ON uh.id_herramienta = h.id_herramienta
-           JOIN PV_OBRAS         o ON uh.id_obra        = o.id_obra
+           FROM pv_usos_herramientas uh
+           JOIN pv_herramientas h ON uh.id_herramienta = h.id_herramienta
+           JOIN pv_obras         o ON uh.id_obra        = o.id_obra
           WHERE uh.id_obra = ?'
     );
     mysqli_bind_param($stmt, 's', $obraId);
     mysqli_stmt_execute($stmt);
     $gastoHerramientas = (float) stmt_value($stmt);
 
-    // ── Actualizar las 4 columnas en PV_OBRAS ────────────────────
+    // ── Actualizar las 4 columnas en pv_obras ────────────────────
     $upd = mysqli_prepare($link,
-        'UPDATE PV_OBRAS
+        'UPDATE pv_obras
             SET gasto_empleados    = ?,
                 gasto_insumos      = ?,
                 gasto_servicios    = ?,

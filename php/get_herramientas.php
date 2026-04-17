@@ -1,6 +1,6 @@
 <?php
 /**
- * Devuelve el catálogo de PV_HERRAMIENTAS como JSON.
+ * Devuelve el catálogo de pv_herramientas como JSON.
  * GET: q (opcional) — filtra por nombre o proveedor.
  *
  * Respuesta: array de objetos con:
@@ -17,8 +17,8 @@ if ($q !== '') {
     $stmt = mysqli_prepare($link,
         'SELECT h.id_herramienta, h.nombre, h.proveedor_id, p.nombre AS proveedor,
                 h.renta_semanal, h.imagen
-           FROM PV_HERRAMIENTAS h
-           JOIN PV_PROVEEDORES p ON h.proveedor_id = p.id
+           FROM pv_herramientas h
+           JOIN pv_proveedores p ON h.proveedor_id = p.id
           WHERE h.nombre LIKE ? OR p.nombre LIKE ?
           ORDER BY h.nombre ASC'
     );
@@ -29,8 +29,8 @@ if ($q !== '') {
     $result = mysqli_query($link,
         'SELECT h.id_herramienta, h.nombre, h.proveedor_id, p.nombre AS proveedor,
                 h.renta_semanal, h.imagen
-           FROM PV_HERRAMIENTAS h
-           JOIN PV_PROVEEDORES p ON h.proveedor_id = p.id
+           FROM pv_herramientas h
+           JOIN pv_proveedores p ON h.proveedor_id = p.id
           ORDER BY h.nombre ASC'
     );
     $herramientas = mysqli_fetch_all($result, MYSQLI_ASSOC);

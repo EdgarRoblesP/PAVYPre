@@ -1,6 +1,6 @@
 <?php
 /**
- * Registra un pago en una obra (INSERT en PV_COBROS).
+ * Registra un pago en una obra (INSERT en pv_cobros).
  * POST: obra_id, fecha_pago, tipo_pago, monto
  */
 session_start();
@@ -25,7 +25,7 @@ if (!$obraId || !$fechaPago || $monto <= 0) {
 }
 
 // Obtener id_cliente de la obra
-$stmtDis = mysqli_prepare($link, 'SELECT id_cliente FROM PV_DISPOSICIONES WHERE id_obra = ? LIMIT 1');
+$stmtDis = mysqli_prepare($link, 'SELECT id_cliente FROM pv_disposiciones WHERE id_obra = ? LIMIT 1');
 mysqli_bind_param($stmtDis, 's', $obraId);
 mysqli_stmt_execute($stmtDis);
 $dis = stmt_row($stmtDis);
@@ -36,7 +36,7 @@ if (!$dis) {
     exit;
 }
 
-$stmt = mysqli_prepare($link, 'INSERT INTO PV_COBROS (fecha_pago, monto, tipo_pago, id_cliente, id_obra) VALUES (?, ?, ?, ?, ?)');
+$stmt = mysqli_prepare($link, 'INSERT INTO pv_cobros (fecha_pago, monto, tipo_pago, id_cliente, id_obra) VALUES (?, ?, ?, ?, ?)');
 mysqli_bind_param($stmt, 'sdsss', $fechaPago, $monto, $tipoPago, $dis['id_cliente'], $obraId);
 mysqli_stmt_execute($stmt);
 

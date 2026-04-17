@@ -1,6 +1,6 @@
 <?php
 /**
- * Devuelve todos los PV_CLIENTES (sin contraseña).
+ * Devuelve todos los pv_clientes (sin contraseña).
  * Uso exclusivo del portal Admin.
  */
 session_start();
@@ -16,7 +16,7 @@ header('Content-Type: application/json');
 $link   = Conectarse();
 $result = mysqli_query($link,
     'SELECT id_cliente AS id, nombre, telefono, email
-       FROM PV_CLIENTES
+       FROM pv_clientes
       ORDER BY nombre'
 );
 

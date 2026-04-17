@@ -1,6 +1,6 @@
 <?php
 /**
- * Guarda (INSERT o UPDATE) un proveedor en PV_PROVEEDORES.
+ * Guarda (INSERT o UPDATE) un proveedor en pv_proveedores.
  * POST: id (vacío = nuevo), nombre, telefono, email, direccion
  */
 session_start();
@@ -29,13 +29,13 @@ if (!$nombre) {
 
 if ($id) {
     $stmt = mysqli_prepare($link,
-        'UPDATE PV_PROVEEDORES SET nombre = ?, telefono = ?, email = ?, direccion = ? WHERE id = ?'
+        'UPDATE pv_proveedores SET nombre = ?, telefono = ?, email = ?, direccion = ? WHERE id = ?'
     );
     mysqli_bind_param($stmt, 'ssssi', $nombre, $telefono, $email, $direccion, $id);
     mysqli_stmt_execute($stmt);
 } else {
     $stmt = mysqli_prepare($link,
-        'INSERT INTO PV_PROVEEDORES (nombre, telefono, email, direccion) VALUES (?, ?, ?, ?)'
+        'INSERT INTO pv_proveedores (nombre, telefono, email, direccion) VALUES (?, ?, ?, ?)'
     );
     mysqli_bind_param($stmt, 'ssss', $nombre, $telefono, $email, $direccion);
     mysqli_stmt_execute($stmt);

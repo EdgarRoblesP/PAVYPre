@@ -1,6 +1,6 @@
 <?php
 /**
- * Devuelve todos los PV_EMPLEADOS con la última obra asignada.
+ * Devuelve todos los pv_empleados con la última obra asignada.
  * Uso exclusivo del portal Admin.
  */
 session_start();
@@ -25,12 +25,12 @@ $result = mysqli_query($link,
             e.id_supervisor,
             s.nombre AS nombre_supervisor,
             (SELECT te.id_obra
-               FROM PV_TRABAJOS_EMPLEADOS te
+               FROM pv_trabajos_empleados te
               WHERE te.id_empleado = e.id_empleado
               ORDER BY te.fecha_adicion DESC
               LIMIT 1) AS obraAsignadaId
-       FROM PV_EMPLEADOS e
-       LEFT JOIN PV_EMPLEADOS s ON e.id_supervisor = s.id_empleado
+       FROM pv_empleados e
+       LEFT JOIN pv_empleados s ON e.id_supervisor = s.id_empleado
       ORDER BY e.nombre'
 );
 $rows = mysqli_fetch_all($result, MYSQLI_ASSOC);

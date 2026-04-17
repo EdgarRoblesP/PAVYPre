@@ -1,6 +1,6 @@
 <?php
 /**
- * Guarda (INSERT o UPDATE) un registro en PV_HERRAMIENTAS.
+ * Guarda (INSERT o UPDATE) un registro en pv_herramientas.
  * POST: id (vacío = nuevo), nombre, proveedor, renta_semanal
  * FILE: imagen (opcional)
  */
@@ -26,8 +26,8 @@ if (!$nombre || !$proveedorNombre) {
     exit;
 }
 
-// Obtener o crear el proveedor en PV_PROVEEDORES
-$stmtProv = mysqli_prepare($link, 'SELECT id FROM PV_PROVEEDORES WHERE nombre = ? LIMIT 1');
+// Obtener o crear el proveedor en pv_proveedores
+$stmtProv = mysqli_prepare($link, 'SELECT id FROM pv_proveedores WHERE nombre = ? LIMIT 1');
 mysqli_bind_param($stmtProv, 's', $proveedorNombre);
 mysqli_stmt_execute($stmtProv);
 $provRow = stmt_row($stmtProv);
@@ -35,7 +35,7 @@ $provRow = stmt_row($stmtProv);
 if ($provRow) {
     $proveedorId = (int)$provRow['id'];
 } else {
-    $stmtIns = mysqli_prepare($link, 'INSERT INTO PV_PROVEEDORES (nombre) VALUES (?)');
+    $stmtIns = mysqli_prepare($link, 'INSERT INTO pv_proveedores (nombre) VALUES (?)');
     mysqli_bind_param($stmtIns, 's', $proveedorNombre);
     mysqli_stmt_execute($stmtIns);
     $proveedorId = (int) mysqli_insert_id($link);
@@ -75,18 +75,18 @@ if (!empty($_FILES['imagen']['tmp_name']) && $_FILES['imagen']['error'] === UPLO
 if ($id) {
     if ($imagenPath) {
         $stmt = mysqli_prepare($link,
-            'UPDATE PV_HERRAMIENTAS SET nombre = ?, proveedor_id = ?, renta_semanal = ?, imagen = ? WHERE id_herramienta = ?'
+            'UPDATE pv_herramientas SET nombre = ?, proveedor_id = ?, renta_semanal = ?, imagen = ? WHERE id_herramienta = ?'
         );
         mysqli_bind_param($stmt, 'sidss', $nombre, $proveedorId, $renta, $imagenPath, $id);
     } else {
         $stmt = mysqli_prepare($link,
-            'UPDATE PV_HERRAMIENTAS SET nombre = ?, proveedor_id = ?, renta_semanal = ? WHERE id_herramienta = ?'
+            'UPDATE pv_herramientas SET nombre = ?, proveedor_id = ?, renta_semanal = ? WHERE id_herramienta = ?'
         );
         mysqli_bind_param($stmt, 'sids', $nombre, $proveedorId, $renta, $id);
     }
     mysqli_stmt_execute($stmt);
 } else {
-    $t1 = 'PV_HERRAMIENTAS'; $t2 = 'id_herramienta'; $t3 = 'HER';
+    $t1 = 'pv_herramientas'; $t2 = 'id_herramienta'; $t3 = 'HER';
     $stmtSp = mysqli_prepare($link, 'CALL sp_generar_id(?, ?, ?, @nuevo_id)');
     mysqli_bind_param($stmtSp, 'sss', $t1, $t2, $t3);
     mysqli_stmt_execute($stmtSp);
@@ -94,7 +94,7 @@ if ($id) {
     $res     = mysqli_query($link, 'SELECT @nuevo_id');
     $nuevoId = mysqli_fetch_row($res)[0];
     $stmt    = mysqli_prepare($link,
-        'INSERT INTO PV_HERRAMIENTAS (id_herramienta, nombre, proveedor_id, renta_semanal, imagen) VALUES (?, ?, ?, ?, ?)'
+        'INSERT INTO pv_herramientas (id_herramienta, nombre, proveedor_id, renta_semanal, imagen) VALUES (?, ?, ?, ?, ?)'
     );
     mysqli_bind_param($stmt, 'ssids', $nuevoId, $nombre, $proveedorId, $renta, $imagenPath);
     mysqli_stmt_execute($stmt);

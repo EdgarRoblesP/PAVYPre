@@ -44,9 +44,9 @@ $link = Conectarse();
 
 // ── Verificar contraseña actual ───────────────────────────────
 if ($role === 'admin' || $role === 'colaborador') {
-    $stmt = mysqli_prepare($link, 'SELECT contrasena FROM PV_EMPLEADOS WHERE id_empleado = ? LIMIT 1');
+    $stmt = mysqli_prepare($link, 'SELECT contrasena FROM pv_empleados WHERE id_empleado = ? LIMIT 1');
 } else {
-    $stmt = mysqli_prepare($link, 'SELECT contrasena FROM PV_CLIENTES WHERE id_cliente = ? LIMIT 1');
+    $stmt = mysqli_prepare($link, 'SELECT contrasena FROM pv_clientes WHERE id_cliente = ? LIMIT 1');
 }
 mysqli_bind_param($stmt, 's', $id);
 mysqli_stmt_execute($stmt);
@@ -62,9 +62,9 @@ if (!$row || !password_verify($actual, $row['contrasena'])) {
 $hash = password_hash($nueva, PASSWORD_ARGON2ID);
 
 if ($role === 'admin' || $role === 'colaborador') {
-    $upd = mysqli_prepare($link, 'UPDATE PV_EMPLEADOS SET contrasena = ? WHERE id_empleado = ?');
+    $upd = mysqli_prepare($link, 'UPDATE pv_empleados SET contrasena = ? WHERE id_empleado = ?');
 } else {
-    $upd = mysqli_prepare($link, 'UPDATE PV_CLIENTES  SET contrasena = ? WHERE id_cliente  = ?');
+    $upd = mysqli_prepare($link, 'UPDATE pv_clientes  SET contrasena = ? WHERE id_cliente  = ?');
 }
 mysqli_bind_param($upd, 'ss', $hash, $id);
 mysqli_stmt_execute($upd);

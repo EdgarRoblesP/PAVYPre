@@ -1,6 +1,6 @@
 <?php
 /**
- * Guarda (INSERT o UPDATE) un registro en PV_EMPLEADOS.
+ * Guarda (INSERT o UPDATE) un registro en pv_empleados.
  * POST: id (vacío = nuevo), nombre, puesto, salario, telefono, email, direccion
  */
 session_start();
@@ -31,7 +31,7 @@ if (!$nombre || !$puesto) {
 
 if ($id) {
     $stmt = mysqli_prepare($link,
-        'UPDATE PV_EMPLEADOS SET nombre = ?, puesto = ?, salario = ?, telefono = ?, email = ?, direccion = ?, id_supervisor = ? WHERE id_empleado = ?'
+        'UPDATE pv_empleados SET nombre = ?, puesto = ?, salario = ?, telefono = ?, email = ?, direccion = ?, id_supervisor = ? WHERE id_empleado = ?'
     );
     mysqli_bind_param($stmt, 'ssdsssss', $nombre, $puesto, $salario, $telefono, $email, $direccion, $idSupervisor, $id);
     mysqli_stmt_execute($stmt);
@@ -41,7 +41,7 @@ if ($id) {
         echo json_encode(['error' => 'La contraseña es obligatoria (mínimo 8 caracteres).']);
         exit;
     }
-    $t1 = 'PV_EMPLEADOS'; $t2 = 'id_empleado'; $t3 = 'EMP';
+    $t1 = 'pv_empleados'; $t2 = 'id_empleado'; $t3 = 'EMP';
     $stmtSp = mysqli_prepare($link, 'CALL sp_generar_id(?, ?, ?, @nuevo_id)');
     mysqli_bind_param($stmtSp, 'sss', $t1, $t2, $t3);
     mysqli_stmt_execute($stmtSp);
@@ -50,7 +50,7 @@ if ($id) {
     $nuevoId = mysqli_fetch_row($res)[0];
     $hash    = password_hash($contrasena, PASSWORD_ARGON2ID);
     $stmt    = mysqli_prepare($link,
-        'INSERT INTO PV_EMPLEADOS (id_empleado, nombre, puesto, telefono, direccion, email, salario, contrasena, id_supervisor) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)'
+        'INSERT INTO pv_empleados (id_empleado, nombre, puesto, telefono, direccion, email, salario, contrasena, id_supervisor) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)'
     );
     mysqli_bind_param($stmt, 'ssssssdss', $nuevoId, $nombre, $puesto, $telefono, $direccion, $email, $salario, $hash, $idSupervisor);
     mysqli_stmt_execute($stmt);

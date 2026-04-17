@@ -35,9 +35,9 @@ use PHPMailer\PHPMailer\Exception;
 
 $link = Conectarse();
 
-// ── Crear tabla PV_RESET_TOKENS si no existe ─────────────────────────────────
+// ── Crear tabla pv_reset_tokens si no existe ─────────────────────────────────
 mysqli_query($link,
-    'CREATE TABLE IF NOT EXISTS PV_RESET_TOKENS (
+    'CREATE TABLE IF NOT EXISTS pv_reset_tokens (
         id          INT AUTO_INCREMENT PRIMARY KEY,
         email       VARCHAR(320) NOT NULL,
         token       CHAR(64)     NOT NULL,
@@ -49,26 +49,26 @@ mysqli_query($link,
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4'
 );
 
-// ── Buscar usuario: PV_EMPLEADOS o PV_CLIENTES ────────────────────────────────
+// ── Buscar usuario: pv_empleados o pv_clientes ────────────────────────────────
 $tabla    = null;
 $userName = '';
 
-$s = mysqli_prepare($link, 'SELECT nombre FROM PV_EMPLEADOS WHERE email = ? LIMIT 1');
+$s = mysqli_prepare($link, 'SELECT nombre FROM pv_empleados WHERE email = ? LIMIT 1');
 mysqli_bind_param($s, 's', $email);
 mysqli_stmt_execute($s);
 $row = stmt_row($s);
 if ($row) {
-    $tabla    = 'PV_EMPLEADOS';
+    $tabla    = 'pv_empleados';
     $userName = $row['nombre'];
 }
 
 if (!$tabla) {
-    $s = mysqli_prepare($link, 'SELECT nombre FROM PV_CLIENTES WHERE email = ? LIMIT 1');
+    $s = mysqli_prepare($link, 'SELECT nombre FROM pv_clientes WHERE email = ? LIMIT 1');
     mysqli_bind_param($s, 's', $email);
     mysqli_stmt_execute($s);
     $row = stmt_row($s);
     if ($row) {
-        $tabla    = 'PV_CLIENTES';
+        $tabla    = 'pv_clientes';
         $userName = $row['nombre'];
     }
 }
@@ -79,7 +79,7 @@ if (!$tabla) {
 }
 
 // ── Eliminar tokens previos no usados del mismo email ───────────────────────
-$del = mysqli_prepare($link, 'DELETE FROM PV_RESET_TOKENS WHERE email = ?');
+$del = mysqli_prepare($link, 'DELETE FROM pv_reset_tokens WHERE email = ?');
 mysqli_bind_param($del, 's', $email);
 mysqli_stmt_execute($del);
 
@@ -87,7 +87,7 @@ mysqli_stmt_execute($del);
 $token     = bin2hex(random_bytes(32));
 $expiresAt = date('Y-m-d H:i:s', time() + 1800);
 
-$ins = mysqli_prepare($link, 'INSERT INTO PV_RESET_TOKENS (email, token, expires_at) VALUES (?, ?, ?)');
+$ins = mysqli_prepare($link, 'INSERT INTO pv_reset_tokens (email, token, expires_at) VALUES (?, ?, ?)');
 mysqli_bind_param($ins, 'sss', $email, $token, $expiresAt);
 mysqli_stmt_execute($ins);
 

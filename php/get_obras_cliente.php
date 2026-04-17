@@ -21,8 +21,8 @@ $stmt = mysqli_prepare($link,
             o.fecha_inicio,
             o.fecha_fin,
             o.presupuesto_inicial
-       FROM PV_OBRAS o
-       JOIN PV_DISPOSICIONES d ON o.id_obra = d.id_obra
+       FROM pv_obras o
+       JOIN pv_disposiciones d ON o.id_obra = d.id_obra
       WHERE d.id_cliente = ?
       ORDER BY o.fecha_inicio DESC'
 );

@@ -30,7 +30,7 @@ if (!$obraId || !$nombre) {
 }
 
 // Obtener id_cliente de la obra
-$stmtDis = mysqli_prepare($link, 'SELECT id_cliente FROM PV_DISPOSICIONES WHERE id_obra = ? LIMIT 1');
+$stmtDis = mysqli_prepare($link, 'SELECT id_cliente FROM pv_disposiciones WHERE id_obra = ? LIMIT 1');
 mysqli_bind_param($stmtDis, 's', $obraId);
 mysqli_stmt_execute($stmtDis);
 $dis = stmt_row($stmtDis);
@@ -46,7 +46,7 @@ if ($tipo === 'Herramienta') {
     $fechaInicio  = $_POST['fecha_inicio']  ?: date('Y-m-d');
     $fechaTermino = $_POST['fecha_termino'] ?: null;
 
-    $stmtH = mysqli_prepare($link, 'SELECT id_herramienta FROM PV_HERRAMIENTAS WHERE nombre = ? LIMIT 1');
+    $stmtH = mysqli_prepare($link, 'SELECT id_herramienta FROM pv_herramientas WHERE nombre = ? LIMIT 1');
     mysqli_bind_param($stmtH, 's', $nombre);
     mysqli_stmt_execute($stmtH);
     $herr = stmt_row($stmtH);
@@ -56,7 +56,7 @@ if ($tipo === 'Herramienta') {
         exit;
     }
     $stmt = mysqli_prepare($link,
-        'INSERT IGNORE INTO PV_USOS_HERRAMIENTAS
+        'INSERT IGNORE INTO pv_usos_herramientas
              (id_herramienta, id_cliente, id_obra, fecha_adicion, fecha_termino, cantidad)
          VALUES (?, ?, ?, ?, ?, ?)'
     );
@@ -67,7 +67,7 @@ if ($tipo === 'Herramienta') {
 } elseif ($tipo === 'Servicio') {
     $kilometraje = (float)($_POST['kilometraje'] ?? 0);
 
-    $stmtSrv = mysqli_prepare($link, 'SELECT id_servicio FROM PV_SERVICIOS WHERE tipo_traslado = ? LIMIT 1');
+    $stmtSrv = mysqli_prepare($link, 'SELECT id_servicio FROM pv_servicios WHERE tipo_traslado = ? LIMIT 1');
     mysqli_bind_param($stmtSrv, 's', $nombre);
     mysqli_stmt_execute($stmtSrv);
     $srv = stmt_row($stmtSrv);
@@ -77,7 +77,7 @@ if ($tipo === 'Herramienta') {
         exit;
     }
     $stmt = mysqli_prepare($link,
-        'INSERT INTO PV_REQUERIMIENTOS_SERVICIOS
+        'INSERT INTO pv_requerimientos_servicios
              (id_servicio, id_cliente, id_obra, kilometraje)
          VALUES (?, ?, ?, ?)'
     );
@@ -88,7 +88,7 @@ if ($tipo === 'Herramienta') {
     // Insumo
     $cantidad = (int)($_POST['cantidad_total'] ?? 0);
 
-    $stmtIns = mysqli_prepare($link, 'SELECT id_insumo FROM PV_INSUMOS WHERE tipo_material = ? LIMIT 1');
+    $stmtIns = mysqli_prepare($link, 'SELECT id_insumo FROM pv_insumos WHERE tipo_material = ? LIMIT 1');
     mysqli_bind_param($stmtIns, 's', $nombre);
     mysqli_stmt_execute($stmtIns);
     $ins = stmt_row($stmtIns);
@@ -98,7 +98,7 @@ if ($tipo === 'Herramienta') {
         exit;
     }
     $stmt = mysqli_prepare($link,
-        'INSERT IGNORE INTO PV_EMPLEOS_INSUMOS
+        'INSERT IGNORE INTO pv_empleos_insumos
              (id_insumo, id_cliente, id_obra, cantidad)
          VALUES (?, ?, ?, ?)'
     );

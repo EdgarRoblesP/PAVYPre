@@ -22,9 +22,9 @@ $stmt = mysqli_prepare($link,
             te.fecha_termino  AS fechaTermino,
             e.salario         AS salarioSemanal,
             e.puesto
-       FROM PV_TRABAJOS_EMPLEADOS te
-       JOIN PV_OBRAS     o ON te.id_obra     = o.id_obra
-       JOIN PV_EMPLEADOS e ON te.id_empleado = e.id_empleado
+       FROM pv_trabajos_empleados te
+       JOIN pv_obras     o ON te.id_obra     = o.id_obra
+       JOIN pv_empleados e ON te.id_empleado = e.id_empleado
       WHERE te.id_empleado = ?
       ORDER BY te.fecha_adicion DESC'
 );

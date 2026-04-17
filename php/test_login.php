@@ -16,7 +16,7 @@ if (!$link) {
 echo "Conexión: OK\n\n";
 
 // Verificar tablas
-foreach (['PV_EMPLEADOS', 'PV_CLIENTES'] as $tabla) {
+foreach (['pv_empleados', 'pv_clientes'] as $tabla) {
     $r = mysqli_query($link, "SHOW TABLES LIKE '$tabla'");
     $existe = $r && mysqli_num_rows($r) > 0;
     echo "Tabla $tabla: " . ($existe ? "EXISTE" : "NO EXISTE") . "\n";
@@ -24,13 +24,13 @@ foreach (['PV_EMPLEADOS', 'PV_CLIENTES'] as $tabla) {
 
 echo "\n";
 
-// Probar prepare en PV_EMPLEADOS
-$sql = 'SELECT id_empleado, nombre, puesto, contrasena FROM PV_EMPLEADOS WHERE email = ? LIMIT 1';
+// Probar prepare en pv_empleados
+$sql = 'SELECT id_empleado, nombre, puesto, contrasena FROM pv_empleados WHERE email = ? LIMIT 1';
 $stmt = mysqli_prepare($link, $sql);
 if ($stmt === false) {
-    echo "mysqli_prepare PV_EMPLEADOS: FALLO — " . mysqli_error($link) . "\n";
+    echo "mysqli_prepare pv_empleados: FALLO — " . mysqli_error($link) . "\n";
 } else {
-    echo "mysqli_prepare PV_EMPLEADOS: OK\n";
+    echo "mysqli_prepare pv_empleados: OK\n";
     $email = 'admin@pavypre.com';
     mysqli_bind_param($stmt, 's', $email);
     mysqli_stmt_execute($stmt);
@@ -40,11 +40,11 @@ if ($stmt === false) {
 
 echo "\n";
 
-// Probar prepare en PV_CLIENTES
-$sql2 = 'SELECT id_cliente, nombre, contrasena FROM PV_CLIENTES WHERE email = ? LIMIT 1';
+// Probar prepare en pv_clientes
+$sql2 = 'SELECT id_cliente, nombre, contrasena FROM pv_clientes WHERE email = ? LIMIT 1';
 $stmt2 = mysqli_prepare($link, $sql2);
 if ($stmt2 === false) {
-    echo "mysqli_prepare PV_CLIENTES: FALLO — " . mysqli_error($link) . "\n";
+    echo "mysqli_prepare pv_clientes: FALLO — " . mysqli_error($link) . "\n";
 } else {
-    echo "mysqli_prepare PV_CLIENTES: OK\n";
+    echo "mysqli_prepare pv_clientes: OK\n";
 }

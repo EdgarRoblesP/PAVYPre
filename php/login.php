@@ -1,9 +1,9 @@
 <?php
 /**
  * Autenticación contra la base de datos.
- * - Admin:       tabla PV_EMPLEADOS con puesto = 'Administrador'.
- * - Colaborador: tabla PV_EMPLEADOS (cualquier otro puesto).
- * - Cliente:     tabla PV_CLIENTES.
+ * - Admin:       tabla pv_empleados con puesto = 'Administrador'.
+ * - Colaborador: tabla pv_empleados (cualquier otro puesto).
+ * - Cliente:     tabla pv_clientes.
  */
 session_start();
 
@@ -23,8 +23,8 @@ if (!$email || !$formPassword) {
 require_once __DIR__ . '/db.php';
 $link = Conectarse();
 
-// ── 1. Empleados (Admin y Colaborador — PV_EMPLEADOS) ───────────
-$stmt = mysqli_prepare($link, 'SELECT id_empleado, nombre, puesto, contrasena FROM PV_EMPLEADOS WHERE email = ? LIMIT 1');
+// ── 1. Empleados (Admin y Colaborador — pv_empleados) ───────────
+$stmt = mysqli_prepare($link, 'SELECT id_empleado, nombre, puesto, contrasena FROM pv_empleados WHERE email = ? LIMIT 1');
 mysqli_bind_param($stmt, 's', $email);
 mysqli_stmt_execute($stmt);
 $row = stmt_row($stmt);
@@ -45,8 +45,8 @@ if ($row && password_verify($formPassword, $row['contrasena'])) {
     exit;
 }
 
-// ── 2. Cliente (PV_CLIENTES) ────────────────────────────────────
-$stmt = mysqli_prepare($link, 'SELECT id_cliente, nombre, contrasena FROM PV_CLIENTES WHERE email = ? LIMIT 1');
+// ── 2. Cliente (pv_clientes) ────────────────────────────────────
+$stmt = mysqli_prepare($link, 'SELECT id_cliente, nombre, contrasena FROM pv_clientes WHERE email = ? LIMIT 1');
 mysqli_bind_param($stmt, 's', $email);
 mysqli_stmt_execute($stmt);
 $row = stmt_row($stmt);

@@ -1,6 +1,6 @@
 <?php
 /**
- * Devuelve PV_OBRAS paginadas con sus sub-arrays anidados.
+ * Devuelve pv_obras paginadas con sus sub-arrays anidados.
  *
  * Parámetros GET:
  *   modo=catalogo  → devuelve solo [{id, nombre}] de todas las obras (para selects)
@@ -23,7 +23,7 @@ $link = Conectarse();
 
 // ── Modo catálogo: id + nombre de todas las obras ────────────────────────────
 if (($_GET['modo'] ?? '') === 'catalogo') {
-    $result = mysqli_query($link, 'SELECT id_obra AS id, ubicacion AS nombre FROM PV_OBRAS ORDER BY ubicacion');
+    $result = mysqli_query($link, 'SELECT id_obra AS id, ubicacion AS nombre FROM pv_obras ORDER BY ubicacion');
     echo json_encode(array_map(function ($r) {
         return ['id' => $r['id'], 'nombre' => $r['nombre']];
     }, mysqli_fetch_all($result, MYSQLI_ASSOC)));
@@ -35,7 +35,7 @@ if (($_GET['modo'] ?? '') === 'reporte') {
     $result = mysqli_query($link,
         'SELECT id_obra, ubicacion, presupuesto_inicial,
                 gasto_empleados + gasto_insumos + gasto_servicios + gasto_herramientas AS costo_final
-           FROM PV_OBRAS
+           FROM pv_obras
           ORDER BY costo_final DESC'
     );
     echo json_encode(array_map(function ($r) {
@@ -58,12 +58,12 @@ $offset   = ($page - 1) * $per_page;
 // ── Contar total de obras ────────────────────────────────────────────────────
 if ($buscar !== '') {
     $like      = '%' . $buscar . '%';
-    $stmtCount = mysqli_prepare($link, 'SELECT COUNT(*) FROM PV_OBRAS WHERE ubicacion LIKE ?');
+    $stmtCount = mysqli_prepare($link, 'SELECT COUNT(*) FROM pv_obras WHERE ubicacion LIKE ?');
     mysqli_bind_param($stmtCount, 's', $like);
     mysqli_stmt_execute($stmtCount);
     $total = (int) stmt_value($stmtCount);
 } else {
-    $total = (int) mysqli_fetch_row(mysqli_query($link, 'SELECT COUNT(*) FROM PV_OBRAS'))[0];
+    $total = (int) mysqli_fetch_row(mysqli_query($link, 'SELECT COUNT(*) FROM pv_obras'))[0];
 }
 
 $pages  = max(1, (int)ceil($total / $per_page));
@@ -77,7 +77,7 @@ if ($buscar !== '') {
         "SELECT id_obra, ubicacion, fecha_inicio, fecha_fin,
                 presupuesto_inicial, utilidad_neta,
                 gasto_empleados, gasto_insumos, gasto_servicios, gasto_herramientas
-           FROM PV_OBRAS
+           FROM pv_obras
           WHERE ubicacion LIKE ?
           ORDER BY fecha_inicio DESC
           LIMIT $per_page OFFSET $offset"
@@ -88,7 +88,7 @@ if ($buscar !== '') {
         "SELECT id_obra, ubicacion, fecha_inicio, fecha_fin,
                 presupuesto_inicial, utilidad_neta,
                 gasto_empleados, gasto_insumos, gasto_servicios, gasto_herramientas
-           FROM PV_OBRAS
+           FROM pv_obras
           ORDER BY fecha_inicio DESC
           LIMIT $per_page OFFSET $offset"
     );
@@ -108,9 +108,9 @@ $stmtEmpl = mysqli_prepare($link,
                 e.salario * (DATEDIFF(COALESCE(te.fecha_termino, o.fecha_fin, NOW()), te.fecha_adicion) / 7),
                 2
             ) AS costoTotal
-       FROM PV_TRABAJOS_EMPLEADOS te
-       JOIN PV_EMPLEADOS e ON te.id_empleado = e.id_empleado
-       JOIN PV_OBRAS      o ON te.id_obra    = o.id_obra
+       FROM pv_trabajos_empleados te
+       JOIN pv_empleados e ON te.id_empleado = e.id_empleado
+       JOIN pv_obras      o ON te.id_obra    = o.id_obra
       WHERE te.id_obra = ?
       ORDER BY te.fecha_adicion'
 );
@@ -132,10 +132,10 @@ $stmtHerram = mysqli_prepare($link,
                 * uh.cantidad,
                 2
             )                                                       AS subtotal
-       FROM PV_USOS_HERRAMIENTAS uh
-       JOIN PV_HERRAMIENTAS h  ON uh.id_herramienta = h.id_herramienta
-       JOIN PV_PROVEEDORES  p  ON h.proveedor_id    = p.id
-       JOIN PV_OBRAS         o ON uh.id_obra        = o.id_obra
+       FROM pv_usos_herramientas uh
+       JOIN pv_herramientas h  ON uh.id_herramienta = h.id_herramienta
+       JOIN pv_proveedores  p  ON h.proveedor_id    = p.id
+       JOIN pv_obras         o ON uh.id_obra        = o.id_obra
       WHERE uh.id_obra = ?
       ORDER BY h.nombre'
 );
@@ -148,9 +148,9 @@ $stmtInsumos = mysqli_prepare($link,
             i.costo_unitario,
             SUM(ei.cantidad)                                     AS cantidadTotal,
             ROUND(i.costo_unitario * SUM(ei.cantidad), 2)        AS subtotal
-       FROM PV_EMPLEOS_INSUMOS ei
-       JOIN PV_INSUMOS     i ON ei.id_insumo   = i.id_insumo
-       JOIN PV_PROVEEDORES p ON i.proveedor_id = p.id
+       FROM pv_empleos_insumos ei
+       JOIN pv_insumos     i ON ei.id_insumo   = i.id_insumo
+       JOIN pv_proveedores p ON i.proveedor_id = p.id
       WHERE ei.id_obra = ?
       GROUP BY i.id_insumo, i.tipo_material, p.nombre, i.costo_unitario
       ORDER BY i.tipo_material'
@@ -164,9 +164,9 @@ $stmtServicios = mysqli_prepare($link,
             s.costo_kilometro,
             ROUND(SUM(rs.kilometraje), 2)                        AS kilometrajeTotal,
             ROUND(s.costo_kilometro * SUM(rs.kilometraje), 2)   AS subtotal
-       FROM PV_REQUERIMIENTOS_SERVICIOS rs
-       JOIN PV_SERVICIOS    s ON rs.id_servicio  = s.id_servicio
-       JOIN PV_PROVEEDORES  p ON s.proveedor_id  = p.id
+       FROM pv_requerimientos_servicios rs
+       JOIN pv_servicios    s ON rs.id_servicio  = s.id_servicio
+       JOIN pv_proveedores  p ON s.proveedor_id  = p.id
       WHERE rs.id_obra = ?
       GROUP BY s.id_servicio, s.tipo_traslado, p.nombre, s.costo_kilometro
       ORDER BY s.tipo_traslado'
@@ -177,7 +177,7 @@ $stmtPagos = mysqli_prepare($link,
     'SELECT fecha_pago  AS fechaPago,
             monto,
             tipo_pago   AS tipoPago
-       FROM PV_COBROS
+       FROM pv_cobros
       WHERE id_obra = ?
       ORDER BY fecha_pago'
 );

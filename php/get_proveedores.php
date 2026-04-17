@@ -1,6 +1,6 @@
 <?php
 /**
- * Devuelve todos los proveedores registrados en PV_PROVEEDORES.
+ * Devuelve todos los proveedores registrados en pv_proveedores.
  * Uso exclusivo del portal Admin.
  */
 session_start();
@@ -23,10 +23,10 @@ $result = mysqli_query($link,
             COALESCE(ins.total,   0)   AS total_insumos,
             COALESCE(srv.total,   0)   AS total_servicios,
             COALESCE(herr.total,  0)   AS total_herramientas
-       FROM PV_PROVEEDORES p
-       LEFT JOIN (SELECT proveedor_id, COUNT(*) AS total FROM PV_INSUMOS      GROUP BY proveedor_id) ins  ON ins.proveedor_id  = p.id
-       LEFT JOIN (SELECT proveedor_id, COUNT(*) AS total FROM PV_SERVICIOS    GROUP BY proveedor_id) srv  ON srv.proveedor_id  = p.id
-       LEFT JOIN (SELECT proveedor_id, COUNT(*) AS total FROM PV_HERRAMIENTAS GROUP BY proveedor_id) herr ON herr.proveedor_id = p.id
+       FROM pv_proveedores p
+       LEFT JOIN (SELECT proveedor_id, COUNT(*) AS total FROM pv_insumos      GROUP BY proveedor_id) ins  ON ins.proveedor_id  = p.id
+       LEFT JOIN (SELECT proveedor_id, COUNT(*) AS total FROM pv_servicios    GROUP BY proveedor_id) srv  ON srv.proveedor_id  = p.id
+       LEFT JOIN (SELECT proveedor_id, COUNT(*) AS total FROM pv_herramientas GROUP BY proveedor_id) herr ON herr.proveedor_id = p.id
       ORDER BY p.nombre'
 );
 $rows = mysqli_fetch_all($result, MYSQLI_ASSOC);

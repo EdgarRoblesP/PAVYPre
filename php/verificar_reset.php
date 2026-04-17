@@ -16,7 +16,7 @@ require_once __DIR__ . '/db.php';
 $link = Conectarse();
 
 mysqli_query($link,
-    'CREATE TABLE IF NOT EXISTS PV_RESET_TOKENS (
+    'CREATE TABLE IF NOT EXISTS pv_reset_tokens (
         id          INT AUTO_INCREMENT PRIMARY KEY,
         email       VARCHAR(320) NOT NULL,
         token       CHAR(64)     NOT NULL,
@@ -29,7 +29,7 @@ mysqli_query($link,
 );
 
 $stmt = mysqli_prepare($link,
-    'SELECT id, expires_at, used FROM PV_RESET_TOKENS WHERE token = ? LIMIT 1'
+    'SELECT id, expires_at, used FROM pv_reset_tokens WHERE token = ? LIMIT 1'
 );
 mysqli_bind_param($stmt, 's', $token);
 mysqli_stmt_execute($stmt);

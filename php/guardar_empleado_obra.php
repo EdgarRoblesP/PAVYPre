@@ -1,6 +1,6 @@
 <?php
 /**
- * Registra un empleado en una obra (INSERT en PV_TRABAJOS_EMPLEADOS).
+ * Registra un empleado en una obra (INSERT en pv_trabajos_empleados).
  * POST: obra_id, id_empleado, fecha_inicio, fecha_termino
  */
 session_start();
@@ -30,7 +30,7 @@ if (!$fechaInicio) {
 }
 
 // ── 1. Verificar que el empleado exista ──────────────────────
-$stmtEmpl = mysqli_prepare($link, 'SELECT id_empleado FROM PV_EMPLEADOS WHERE id_empleado = ?');
+$stmtEmpl = mysqli_prepare($link, 'SELECT id_empleado FROM pv_empleados WHERE id_empleado = ?');
 mysqli_bind_param($stmtEmpl, 's', $idEmpleado);
 mysqli_stmt_execute($stmtEmpl);
 if (!stmt_row($stmtEmpl)) {
@@ -44,8 +44,8 @@ $nuevoFin = $fechaTerm ?: '9999-12-31';
 
 $stmtConflicto = mysqli_prepare($link,
     'SELECT te.id_obra, o.ubicacion
-       FROM PV_TRABAJOS_EMPLEADOS te
-       JOIN PV_OBRAS o ON te.id_obra = o.id_obra
+       FROM pv_trabajos_empleados te
+       JOIN pv_obras o ON te.id_obra = o.id_obra
       WHERE te.id_empleado = ?
         AND te.id_obra     != ?
         AND te.fecha_adicion <= ?
@@ -65,7 +65,7 @@ if ($conflicto) {
 }
 
 // ── 3. Obtener id_cliente de la disposición de la obra ───────
-$stmtDis = mysqli_prepare($link, 'SELECT id_cliente FROM PV_DISPOSICIONES WHERE id_obra = ? LIMIT 1');
+$stmtDis = mysqli_prepare($link, 'SELECT id_cliente FROM pv_disposiciones WHERE id_obra = ? LIMIT 1');
 mysqli_bind_param($stmtDis, 's', $obraId);
 mysqli_stmt_execute($stmtDis);
 $dis = stmt_row($stmtDis);
@@ -76,10 +76,10 @@ if (!$dis) {
     exit;
 }
 
-// ── 4. Insertar en PV_TRABAJOS_EMPLEADOS ────────────────────────
+// ── 4. Insertar en pv_trabajos_empleados ────────────────────────
 $fechaTermVal = $fechaTerm ?: null;
 $stmtIns = mysqli_prepare($link,
-    'INSERT IGNORE INTO PV_TRABAJOS_EMPLEADOS
+    'INSERT IGNORE INTO pv_trabajos_empleados
         (id_empleado, id_cliente, id_obra, fecha_adicion, fecha_termino)
      VALUES (?, ?, ?, ?, ?)'
 );

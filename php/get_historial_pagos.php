@@ -20,7 +20,7 @@ $stmt = mysqli_prepare($link,
             fecha_pago,
             monto,
             tipo_pago AS tipoPago
-       FROM PV_COBROS
+       FROM pv_cobros
       WHERE id_cliente = ?
       ORDER BY id_obra, fecha_pago ASC'
 );

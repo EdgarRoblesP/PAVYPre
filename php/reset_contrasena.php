@@ -44,7 +44,7 @@ $link = Conectarse();
 
 // ── Verificar token ──────────────────────────────────────────────────────────
 $stmt = mysqli_prepare($link,
-    'SELECT id, email, expires_at, used FROM PV_RESET_TOKENS WHERE token = ? LIMIT 1'
+    'SELECT id, email, expires_at, used FROM pv_reset_tokens WHERE token = ? LIMIT 1'
 );
 mysqli_bind_param($stmt, 's', $token);
 mysqli_stmt_execute($stmt);
@@ -71,10 +71,10 @@ if (strtotime($row['expires_at']) < time()) {
 $email = $row['email'];
 $hash  = password_hash($nueva, PASSWORD_ARGON2ID);
 
-// ── Actualizar contraseña en PV_EMPLEADOS o PV_CLIENTES ─────────────────────
+// ── Actualizar contraseña en pv_empleados o pv_clientes ─────────────────────
 $actualizado = false;
 
-$upd = mysqli_prepare($link, 'UPDATE PV_EMPLEADOS SET contrasena = ? WHERE email = ?');
+$upd = mysqli_prepare($link, 'UPDATE pv_empleados SET contrasena = ? WHERE email = ?');
 mysqli_bind_param($upd, 'ss', $hash, $email);
 mysqli_stmt_execute($upd);
 if (mysqli_stmt_affected_rows($upd) > 0) {
@@ -82,7 +82,7 @@ if (mysqli_stmt_affected_rows($upd) > 0) {
 }
 
 if (!$actualizado) {
-    $upd = mysqli_prepare($link, 'UPDATE PV_CLIENTES SET contrasena = ? WHERE email = ?');
+    $upd = mysqli_prepare($link, 'UPDATE pv_clientes SET contrasena = ? WHERE email = ?');
     mysqli_bind_param($upd, 'ss', $hash, $email);
     mysqli_stmt_execute($upd);
     if (mysqli_stmt_affected_rows($upd) > 0) {
@@ -98,7 +98,7 @@ if (!$actualizado) {
 
 // ── Marcar token como usado ──────────────────────────────────────────────────
 $tokenId = $row['id'];
-$upd     = mysqli_prepare($link, 'UPDATE PV_RESET_TOKENS SET used = 1 WHERE id = ?');
+$upd     = mysqli_prepare($link, 'UPDATE pv_reset_tokens SET used = 1 WHERE id = ?');
 mysqli_bind_param($upd, 'i', $tokenId);
 mysqli_stmt_execute($upd);
 
