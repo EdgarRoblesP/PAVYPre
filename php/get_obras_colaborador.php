@@ -1,7 +1,6 @@
 <?php
 /**
  * Devuelve las obras en que participó el colaborador autenticado.
- * Usa la conexión de solo lectura (usuario: colaborador).
  */
 session_start();
 if (($_SESSION['user_role'] ?? '') !== 'colaborador') {
@@ -10,26 +9,28 @@ if (($_SESSION['user_role'] ?? '') !== 'colaborador') {
     exit;
 }
 
-require_once __DIR__ . '/db_colaborador.php';
+require_once __DIR__ . '/db.php';
 header('Content-Type: application/json');
 
+$link       = Conectarse();
 $idEmpleado = $_SESSION['user_id'];
 
-$stmt = $pdo->prepare(
+$stmt = mysqli_prepare($link,
     'SELECT o.id_obra,
             o.ubicacion,
             te.fecha_adicion  AS fechaInicio,
             te.fecha_termino  AS fechaTermino,
             e.salario         AS salarioSemanal,
             e.puesto
-       FROM TRABAJOS_EMPLEADOS te
-       JOIN OBRAS     o ON te.id_obra     = o.id_obra
-       JOIN EMPLEADOS e ON te.id_empleado = e.id_empleado
+       FROM PV_TRABAJOS_EMPLEADOS te
+       JOIN PV_OBRAS     o ON te.id_obra     = o.id_obra
+       JOIN PV_EMPLEADOS e ON te.id_empleado = e.id_empleado
       WHERE te.id_empleado = ?
       ORDER BY te.fecha_adicion DESC'
 );
-$stmt->execute([$idEmpleado]);
-$rows = $stmt->fetchAll();
+mysqli_bind_param($stmt, 's', $idEmpleado);
+mysqli_stmt_execute($stmt);
+$rows = stmt_rows($stmt);
 
 $hoy = date('Y-m-d');
 

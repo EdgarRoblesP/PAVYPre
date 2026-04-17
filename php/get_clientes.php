@@ -1,6 +1,6 @@
 <?php
 /**
- * Devuelve todos los CLIENTES (sin contraseña).
+ * Devuelve todos los PV_CLIENTES (sin contraseña).
  * Uso exclusivo del portal Admin.
  */
 session_start();
@@ -10,13 +10,14 @@ if (($_SESSION['user_role'] ?? '') !== 'admin') {
     exit;
 }
 
-require_once __DIR__ . '/db_admin.php';
+require_once __DIR__ . '/db.php';
 header('Content-Type: application/json');
 
-$rows = $pdo->query(
+$link   = Conectarse();
+$result = mysqli_query($link,
     'SELECT id_cliente AS id, nombre, telefono, email
-       FROM CLIENTES
+       FROM PV_CLIENTES
       ORDER BY nombre'
-)->fetchAll();
+);
 
-echo json_encode($rows);
+echo json_encode(mysqli_fetch_all($result, MYSQLI_ASSOC));

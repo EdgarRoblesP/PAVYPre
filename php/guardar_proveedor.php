@@ -1,18 +1,25 @@
 <?php
 /**
- * Guarda (INSERT o UPDATE) un proveedor.
- * POST: id (vacío = nuevo), nombre, telefono, email
- * Nota: el esquema actual no tiene tabla PROVEEDORES independiente.
- * Este archivo queda listo para cuando se agregue dicha tabla.
+ * Guarda (INSERT o UPDATE) un proveedor en PV_PROVEEDORES.
+ * POST: id (vacío = nuevo), nombre, telefono, email, direccion
  */
-require_once __DIR__ . '/db_admin.php';
+session_start();
+if (($_SESSION['user_role'] ?? '') !== 'admin') {
+    http_response_code(403);
+    header('Content-Type: application/json');
+    echo json_encode(['error' => 'Acceso no autorizado.']);
+    exit;
+}
 
+require_once __DIR__ . '/db.php';
 header('Content-Type: application/json');
 
-$id       = trim($_POST['id'] ?? '');
-$nombre   = trim($_POST['nombre'] ?? '');
-$telefono = trim($_POST['telefono'] ?? '');
-$email    = trim($_POST['email'] ?? '');
+$link      = Conectarse();
+$id        = (int)($_POST['id']        ?? 0);
+$nombre    = trim($_POST['nombre']    ?? '');
+$telefono  = trim($_POST['telefono']  ?? '') ?: null;
+$email     = trim($_POST['email']     ?? '') ?: null;
+$direccion = trim($_POST['direccion'] ?? '') ?: null;
 
 if (!$nombre) {
     http_response_code(400);
@@ -20,6 +27,19 @@ if (!$nombre) {
     exit;
 }
 
-// TODO: reemplazar con INSERT/UPDATE a tabla PROVEEDORES cuando exista en el esquema.
-// Por ahora devolvemos éxito para no romper el flujo del frontend.
-echo json_encode(['success' => true, 'nota' => 'Tabla PROVEEDORES pendiente de crear en el esquema.']);
+if ($id) {
+    $stmt = mysqli_prepare($link,
+        'UPDATE PV_PROVEEDORES SET nombre = ?, telefono = ?, email = ?, direccion = ? WHERE id = ?'
+    );
+    mysqli_bind_param($stmt, 'ssssi', $nombre, $telefono, $email, $direccion, $id);
+    mysqli_stmt_execute($stmt);
+} else {
+    $stmt = mysqli_prepare($link,
+        'INSERT INTO PV_PROVEEDORES (nombre, telefono, email, direccion) VALUES (?, ?, ?, ?)'
+    );
+    mysqli_bind_param($stmt, 'ssss', $nombre, $telefono, $email, $direccion);
+    mysqli_stmt_execute($stmt);
+    $id = (int) mysqli_insert_id($link);
+}
+
+echo json_encode(['success' => true, 'id' => $id]);

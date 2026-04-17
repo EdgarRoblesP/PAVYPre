@@ -1,8 +1,6 @@
 <?php
 /**
- * Devuelve INSUMOS y SERVICIOS como un único catálogo.
- * Campos devueltos compatibles con el array `insumos` del portal Admin:
- *   id, nombre, tipo, proveedor, costoUnitario
+ * Devuelve PV_INSUMOS y PV_SERVICIOS como un único catálogo.
  * Uso exclusivo del portal Admin.
  */
 session_start();
@@ -12,33 +10,40 @@ if (($_SESSION['user_role'] ?? '') !== 'admin') {
     exit;
 }
 
-require_once __DIR__ . '/db_admin.php';
+require_once __DIR__ . '/db.php';
 header('Content-Type: application/json');
 
-$rows = $pdo->query(
-    'SELECT id_insumo  AS id,
-            tipo_material  AS nombre,
-            "Insumo"       AS tipo,
-            proveedor,
-            costo_unitario AS costoUnitario
-       FROM INSUMOS
+$link   = Conectarse();
+$result = mysqli_query($link,
+    'SELECT i.id_insumo      AS id,
+            i.tipo_material  AS nombre,
+            "Insumo"         AS tipo,
+            i.proveedor_id,
+            p.nombre         AS proveedor,
+            i.costo_unitario AS costoUnitario
+       FROM PV_INSUMOS i
+       JOIN PV_PROVEEDORES p ON i.proveedor_id = p.id
      UNION ALL
-     SELECT id_servicio,
-            tipo_traslado,
+     SELECT s.id_servicio,
+            s.tipo_traslado,
             "Servicio",
-            proveedor,
-            costo_kilometro
-       FROM SERVICIOS
+            s.proveedor_id,
+            p2.nombre,
+            s.costo_kilometro
+       FROM PV_SERVICIOS s
+       JOIN PV_PROVEEDORES p2 ON s.proveedor_id = p2.id
      ORDER BY tipo, nombre'
-)->fetchAll();
+);
+$rows = mysqli_fetch_all($result, MYSQLI_ASSOC);
 
 $insumos = array_map(function ($r) {
     return [
-        'id'           => $r['id'],
-        'nombre'       => $r['nombre'],
-        'tipo'         => $r['tipo'],
-        'proveedor'    => $r['proveedor'],
-        'costoUnitario'=> (float)$r['costoUnitario'],
+        'id'            => $r['id'],
+        'nombre'        => $r['nombre'],
+        'tipo'          => $r['tipo'],
+        'proveedor_id'  => (int)$r['proveedor_id'],
+        'proveedor'     => $r['proveedor'],
+        'costoUnitario' => (float)$r['costoUnitario'],
     ];
 }, $rows);
 

@@ -1,6 +1,6 @@
 <?php
 /**
- * Devuelve todos los EMPLEADOS con la última obra asignada.
+ * Devuelve todos los PV_EMPLEADOS con la última obra asignada.
  * Uso exclusivo del portal Admin.
  */
 session_start();
@@ -10,10 +10,11 @@ if (($_SESSION['user_role'] ?? '') !== 'admin') {
     exit;
 }
 
-require_once __DIR__ . '/db_admin.php';
+require_once __DIR__ . '/db.php';
 header('Content-Type: application/json');
 
-$rows = $pdo->query(
+$link   = Conectarse();
+$result = mysqli_query($link,
     'SELECT e.id_empleado AS id,
             e.nombre,
             e.puesto,
@@ -21,25 +22,31 @@ $rows = $pdo->query(
             e.email,
             e.direccion,
             e.salario,
+            e.id_supervisor,
+            s.nombre AS nombre_supervisor,
             (SELECT te.id_obra
-               FROM TRABAJOS_EMPLEADOS te
+               FROM PV_TRABAJOS_EMPLEADOS te
               WHERE te.id_empleado = e.id_empleado
               ORDER BY te.fecha_adicion DESC
               LIMIT 1) AS obraAsignadaId
-       FROM EMPLEADOS e
+       FROM PV_EMPLEADOS e
+       LEFT JOIN PV_EMPLEADOS s ON e.id_supervisor = s.id_empleado
       ORDER BY e.nombre'
-)->fetchAll();
+);
+$rows = mysqli_fetch_all($result, MYSQLI_ASSOC);
 
 $empleados = array_map(function ($e) {
     return [
-        'id'            => $e['id'],
-        'nombre'        => $e['nombre'],
-        'puesto'        => $e['puesto'],
-        'telefono'      => $e['telefono'],
-        'email'         => $e['email'],
-        'direccion'     => $e['direccion'],
-        'salario'       => (float)$e['salario'],
-        'obraAsignadaId'=> $e['obraAsignadaId'],
+        'id'               => $e['id'],
+        'nombre'           => $e['nombre'],
+        'puesto'           => $e['puesto'],
+        'telefono'         => $e['telefono'],
+        'email'            => $e['email'],
+        'direccion'        => $e['direccion'],
+        'salario'          => (float)$e['salario'],
+        'supervisorId'     => $e['id_supervisor'],
+        'supervisorNombre' => $e['nombre_supervisor'],
+        'obraAsignadaId'   => $e['obraAsignadaId'],
     ];
 }, $rows);
 

@@ -1,8 +1,6 @@
 <?php
 /**
- * Devuelve proveedores únicos derivados de INSUMOS, SERVICIOS y HERRAMIENTAS.
- * No existe tabla PROVEEDORES en el esquema actual; los nombres se almacenan
- * como VARCHAR en cada tabla.
+ * Devuelve todos los proveedores registrados en PV_PROVEEDORES.
  * Uso exclusivo del portal Admin.
  */
 session_start();
@@ -12,34 +10,35 @@ if (($_SESSION['user_role'] ?? '') !== 'admin') {
     exit;
 }
 
-require_once __DIR__ . '/db_admin.php';
+require_once __DIR__ . '/db.php';
 header('Content-Type: application/json');
 
-$rows = $pdo->query(
-    'SELECT p.nombre,
-            COALESCE(ins.total,  0) AS total_insumos,
-            COALESCE(srv.total,  0) AS total_servicios,
-            COALESCE(herr.total, 0) AS total_herramientas
-       FROM (
-           SELECT DISTINCT proveedor AS nombre FROM INSUMOS
-           UNION
-           SELECT DISTINCT proveedor FROM SERVICIOS
-           UNION
-           SELECT DISTINCT proveedor FROM HERRAMIENTAS
-       ) p
-       LEFT JOIN (SELECT proveedor, COUNT(*) AS total FROM INSUMOS      GROUP BY proveedor) ins  ON ins.proveedor  = p.nombre
-       LEFT JOIN (SELECT proveedor, COUNT(*) AS total FROM SERVICIOS    GROUP BY proveedor) srv  ON srv.proveedor  = p.nombre
-       LEFT JOIN (SELECT proveedor, COUNT(*) AS total FROM HERRAMIENTAS GROUP BY proveedor) herr ON herr.proveedor = p.nombre
+$link   = Conectarse();
+$result = mysqli_query($link,
+    'SELECT p.id,
+            p.nombre,
+            COALESCE(p.telefono,  \'\') AS telefono,
+            COALESCE(p.email,     \'\') AS email,
+            COALESCE(p.direccion, \'\') AS direccion,
+            COALESCE(ins.total,   0)   AS total_insumos,
+            COALESCE(srv.total,   0)   AS total_servicios,
+            COALESCE(herr.total,  0)   AS total_herramientas
+       FROM PV_PROVEEDORES p
+       LEFT JOIN (SELECT proveedor_id, COUNT(*) AS total FROM PV_INSUMOS      GROUP BY proveedor_id) ins  ON ins.proveedor_id  = p.id
+       LEFT JOIN (SELECT proveedor_id, COUNT(*) AS total FROM PV_SERVICIOS    GROUP BY proveedor_id) srv  ON srv.proveedor_id  = p.id
+       LEFT JOIN (SELECT proveedor_id, COUNT(*) AS total FROM PV_HERRAMIENTAS GROUP BY proveedor_id) herr ON herr.proveedor_id = p.id
       ORDER BY p.nombre'
-)->fetchAll();
+);
+$rows = mysqli_fetch_all($result, MYSQLI_ASSOC);
 
 $proveedores = [];
-foreach ($rows as $i => $r) {
+foreach ($rows as $r) {
     $proveedores[] = [
-        'id'                => $i + 1,
+        'id'                => (int)$r['id'],
         'nombre'            => $r['nombre'],
-        'telefono'          => '',
-        'email'             => '',
+        'telefono'          => $r['telefono'],
+        'email'             => $r['email'],
+        'direccion'         => $r['direccion'],
         'totalInsumos'      => (int)$r['total_insumos'],
         'totalServicios'    => (int)$r['total_servicios'],
         'totalHerramientas' => (int)$r['total_herramientas'],

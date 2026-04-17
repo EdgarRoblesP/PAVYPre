@@ -2,7 +2,7 @@
 /**
  * Cambia la contraseña del usuario autenticado.
  * POST: contrasena_actual, nueva_contrasena, confirmar_contrasena
- * Roles válidos: colaborador, cliente
+ * Roles válidos: admin, colaborador, cliente
  */
 session_start();
 header('Content-Type: application/json');
@@ -10,19 +10,18 @@ header('Content-Type: application/json');
 $role = $_SESSION['user_role'] ?? '';
 $id   = $_SESSION['user_id']   ?? '';
 
-if (!$role || !$id || $role === 'admin') {
+if (!$role || !$id) {
     http_response_code(403);
     echo json_encode(['error' => 'Acceso no autorizado.']);
     exit;
 }
 
-require_once __DIR__ . '/db_admin.php';
+require_once __DIR__ . '/db.php';
 
 $actual    = $_POST['contrasena_actual']    ?? '';
 $nueva     = $_POST['nueva_contrasena']     ?? '';
 $confirmar = $_POST['confirmar_contrasena'] ?? '';
 
-// ── Validaciones ──────────────────────────────────────────────
 if (!$actual || !$nueva || !$confirmar) {
     http_response_code(400);
     echo json_encode(['error' => 'Todos los campos son obligatorios.']);
@@ -41,14 +40,17 @@ if ($nueva !== $confirmar) {
     exit;
 }
 
+$link = Conectarse();
+
 // ── Verificar contraseña actual ───────────────────────────────
-if ($role === 'colaborador') {
-    $stmt = $pdo->prepare('SELECT contrasena FROM EMPLEADOS WHERE id_empleado = ? LIMIT 1');
+if ($role === 'admin' || $role === 'colaborador') {
+    $stmt = mysqli_prepare($link, 'SELECT contrasena FROM PV_EMPLEADOS WHERE id_empleado = ? LIMIT 1');
 } else {
-    $stmt = $pdo->prepare('SELECT contrasena FROM CLIENTES WHERE id_cliente = ? LIMIT 1');
+    $stmt = mysqli_prepare($link, 'SELECT contrasena FROM PV_CLIENTES WHERE id_cliente = ? LIMIT 1');
 }
-$stmt->execute([$id]);
-$row = $stmt->fetch();
+mysqli_bind_param($stmt, 's', $id);
+mysqli_stmt_execute($stmt);
+$row = stmt_row($stmt);
 
 if (!$row || !password_verify($actual, $row['contrasena'])) {
     http_response_code(401);
@@ -59,11 +61,12 @@ if (!$row || !password_verify($actual, $row['contrasena'])) {
 // ── Actualizar con Argon2ID ───────────────────────────────────
 $hash = password_hash($nueva, PASSWORD_ARGON2ID);
 
-if ($role === 'colaborador') {
-    $upd = $pdo->prepare('UPDATE EMPLEADOS SET contrasena = ? WHERE id_empleado = ?');
+if ($role === 'admin' || $role === 'colaborador') {
+    $upd = mysqli_prepare($link, 'UPDATE PV_EMPLEADOS SET contrasena = ? WHERE id_empleado = ?');
 } else {
-    $upd = $pdo->prepare('UPDATE CLIENTES  SET contrasena = ? WHERE id_cliente  = ?');
+    $upd = mysqli_prepare($link, 'UPDATE PV_CLIENTES  SET contrasena = ? WHERE id_cliente  = ?');
 }
-$upd->execute([$hash, $id]);
+mysqli_bind_param($upd, 'ss', $hash, $id);
+mysqli_stmt_execute($upd);
 
 echo json_encode(['success' => true]);

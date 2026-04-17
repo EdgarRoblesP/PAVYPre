@@ -21,35 +21,87 @@
         /* ── Grid de tarjetas proveedores ── */
         .grid-proveedores {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
             gap: 1rem;
         }
         .card-proveedor {
+            position: relative;
+            overflow: hidden;
             background: #fff;
             border: 1px solid #e5e7eb;
             border-radius: .75rem;
             padding: 1rem 1.25rem;
             box-shadow: 0 1px 3px rgba(0,0,0,.06);
-            transition: box-shadow .15s;
+            transition: box-shadow .2s, border-color .2s, transform .2s;
             cursor: pointer;
         }
-        .card-proveedor:hover { box-shadow: 0 4px 14px rgba(0,0,0,.1); }
+        .card-proveedor:hover {
+            box-shadow: 0 6px 20px rgba(0,0,0,.12);
+            border-color: #FFC107;
+            transform: translateY(-2px);
+        }
+        /* Capa de edición que aparece en hover */
+        .card-proveedor::after {
+            content: '✎ Editar';
+            position: absolute;
+            top: 0; right: 0;
+            background: #FFC107;
+            color: #000;
+            font-size: .7rem;
+            font-weight: 700;
+            letter-spacing: .05em;
+            padding: .25rem .6rem;
+            border-bottom-left-radius: .5rem;
+            opacity: 0;
+            transform: translateY(-100%);
+            transition: opacity .2s, transform .2s;
+        }
+        .card-proveedor:hover::after {
+            opacity: 1;
+            transform: translateY(0);
+        }
         .card-proveedor-nombre {
             display: block;
-            font-weight: 600;
+            font-weight: 700;
             font-size: .95rem;
             color: #111;
+            margin-bottom: .3rem;
+        }
+        .card-proveedor-contact {
+            font-size: .76rem;
+            color: #374151;
             margin-bottom: .45rem;
+            line-height: 1.55;
+        }
+        .card-proveedor-contact .cp-row {
+            display: flex;
+            align-items: flex-start;
+            gap: .35rem;
+        }
+        .card-proveedor-contact .cp-label {
+            color: #9ca3af;
+            flex-shrink: 0;
+            min-width: 4.5rem;
         }
         .card-proveedor-stats {
-            font-size: .78rem;
+            font-size: .75rem;
             color: #6b7280;
             display: flex;
             flex-wrap: wrap;
             gap: .3rem;
             align-items: center;
+            border-top: 1px solid #f3f4f6;
+            padding-top: .4rem;
+            margin-top: .4rem;
         }
         .card-proveedor-stats .sep { color: #d1d5db; }
+        .card-proveedor-stats .stat-badge {
+            background: #f9fafb;
+            border: 1px solid #e5e7eb;
+            border-radius: .35rem;
+            padding: .1rem .45rem;
+            font-size: .72rem;
+        }
     </style>
     <link rel="icon" type="image/png" sizes="16x16" href="img/logo-16x16.png">
 
@@ -67,7 +119,10 @@
             </div>
         </div>
         <div class="flex items-center gap-4">
-            <span class="text-[#FFC107] text-sm hidden md:block">admin@pavypre.com</span>
+            <div class="text-right hidden sm:block">
+                <p class="text-sm text-gray-400">Bienvenido</p>
+                <a href="perfil.html" class="text-[#FFC107] font-semibold text-sm hover:underline" id="nombre-usuario">—</a>
+            </div>
             <a href="php/salir.php" class="bg-[#FFC107] text-black px-6 py-2 rounded hover:bg-yellow-500 transition-colors font-semibold text-sm">
                 Cerrar Sesión
             </a>
@@ -148,7 +203,8 @@
                 </button>
             </div>
 
-            <div id="obras-container" class="space-y-4"></div>
+            <div id="obras-container" class="space-y-10"></div>
+            <div id="obras-paginacion"></div>
         </div>
 
         <!-- Vista de detalle de una obra específica -->
@@ -193,11 +249,12 @@
                 <table class="w-full">
                     <thead class="bg-black text-white text-sm">
                         <tr>
-                            <th class="px-4 py-3 text-left">Nombre</th>
-                            <th class="px-4 py-3 text-left">Puesto</th>
+                            <th onclick="sortEmpleados('nombre')"  class="px-4 py-3 text-left cursor-pointer hover:bg-gray-800 transition-colors select-none">Nombre<span id="si-empleados-nombre"  class="ml-1 text-xs opacity-40">↕</span></th>
+                            <th onclick="sortEmpleados('puesto')"  class="px-4 py-3 text-left cursor-pointer hover:bg-gray-800 transition-colors select-none">Puesto<span id="si-empleados-puesto"  class="ml-1 text-xs opacity-40">↕</span></th>
                             <th class="px-4 py-3 text-left">Teléfono</th>
-                            <th class="px-4 py-3 text-left">Email</th>
-                            <th class="px-4 py-3 text-right">Salario Semanal</th>
+                            <th onclick="sortEmpleados('email')"   class="px-4 py-3 text-left cursor-pointer hover:bg-gray-800 transition-colors select-none">Email<span id="si-empleados-email"   class="ml-1 text-xs opacity-40">↕</span></th>
+                            <th onclick="sortEmpleados('salario')" class="px-4 py-3 text-right cursor-pointer hover:bg-gray-800 transition-colors select-none">Salario Semanal<span id="si-empleados-salario" class="ml-1 text-xs opacity-40">↕</span></th>
+                            <th class="px-4 py-3 text-left">Supervisor</th>
                             <th class="px-4 py-3 text-center">Editar</th>
                         </tr>
                     </thead>
@@ -205,6 +262,7 @@
                 </table>
             </div>
         </div>
+        <div id="empleados-paginacion"></div>
     </div>
 
     <!-- ==================== CLIENTES TAB ==================== -->
@@ -239,9 +297,9 @@
                 <table class="w-full">
                     <thead class="bg-black text-white text-sm">
                         <tr>
-                            <th class="px-4 py-3 text-left">Nombre</th>
+                            <th onclick="sortClientes('nombre')" class="px-4 py-3 text-left cursor-pointer hover:bg-gray-800 transition-colors select-none">Nombre<span id="si-clientes-nombre" class="ml-1 text-xs opacity-40">↕</span></th>
                             <th class="px-4 py-3 text-left">Teléfono</th>
-                            <th class="px-4 py-3 text-left">Email</th>
+                            <th onclick="sortClientes('email')"  class="px-4 py-3 text-left cursor-pointer hover:bg-gray-800 transition-colors select-none">Email<span id="si-clientes-email"  class="ml-1 text-xs opacity-40">↕</span></th>
                             <th class="px-4 py-3 text-center">Editar</th>
                         </tr>
                     </thead>
@@ -301,10 +359,10 @@
                 <table class="w-full">
                     <thead class="bg-black text-white text-sm">
                         <tr>
-                            <th class="px-4 py-3 text-left">Nombre</th>
-                            <th class="px-4 py-3 text-left">Tipo</th>
-                            <th class="px-4 py-3 text-left">Proveedor</th>
-                            <th class="px-4 py-3 text-right">Costo Unitario</th>
+                            <th onclick="sortInsumos('nombre')"      class="px-4 py-3 text-left cursor-pointer hover:bg-gray-800 transition-colors select-none">Nombre<span id="si-insumos-nombre"      class="ml-1"></span></th>
+                            <th onclick="sortInsumos('tipo')"        class="px-4 py-3 text-left cursor-pointer hover:bg-gray-800 transition-colors select-none">Tipo<span id="si-insumos-tipo"        class="ml-1"></span></th>
+                            <th onclick="sortInsumos('proveedor')"   class="px-4 py-3 text-left cursor-pointer hover:bg-gray-800 transition-colors select-none">Proveedor<span id="si-insumos-proveedor"   class="ml-1"></span></th>
+                            <th onclick="sortInsumos('costoUnitario')" class="px-4 py-3 text-right cursor-pointer hover:bg-gray-800 transition-colors select-none">Costo Unitario<span id="si-insumos-costoUnitario" class="ml-1"></span></th>
                             <th class="px-4 py-3 text-center">Editar</th>
                         </tr>
                     </thead>
@@ -337,9 +395,9 @@
                     <thead class="bg-black text-white text-sm">
                         <tr>
                             <th class="px-4 py-3 text-left">Imagen</th>
-                            <th class="px-4 py-3 text-left">Nombre</th>
-                            <th class="px-4 py-3 text-left">Proveedor</th>
-                            <th class="px-4 py-3 text-right">Renta por Semana</th>
+                            <th onclick="sortHerramientas('nombre')"     class="px-4 py-3 text-left cursor-pointer hover:bg-gray-800 transition-colors select-none">Nombre<span id="si-herramientas-nombre"     class="ml-1"></span></th>
+                            <th onclick="sortHerramientas('proveedor')"  class="px-4 py-3 text-left cursor-pointer hover:bg-gray-800 transition-colors select-none">Proveedor<span id="si-herramientas-proveedor"  class="ml-1"></span></th>
+                            <th onclick="sortHerramientas('renta_semanal')" class="px-4 py-3 text-right cursor-pointer hover:bg-gray-800 transition-colors select-none">Renta por Semana<span id="si-herramientas-renta_semanal" class="ml-1"></span></th>
                             <th class="px-4 py-3 text-center">Editar</th>
                         </tr>
                     </thead>
@@ -461,6 +519,13 @@
                 <input id="empleado-direccion" name="direccion" type="text"
                     class="w-full border-2 border-gray-200 rounded-lg px-4 py-2 focus:outline-none focus:border-[#FFC107] text-sm">
             </div>
+            <div>
+                <label class="block text-sm font-semibold text-gray-700 mb-1">Supervisor</label>
+                <select id="empleado-supervisor" name="id_supervisor"
+                    class="w-full border-2 border-gray-200 rounded-lg px-4 py-2 focus:outline-none focus:border-[#FFC107] text-sm bg-white">
+                    <option value="">Sin supervisor</option>
+                </select>
+            </div>
             <div class="hide-on-edit">
                 <label class="block text-sm font-semibold text-gray-700 mb-1">Contraseña *</label>
                 <div class="flex gap-2">
@@ -538,7 +603,15 @@
             <button onclick="closeModal('lista-proveedores-modal')" class="text-gray-400 hover:text-white text-2xl leading-none">&times;</button>
         </div>
         <div class="p-6 overflow-y-auto">
+            <div class="flex items-center gap-2 mb-4 flex-wrap">
+                <span class="text-xs text-gray-400 mr-1">Ordenar:</span>
+                <button onclick="sortProveedores('nombre')"           class="px-2.5 py-1 text-xs rounded border border-gray-200 text-gray-600 hover:border-black hover:text-black transition-colors">Nombre<span           id="si-proveedores-nombre"           class="ml-1 opacity-40">↕</span></button>
+                <button onclick="sortProveedores('totalInsumos')"     class="px-2.5 py-1 text-xs rounded border border-gray-200 text-gray-600 hover:border-black hover:text-black transition-colors">Insumos<span           id="si-proveedores-totalInsumos"     class="ml-1 opacity-40">↕</span></button>
+                <button onclick="sortProveedores('totalServicios')"   class="px-2.5 py-1 text-xs rounded border border-gray-200 text-gray-600 hover:border-black hover:text-black transition-colors">Servicios<span         id="si-proveedores-totalServicios"   class="ml-1 opacity-40">↕</span></button>
+                <button onclick="sortProveedores('totalHerramientas')" class="px-2.5 py-1 text-xs rounded border border-gray-200 text-gray-600 hover:border-black hover:text-black transition-colors">Herramientas<span id="si-proveedores-totalHerramientas" class="ml-1 opacity-40">↕</span></button>
+            </div>
             <div id="grid-proveedores" class="grid-proveedores"></div>
+            <div id="proveedores-paginacion"></div>
         </div>
     </div>
 </div>
@@ -550,16 +623,30 @@
             <h3 id="proveedor-modal-title" class="text-lg font-bold">Nuevo Proveedor</h3>
             <button onclick="closeModal('proveedor-modal')" class="text-gray-400 hover:text-white text-2xl leading-none">&times;</button>
         </div>
-        <!-- action="php/guardar_proveedor.php" -->
         <form id="proveedor-form" action="php/guardar_proveedor.php" method="POST" class="p-6 space-y-4">
             <input type="hidden" id="proveedor-id" name="id">
-            <input type="hidden" id="proveedor-telefono" name="telefono" value="">
-            <input type="hidden" id="proveedor-email"    name="email"    value="">
             <div>
                 <label class="block text-sm font-semibold text-gray-700 mb-1">Nombre *</label>
-                <input id="proveedor-nombre" name="nombre" type="text"
+                <input id="proveedor-nombre" name="nombre" type="text" placeholder="Ej. Materiales y Agregados S.A."
                     class="w-full border-2 border-gray-200 rounded-lg px-4 py-2 focus:outline-none focus:border-[#FFC107] text-sm">
                 <p id="proveedor-nombre-err" class="hidden text-red-500 text-xs mt-1">El nombre del proveedor es obligatorio.</p>
+            </div>
+            <div class="grid grid-cols-2 gap-3">
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700 mb-1">Teléfono</label>
+                    <input id="proveedor-telefono" name="telefono" type="tel" placeholder="222 000 0000"
+                        class="w-full border-2 border-gray-200 rounded-lg px-4 py-2 focus:outline-none focus:border-[#FFC107] text-sm">
+                </div>
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700 mb-1">Correo electrónico</label>
+                    <input id="proveedor-email" name="email" type="email" placeholder="contacto@empresa.mx"
+                        class="w-full border-2 border-gray-200 rounded-lg px-4 py-2 focus:outline-none focus:border-[#FFC107] text-sm">
+                </div>
+            </div>
+            <div>
+                <label class="block text-sm font-semibold text-gray-700 mb-1">Dirección</label>
+                <input id="proveedor-direccion" name="direccion" type="text" placeholder="Calle, Col., Ciudad, Estado"
+                    class="w-full border-2 border-gray-200 rounded-lg px-4 py-2 focus:outline-none focus:border-[#FFC107] text-sm">
             </div>
             <div class="flex gap-3 pt-2">
                 <button type="submit" class="flex-1 bg-[#FFC107] text-black py-3 rounded-lg hover:bg-yellow-500 font-bold text-sm">Guardar</button>
@@ -691,8 +778,8 @@
                 <div class="flex items-start justify-between gap-2">
                     <div class="text-sm">
                         <p class="font-semibold text-black" id="sub-empleado-preview-nombre"></p>
-                        <p class="text-gray-600 mt-0.5" id="sub-empleado-preview-puesto"></p>
-                        <p class="text-gray-400 text-xs mt-0.5">ID: <span id="sub-empleado-preview-id" class="font-mono"></span></p>
+                        <p class="text-gray-600 text-xs " id="sub-empleado-preview-puesto"></p>
+                        <p class="text-gray-600 text-xs mt-0.5">Correo: <span id="sub-empleado-preview-email"></span></p>
                     </div>
                     <button type="button" onclick="clearSubEmpleadoSelection()"
                         class="text-xs text-gray-400 hover:text-red-500 transition-colors whitespace-nowrap font-medium">
@@ -702,14 +789,16 @@
             </div>
             <div class="grid grid-cols-2 gap-4">
                 <div>
-                    <label class="block text-sm font-semibold text-gray-700 mb-1">Fecha Inicio</label>
+                    <label class="block text-sm font-semibold text-gray-700 mb-1">Fecha Inicio *</label>
                     <input id="sub-empleado-fechaInicio" name="fecha_inicio" type="date"
                         class="w-full border-2 border-gray-200 rounded-lg px-4 py-2 focus:outline-none focus:border-[#FFC107] text-sm">
+                    <p id="sub-empleado-fechaInicio-err" class="hidden text-red-500 text-xs mt-1">La fecha de inicio es obligatoria.</p>
                 </div>
                 <div>
-                    <label class="block text-sm font-semibold text-gray-700 mb-1">Fecha Término</label>
+                    <label class="block text-sm font-semibold text-gray-700 mb-1">Fecha Término *</label>
                     <input id="sub-empleado-fechaTermino" name="fecha_termino" type="date"
                         class="w-full border-2 border-gray-200 rounded-lg px-4 py-2 focus:outline-none focus:border-[#FFC107] text-sm">
+                    <p id="sub-empleado-fechaTermino-err" class="hidden text-red-500 text-xs mt-1">La fecha de término es obligatoria.</p>
                 </div>
             </div>
             <div class="flex gap-3 pt-2">
@@ -731,51 +820,58 @@
             <input type="hidden" id="sub-recurso-obra-id" name="obra_id">
             <!-- Tipo -->
             <div>
-                <label class="block text-sm font-semibold text-gray-700 mb-1">Tipo de Recurso</label>
+                <label class="block text-sm font-semibold text-gray-700 mb-1">Tipo de Recurso *</label>
                 <select id="sub-recurso-tipo" name="tipo_recurso" onchange="switchSubRecursoTipo()"
-                    class="w-full border-2 border-gray-200 rounded-lg px-4 py-2 focus:outline-none focus:border-[#FFC107] text-sm">
+                    class="w-full border-2 border-gray-200 rounded-lg px-4 py-2 focus:outline-none focus:border-[#FFC107] text-sm bg-white">
                     <option value="Insumo">Insumo</option>
                     <option value="Servicio">Servicio</option>
                     <option value="Herramienta">Herramienta</option>
                 </select>
             </div>
-            <!-- Nombre (siempre visible) -->
+            <!-- Recurso (select dinámico por tipo) -->
             <div>
-                <label class="block text-sm font-semibold text-gray-700 mb-1">Nombre del Recurso *</label>
-                <input id="sub-recurso-nombre" name="nombre_recurso" type="text"
-                    class="w-full border-2 border-gray-200 rounded-lg px-4 py-2 focus:outline-none focus:border-[#FFC107] text-sm">
-                <p id="sub-recurso-nombre-err" class="hidden text-red-500 text-xs mt-1">El nombre del recurso es obligatorio.</p>
+                <label class="block text-sm font-semibold text-gray-700 mb-1">Recurso *</label>
+                <select id="sub-recurso-nombre" name="nombre_recurso"
+                    class="w-full border-2 border-gray-200 rounded-lg px-4 py-2 focus:outline-none focus:border-[#FFC107] text-sm bg-white">
+                    <option value="">— Selecciona un recurso —</option>
+                </select>
+                <p id="sub-recurso-nombre-err" class="hidden text-red-500 text-xs mt-1">Selecciona un recurso del catálogo.</p>
             </div>
             <!-- Campos: Insumo -->
             <div id="sub-recurso-campos-insumo">
-                <label class="block text-sm font-semibold text-gray-700 mb-1">Cantidad (unidades)</label>
-                <input id="sub-recurso-cantidad" name="cantidad_total" type="number" min="0" placeholder="0"
+                <label class="block text-sm font-semibold text-gray-700 mb-1">Cantidad (unidades) *</label>
+                <input id="sub-recurso-cantidad" name="cantidad_total" type="number" min="1" placeholder="1"
                     class="w-full border-2 border-gray-200 rounded-lg px-4 py-2 focus:outline-none focus:border-[#FFC107] text-sm">
+                <p id="sub-recurso-cantidad-err" class="hidden text-red-500 text-xs mt-1">La cantidad debe ser mayor a 0.</p>
             </div>
             <!-- Campos: Servicio -->
             <div id="sub-recurso-campos-servicio" style="display:none">
-                <label class="block text-sm font-semibold text-gray-700 mb-1">Kilometraje</label>
-                <input id="sub-recurso-kilometraje" name="kilometraje" type="number" min="0" step="0.01" placeholder="0"
+                <label class="block text-sm font-semibold text-gray-700 mb-1">Kilometraje *</label>
+                <input id="sub-recurso-kilometraje" name="kilometraje" type="number" min="0.01" step="0.01" placeholder="0.00"
                     class="w-full border-2 border-gray-200 rounded-lg px-4 py-2 focus:outline-none focus:border-[#FFC107] text-sm">
+                <p id="sub-recurso-kilometraje-err" class="hidden text-red-500 text-xs mt-1">El kilometraje debe ser mayor a 0.</p>
             </div>
             <!-- Campos: Herramienta -->
             <div id="sub-recurso-campos-herramienta" style="display:none" class="space-y-4">
                 <div class="grid grid-cols-2 gap-4">
                     <div>
-                        <label class="block text-sm font-semibold text-gray-700 mb-1">Fecha Inicio</label>
+                        <label class="block text-sm font-semibold text-gray-700 mb-1">Fecha Inicio *</label>
                         <input id="sub-recurso-fecha-inicio" name="fecha_inicio" type="date"
                             class="w-full border-2 border-gray-200 rounded-lg px-4 py-2 focus:outline-none focus:border-[#FFC107] text-sm">
+                        <p id="sub-recurso-fecha-inicio-err" class="hidden text-red-500 text-xs mt-1">La fecha de inicio es obligatoria.</p>
                     </div>
                     <div>
-                        <label class="block text-sm font-semibold text-gray-700 mb-1">Fecha Término</label>
+                        <label class="block text-sm font-semibold text-gray-700 mb-1">Fecha Término *</label>
                         <input id="sub-recurso-fecha-termino" name="fecha_termino" type="date"
                             class="w-full border-2 border-gray-200 rounded-lg px-4 py-2 focus:outline-none focus:border-[#FFC107] text-sm">
+                        <p id="sub-recurso-fecha-termino-err" class="hidden text-red-500 text-xs mt-1">La fecha de término es obligatoria.</p>
                     </div>
                 </div>
                 <div>
-                    <label class="block text-sm font-semibold text-gray-700 mb-1">Cantidad de unidades</label>
+                    <label class="block text-sm font-semibold text-gray-700 mb-1">Cantidad de unidades *</label>
                     <input id="sub-recurso-cantidad-herr" name="cantidad_herr" type="number" min="1" value="1"
                         class="w-full border-2 border-gray-200 rounded-lg px-4 py-2 focus:outline-none focus:border-[#FFC107] text-sm">
+                    <p id="sub-recurso-cantidad-herr-err" class="hidden text-red-500 text-xs mt-1">La cantidad debe ser al menos 1.</p>
                 </div>
             </div>
             <div class="flex gap-3 pt-2">
@@ -804,7 +900,7 @@
                 <p id="sub-pago-fecha-err" class="hidden text-red-500 text-xs mt-1">La fecha de pago es obligatoria.</p>
             </div>
             <div>
-                <label class="block text-sm font-semibold text-gray-700 mb-1">Tipo de Pago</label>
+                <label class="block text-sm font-semibold text-gray-700 mb-1">Tipo de Pago *</label>
                 <select id="sub-pago-tipo" name="tipo_pago"
                     class="w-full border-2 border-gray-200 rounded-lg px-4 py-2 focus:outline-none focus:border-[#FFC107] text-sm">
                     <option value="Transferencia">Transferencia</option>
@@ -849,7 +945,30 @@
 // ============================================================
 let nextId = { obras: 0, empleados: 0, clientes: 0, proveedores: 0, insumos: 0, herramientas: 0 };
 
-let obras       = [];
+let obras          = [];
+let obrasCatalogo  = [];   // id + nombre de todas las obras — para selects
+let obrasPage      = 1;    // página activa
+let obrasTotalPags = 1;    // total de páginas
+let obrasTotal     = 0;    // total de registros
+let _filtrarTimer  = null; // debounce búsqueda de obras
+
+let empleadosFiltrados   = [];
+let empleadosPage        = 1;
+let empleadosSort        = { key: 'nombre', dir: 'asc' };
+
+let clientesFiltrados    = [];
+let clientesSort         = { key: 'nombre', dir: 'asc' };
+
+let proveedoresFiltrados = [];
+let proveedoresPage      = 1;
+let proveedoresSort      = { key: 'nombre', dir: 'asc' };
+
+let insumosFiltrados     = [];
+let insumosSort          = { key: 'nombre', dir: 'asc' };
+
+let herramientasFiltradas = [];
+let herramientasSort     = { key: 'nombre', dir: 'asc' };
+
 let empleados   = [];
 let clientes    = [];
 let proveedores = [];
@@ -936,11 +1055,27 @@ function resetObraForm() {
     document.getElementById('obra-fechaTermino').setAttribute('required', 'true');
     document.getElementById('obra-presupuesto').setAttribute('required', 'true');
 }
+function updateSupervisoresSelect(selectedId) {
+    const puestosValidos = ['Ingeniero Superintendente', 'Ingeniero residente', 'Sobrestante'];
+    const select = document.getElementById('empleado-supervisor');
+    select.innerHTML = '<option value="">Sin supervisor</option>';
+    empleados
+        .filter(e => puestosValidos.includes(e.puesto))
+        .forEach(e => {
+            const opt = document.createElement('option');
+            opt.value = e.id;
+            opt.textContent = `${e.nombre} (${e.puesto})`;
+            select.appendChild(opt);
+        });
+    select.value = selectedId || '';
+}
+
 function resetEmpleadoForm() {
     document.getElementById('empleado-id').value = '';
     document.getElementById('empleado-form').reset();
     document.getElementById('empleado-modal-title').textContent = 'Nuevo Empleado';
     document.getElementById('empleado-form').querySelectorAll('.hide-on-edit').forEach(el => { el.style.display = ''; });
+    updateSupervisoresSelect('');
     limpiarErroresForm([
         ['empleado-nombre',     'empleado-nombre-err'],
         ['empleado-puesto',     'empleado-puesto-err'],
@@ -963,6 +1098,10 @@ function resetProveedorForm() {
     document.getElementById('proveedor-id').value = '';
     document.getElementById('proveedor-form').reset();
     document.getElementById('proveedor-modal-title').textContent = 'Nuevo Proveedor';
+    ['proveedor-telefono', 'proveedor-email', 'proveedor-direccion'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.value = '';
+    });
     limpiarErroresForm([['proveedor-nombre', 'proveedor-nombre-err']]);
 }
 function resetInsumoForm() {
@@ -995,16 +1134,10 @@ function sinAcentos(texto){
 // y por estado, luego re-renderiza solo los resultados.
 // ============================================================
 function filtrarObras() {
-    const texto  = document.getElementById('obras-search').value.toLowerCase().trim();
-   // const estado = document.getElementById('obras-estado-filter').value;
-
-    const resultado = obras.filter(o => {
-        const coincideNombre = sinAcentos(o.nombre.toLowerCase()).includes(sinAcentos(texto));
-        // const coincideEstado = estado === '' || o.estado === estado;
-        return coincideNombre // && coincideEstado;
-    });
-
-    renderObrasConDatos(resultado);
+    clearTimeout(_filtrarTimer);
+    _filtrarTimer = setTimeout(function () {
+        cargarObras(1, document.getElementById('obras-search').value.trim());
+    }, 300);
 }
 
 function limpiarFiltrosObras() {
@@ -1019,12 +1152,11 @@ function limpiarFiltrosObras() {
 // ============================================================
 function filtrarEmpleados() {
     const texto = document.getElementById('empleados-search').value.toLowerCase().trim();
-
-    const resultado = empleados.filter(e =>
+    empleadosFiltrados = empleados.filter(e =>
         sinAcentos(e.nombre.toLowerCase()).includes(sinAcentos(texto))
     );
-
-    renderEmpleadosConDatos(resultado);
+    empleadosPage = 1;
+    renderEmpleadosConDatos(empleadosFiltrados);
 }
 
 function limpiarFiltrosEmpleados() {
@@ -1037,8 +1169,8 @@ function limpiarFiltrosEmpleados() {
 // ============================================================
 function filtrarClientes() {
     const texto = document.getElementById('clientes-search').value.toLowerCase().trim();
-    const resultado = clientes.filter(c => sinAcentos(c.nombre.toLowerCase()).includes(sinAcentos(texto)));
-    renderClientesConDatos(resultado);
+    clientesFiltrados = clientes.filter(c => sinAcentos(c.nombre.toLowerCase()).includes(sinAcentos(texto)));
+    renderClientesConDatos(clientesFiltrados);
 }
 
 function limpiarFiltrosClientes() {
@@ -1050,7 +1182,9 @@ function limpiarFiltrosClientes() {
 // FILTROS DE PROVEEDORES
 // ============================================================
 function filtrarProveedores() {
-    renderProveedoresConDatos(proveedores);
+    proveedoresFiltrados = proveedores.slice();
+    proveedoresPage = 1;
+    renderProveedoresConDatos(proveedoresFiltrados);
 }
 
 // ============================================================
@@ -1058,8 +1192,8 @@ function filtrarProveedores() {
 // ============================================================
 function filtrarInsumos() {
     const texto = document.getElementById('insumos-search').value.toLowerCase().trim();
-    const resultado = insumos.filter(i => sinAcentos(i.nombre.toLowerCase()).includes(sinAcentos(texto)));
-    renderInsumosConDatos(resultado);
+    insumosFiltrados = insumos.filter(i => sinAcentos(i.nombre.toLowerCase()).includes(sinAcentos(texto)));
+    renderInsumosConDatos(insumosFiltrados);
 }
 
 function limpiarFiltrosInsumos() {
@@ -1072,8 +1206,8 @@ function limpiarFiltrosInsumos() {
 // ============================================================
 function filtrarHerramientas() {
     const texto = document.getElementById('herramientas-search').value.toLowerCase().trim();
-    const resultado = herramientas.filter(h => sinAcentos(h.nombre.toLowerCase()).includes(sinAcentos(texto)));
-    renderHerramientasConDatos(resultado);
+    herramientasFiltradas = herramientas.filter(h => sinAcentos(h.nombre.toLowerCase()).includes(sinAcentos(texto)));
+    renderHerramientasConDatos(herramientasFiltradas);
 }
 
 function limpiarFiltrosHerramientas() {
@@ -1086,16 +1220,17 @@ function limpiarFiltrosHerramientas() {
 // renderObras() llama a filtrarObras() para respetar los filtros activos.
 // renderObrasConDatos() recibe el array ya filtrado y pinta las tarjetas.
 // ============================================================
-function renderObras() { filtrarObras(); }
+function renderObras() { renderObrasConDatos(obras); }
 
 function renderObrasConDatos(lista) {
     const c = document.getElementById('obras-container');
     if (!lista.length) {
         c.innerHTML = '<p class="text-gray-400 py-8 text-center">No se encontraron obras con esos criterios.</p>';
+        renderPaginacion();
         return;
     }
     c.innerHTML = lista.map(o => `
-        <div class="bg-white rounded-xl shadow-md overflow-hidden hover:shadow-lg transition-shadow">
+        <div class="bg-white rounded-xl shadow-md overflow-hidden hover:shadow-lg transition-shadow pb-3">
             <div class="p-6 bg-gradient-to-r from-gray-50 to-white">
                 <div class="flex items-start justify-between gap-4 flex-wrap mb-4">
                     <div>
@@ -1121,6 +1256,116 @@ function renderObrasConDatos(lista) {
                 </button>
             </div>
         </div>`).join('');
+    renderPaginacion();
+}
+
+// ============================================================
+// PAGINACIÓN DE OBRAS
+// ============================================================
+function cargarObras(page, buscar) {
+    if (buscar === undefined) buscar = document.getElementById('obras-search').value.trim();
+    const params = new URLSearchParams({ page: page, buscar: buscar });
+
+    // Persistir página en la URL sin recargar la página
+    const url = new URL(window.location.href);
+    url.searchParams.set('page', page);
+    if (buscar) url.searchParams.set('buscar', buscar);
+    else        url.searchParams.delete('buscar');
+    history.replaceState(null, '', url);
+
+    fetch('php/get_obras_admin.php?' + params)
+        .then(r => r.ok ? r.json() : Promise.reject(r.status))
+        .then(data => {
+            obras          = data.obras;
+            obrasPage      = data.page;
+            obrasTotalPags = data.pages;
+            obrasTotal     = data.total;
+            renderObrasConDatos(obras);
+        })
+        .catch(function () {
+            obras = [];
+            renderObrasConDatos([]);
+        });
+}
+
+function renderPaginacion() {
+    const c = document.getElementById('obras-paginacion');
+    if (obrasTotalPags <= 1) { c.innerHTML = ''; return; }
+
+    const desde = (obrasPage - 1) * 5 + 1;
+    const hasta  = Math.min(obrasPage * 5, obrasTotal);
+
+    const btnBase  = 'px-3 py-1.5 text-sm rounded border transition-colors';
+    const btnActivo = btnBase + ' bg-black text-white border-black font-semibold';
+    const btnNormal = btnBase + ' border-gray-300 text-gray-600 hover:border-black hover:text-black';
+    const btnDis    = btnBase + ' border-gray-200 text-gray-300 cursor-not-allowed';
+
+    let botones = '';
+
+    const prevDis = obrasPage === 1;
+    botones += `<button onclick="irAPaginaObras(${obrasPage - 1})" ${prevDis ? 'disabled' : ''}
+        class="${prevDis ? btnDis : btnNormal}">Anterior</button>`;
+
+    for (let i = 1; i <= obrasTotalPags; i++) {
+        botones += `<button onclick="irAPaginaObras(${i})"
+            class="${i === obrasPage ? btnActivo : btnNormal}">${i}</button>`;
+    }
+
+    const nextDis = obrasPage === obrasTotalPags;
+    botones += `<button onclick="irAPaginaObras(${obrasPage + 1})" ${nextDis ? 'disabled' : ''}
+        class="${nextDis ? btnDis : btnNormal}">Siguiente</button>`;
+
+    c.innerHTML = `
+        <div class="flex items-center justify-between flex-wrap gap-3 mt-12 pt-4 border-t border-gray-100">
+            <span class="text-sm text-gray-400">
+                Mostrando ${desde}–${hasta} de ${obrasTotal} obra${obrasTotal !== 1 ? 's' : ''}
+            </span>
+            <div class="flex items-center gap-1.5">${botones}</div>
+        </div>`;
+}
+
+function irAPaginaObras(page) {
+    if (page < 1 || page > obrasTotalPags) return;
+    cargarObras(page, document.getElementById('obras-search').value.trim());
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+// ============================================================
+// PAGINACIÓN GENÉRICA (empleados, proveedores y cualquier sección futura)
+// Mismos estilos que la paginación de obras.
+// ============================================================
+function renderPaginacionGeneric(containerId, page, totalPags, total, perPage, navFn) {
+    const c = document.getElementById(containerId);
+    if (!c) return;
+    if (totalPags <= 1) { c.innerHTML = ''; return; }
+
+    const desde = (page - 1) * perPage + 1;
+    const hasta  = Math.min(page * perPage, total);
+
+    const btnBase   = 'px-3 py-1.5 text-sm rounded border transition-colors';
+    const btnActivo = btnBase + ' bg-black text-white border-black font-semibold';
+    const btnNormal = btnBase + ' border-gray-300 text-gray-600 hover:border-black hover:text-black';
+    const btnDis    = btnBase + ' border-gray-200 text-gray-300 cursor-not-allowed';
+
+    let botones = '';
+    const prevDis = page === 1;
+    botones += `<button onclick="${navFn}(${page - 1})" ${prevDis ? 'disabled' : ''}
+        class="${prevDis ? btnDis : btnNormal}">Anterior</button>`;
+
+    for (let i = 1; i <= totalPags; i++) {
+        botones += `<button onclick="${navFn}(${i})"
+            class="${i === page ? btnActivo : btnNormal}">${i}</button>`;
+    }
+
+    const nextDis = page === totalPags;
+    botones += `<button onclick="${navFn}(${page + 1})" ${nextDis ? 'disabled' : ''}
+        class="${nextDis ? btnDis : btnNormal}">Siguiente</button>`;
+
+    c.innerHTML = `
+        <div class="flex items-center justify-between flex-wrap gap-3 mt-10 pt-4 border-t border-gray-100">
+            <span class="text-sm text-gray-400">Mostrando ${desde}–${hasta} de ${total}</span>
+            <div class="flex items-center gap-1.5">${botones}</div>
+        </div>`;
 }
 
 // ============================================================
@@ -1393,15 +1638,26 @@ function switchSubTab(t) {
 // REPORTE ESTADÍSTICO
 // ============================================================
 function openReporte() {
-    if (!obras.length) {
+    document.getElementById('reporte-content').innerHTML = '<p class="text-center text-gray-400 py-12">Cargando datos…</p>';
+    openModal('reporte-modal');
+
+    fetch('php/get_obras_admin.php?modo=reporte')
+        .then(r => r.ok ? r.json() : Promise.reject(r.status))
+        .then(todasObras => _renderReporte(todasObras))
+        .catch(() => {
+            document.getElementById('reporte-content').innerHTML = '<p class="text-center text-red-500 py-12">Error al cargar el reporte.</p>';
+        });
+}
+
+function _renderReporte(todasObras) {
+    if (!todasObras.length) {
         document.getElementById('reporte-content').innerHTML = '<p class="text-center text-gray-500 py-12">No hay obras para generar el reporte.</p>';
-        openModal('reporte-modal');
         return;
     }
-    const costos     = obras.map(o => o.costoFinal);
+    const costos     = todasObras.map(o => o.costoFinal);
     const promedio   = costos.reduce((a, b) => a + b, 0) / costos.length;
     const desviacion = Math.sqrt(costos.reduce((s, c) => s + Math.pow(c - promedio, 2), 0) / costos.length);
-    const sorted     = [...obras].sort((a, b) => b.costoFinal - a.costoFinal);
+    const sorted     = todasObras;
     const totalInv   = costos.reduce((a, b) => a + b, 0);
 
     document.getElementById('reporte-content').innerHTML = `
@@ -1417,7 +1673,7 @@ function openReporte() {
             <div class="bg-gradient-to-br from-gray-100 to-gray-200 text-black p-6 rounded-xl shadow">
                 <p class="text-sm font-medium mb-2 opacity-70">Total Invertido</p>
                 <p class="text-2xl font-bold">${fmt(totalInv)}</p>
-                <p class="text-xs opacity-60 mt-1">${obras.length} obras en total</p>
+                <p class="text-xs opacity-60 mt-1">${todasObras.length} obras en total</p>
             </div>
         </div>
         <div class="bg-gray-50 p-6 rounded-xl border border-gray-200">
@@ -1482,40 +1738,146 @@ function openReporte() {
 }
 
 // ============================================================
+// ORDENAMIENTO: helpers compartidos
+// ============================================================
+function sortLista(lista, key, tipo) {
+    return lista.slice().sort(function (a, b) {
+        const va = a[key], vb = b[key];
+        if (tipo === 'num') return (va || 0) - (vb || 0);
+        return String(va || '').localeCompare(String(vb || ''), 'es-MX', { sensitivity: 'base' });
+    });
+}
+
+function actualizarIndicadores(prefix, sort, keys) {
+    keys.forEach(function (k) {
+        const el = document.getElementById('si-' + prefix + '-' + k);
+        if (!el) return;
+        const activo = sort.key === k;
+        if (activo) {
+            const src = sort.dir === 'asc' ? 'img/up-arrow.svg' : 'img/down-arrow.svg';
+            el.innerHTML = `<img src="${src}" class="inline-block w-3 h-3 ml-1 align-middle">`;
+            el.style.opacity = '1';
+        } else {
+            el.innerHTML = `<img src="img/up-arrow.svg" class="inline-block w-2.5 h-2.5 ml-1 align-middle">`
+                         + `<img src="img/down-arrow.svg" class="inline-block w-2.5 h-2.5 align-middle">`;
+            el.style.opacity = '0.5';
+        }
+    });
+}
+
+function actualizarIndicadoresProveedores(prefix, sort, keys) {
+    keys.forEach(function (k) {
+        const el = document.getElementById('si-' + prefix + '-' + k);
+        if (!el) return;
+        const activo = sort.key === k;
+        if (activo) {
+            const src = sort.dir === 'asc' ? 'img/up-arrow-gray.svg' : 'img/down-arrow-gray.svg';
+            el.innerHTML = `<img src="${src}" class="inline-block w-3 h-3 ml-1 align-middle">`;
+            el.style.opacity = '1';
+        } else {
+            el.innerHTML = `<img src="img/up-arrow-gray.svg" class="inline-block w-2.5 h-2.5 ml-1 align-middle">`
+                         + `<img src="img/down-arrow-gray.svg" class="inline-block w-2.5 h-2.5 align-middle">`;
+            el.style.opacity = '0.5';
+        }
+    });
+}
+
+function sortEmpleados(key) {
+    empleadosSort.dir = empleadosSort.key === key && empleadosSort.dir === 'asc' ? 'desc' : 'asc';
+    empleadosSort.key = key;
+    empleadosPage = 1;
+    renderEmpleadosConDatos(empleadosFiltrados);
+}
+
+function sortClientes(key) {
+    clientesSort.dir = clientesSort.key === key && clientesSort.dir === 'asc' ? 'desc' : 'asc';
+    clientesSort.key = key;
+    renderClientesConDatos(clientesFiltrados);
+}
+
+function sortProveedores(key) {
+    proveedoresSort.dir = proveedoresSort.key === key && proveedoresSort.dir === 'asc' ? 'desc' : 'asc';
+    proveedoresSort.key = key;
+    proveedoresPage = 1;
+    renderProveedoresConDatos(proveedoresFiltrados);
+}
+
+function sortInsumos(key) {
+    insumosSort.dir = insumosSort.key === key && insumosSort.dir === 'asc' ? 'desc' : 'asc';
+    insumosSort.key = key;
+    renderInsumosConDatos(insumosFiltrados);
+}
+
+function sortHerramientas(key) {
+    herramientasSort.dir = herramientasSort.key === key && herramientasSort.dir === 'asc' ? 'desc' : 'asc';
+    herramientasSort.key = key;
+    renderHerramientasConDatos(herramientasFiltradas);
+}
+
+// ============================================================
 // RENDER DE EMPLEADOS, CLIENTES Y PROVEEDORES
 // Cada render() llama al filtro para respetar búsquedas activas.
 // ============================================================
 function renderEmpleados() { filtrarEmpleados(); }
 
 function renderEmpleadosConDatos(lista) {
+    const PER_PAGE = 10;
+    const numKeys  = ['salario'];
+    const sorted   = sortLista(lista, empleadosSort.key, numKeys.includes(empleadosSort.key) ? 'num' : 'str');
+    if (empleadosSort.dir === 'desc') sorted.reverse();
+    actualizarIndicadores('empleados', empleadosSort, ['nombre', 'puesto', 'email', 'salario']);
+
+    const totalPags = Math.max(1, Math.ceil(sorted.length / PER_PAGE));
+    empleadosPage   = Math.min(empleadosPage, totalPags);
+    const inicio    = (empleadosPage - 1) * PER_PAGE;
+    const pagina    = sorted.slice(inicio, inicio + PER_PAGE);
+
     const tbody = document.getElementById('empleados-tbody');
-    if (!lista.length) {
-        tbody.innerHTML = '<tr><td colspan="6" class="px-4 py-8 text-center text-gray-400">No se encontraron empleados.</td></tr>';
+    if (!sorted.length) {
+        tbody.innerHTML = '<tr><td colspan="7" class="px-4 py-8 text-center text-gray-400">No se encontraron empleados.</td></tr>';
+        renderPaginacionGeneric('empleados-paginacion', empleadosPage, totalPags, sorted.length, PER_PAGE, 'irAPaginaEmpleados');
         return;
     }
-    tbody.innerHTML = lista.map(e => {
+    tbody.innerHTML = pagina.map(e => {
+        const supervisorLabel = e.supervisorNombre
+            ? `<span class="font-medium text-black">${e.supervisorNombre}</span>`
+            : `<span class="text-gray-300">—</span>`;
         return `<tr class="border-b border-gray-100 hover:bg-gray-50 text-sm">
             <td class="px-4 py-3 font-semibold text-black">${e.nombre}</td>
             <td class="px-4 py-3 text-gray-500">${e.puesto}</td>
             <td class="px-4 py-3 text-gray-500">${e.telefono}</td>
             <td class="px-4 py-3 text-gray-500">${e.email}</td>
             <td class="px-4 py-3 text-right text-[#FFC107] font-semibold">${fmt(e.salario)}</td>
+            <td class="px-4 py-3 text-gray-500">${supervisorLabel}</td>
             <td class="px-4 py-3 text-center">
                 <button onclick="editEmpleado('${e.id}')" class="p-1.5 text-gray-400 hover:text-black hover:bg-gray-100 rounded-lg transition-colors">${editIcon}</button>
             </td>
         </tr>`;
     }).join('');
+    renderPaginacionGeneric('empleados-paginacion', empleadosPage, totalPags, sorted.length, PER_PAGE, 'irAPaginaEmpleados');
+}
+
+function irAPaginaEmpleados(page) {
+    const totalPags = Math.max(1, Math.ceil(empleadosFiltrados.length / 10));
+    if (page < 1 || page > totalPags) return;
+    empleadosPage = page;
+    renderEmpleadosConDatos(empleadosFiltrados);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
 function renderClientes() { filtrarClientes(); }
 
 function renderClientesConDatos(lista) {
+    const sorted = sortLista(lista, clientesSort.key, 'str');
+    if (clientesSort.dir === 'desc') sorted.reverse();
+    actualizarIndicadores('clientes', clientesSort, ['nombre', 'email']);
+
     const tbody = document.getElementById('clientes-tbody');
-    if (!lista.length) {
+    if (!sorted.length) {
         tbody.innerHTML = '<tr><td colspan="4" class="px-4 py-8 text-center text-gray-400">No se encontraron clientes.</td></tr>';
         return;
     }
-    tbody.innerHTML = lista.map(c => `<tr class="border-b border-gray-100 hover:bg-gray-50 text-sm">
+    tbody.innerHTML = sorted.map(c => `<tr class="border-b border-gray-100 hover:bg-gray-50 text-sm">
         <td class="px-4 py-3 font-semibold text-black">${c.nombre}</td>
         <td class="px-4 py-3 text-gray-500">${c.telefono}</td>
         <td class="px-4 py-3 text-gray-500">${c.email}</td>
@@ -1528,33 +1890,63 @@ function renderClientesConDatos(lista) {
 function renderProveedores() { filtrarProveedores(); }
 
 function renderProveedoresConDatos(lista) {
+    const PER_PAGE = 10;
+    const numKeys  = ['totalInsumos', 'totalServicios', 'totalHerramientas'];
+    const sorted   = sortLista(lista, proveedoresSort.key, numKeys.includes(proveedoresSort.key) ? 'num' : 'str');
+    if (proveedoresSort.dir === 'desc') sorted.reverse();
+    actualizarIndicadoresProveedores('proveedores', proveedoresSort, ['nombre', 'totalInsumos', 'totalServicios', 'totalHerramientas']);
+
+    const totalPags = Math.max(1, Math.ceil(sorted.length / PER_PAGE));
+    proveedoresPage = Math.min(proveedoresPage, totalPags);
+    const inicio    = (proveedoresPage - 1) * PER_PAGE;
+    const pagina    = sorted.slice(inicio, inicio + PER_PAGE);
+
     const grid = document.getElementById('grid-proveedores');
-    if (!lista.length) {
+    if (!sorted.length) {
         grid.innerHTML = '<p class="text-gray-400 text-sm py-8 text-center col-span-full">No se encontraron proveedores.</p>';
+        renderPaginacionGeneric('proveedores-paginacion', proveedoresPage, totalPags, sorted.length, PER_PAGE, 'irAPaginaProveedores');
         return;
     }
-    grid.innerHTML = lista.map(p => `
+    grid.innerHTML = pagina.map(p => {
+        const tel  = p.telefono  ? `<div class="cp-row"><span class="cp-label">Teléfono</span><span>${p.telefono}</span></div>`  : '';
+        const mail = p.email     ? `<div class="cp-row"><span class="cp-label">Correo</span><span>${p.email}</span></div>`       : '';
+        const dir  = p.direccion ? `<div class="cp-row"><span class="cp-label">Dirección</span><span>${p.direccion}</span></div>` : '';
+        const hasContact = tel || mail || dir;
+        return `
         <div class="card-proveedor" onclick="editProveedor('${p.id}')" title="Editar proveedor">
             <span class="card-proveedor-nombre">${p.nombre}</span>
+            ${hasContact ? `<div class="card-proveedor-contact">${tel}${mail}${dir}</div>` : ''}
             <div class="card-proveedor-stats">
-                <span>${p.totalInsumos ?? 0} Insumos</span>
-                <span class="sep">|</span>
-                <span>${p.totalServicios ?? 0} Servicios</span>
-                <span class="sep">|</span>
-                <span>${p.totalHerramientas ?? 0} Herramientas</span>
+                <span class="stat-badge">${p.totalInsumos ?? 0} Insumos</span>
+                <span class="stat-badge">${p.totalServicios ?? 0} Servicios</span>
+                <span class="stat-badge">${p.totalHerramientas ?? 0} Herramientas</span>
             </div>
-        </div>`).join('');
+        </div>`;
+    }).join('');
+    renderPaginacionGeneric('proveedores-paginacion', proveedoresPage, totalPags, sorted.length, PER_PAGE, 'irAPaginaProveedores');
+}
+
+function irAPaginaProveedores(page) {
+    const totalPags = Math.max(1, Math.ceil(proveedoresFiltrados.length / 10));
+    if (page < 1 || page > totalPags) return;
+    proveedoresPage = page;
+    renderProveedoresConDatos(proveedoresFiltrados);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
 function renderInsumos() { filtrarInsumos(); }
 
 function renderInsumosConDatos(lista) {
     const tbody = document.getElementById('insumos-tbody');
-    if (!lista.length) {
+    const numKeys = ['costoUnitario'];
+    const sorted  = sortLista(lista, insumosSort.key, numKeys.includes(insumosSort.key) ? 'num' : 'str');
+    if (insumosSort.dir === 'desc') sorted.reverse();
+    actualizarIndicadores('insumos', insumosSort, ['nombre', 'tipo', 'proveedor', 'costoUnitario']);
+    if (!sorted.length) {
         tbody.innerHTML = '<tr><td colspan="5" class="px-4 py-8 text-center text-gray-400">No se encontraron insumos.</td></tr>';
         return;
     }
-    tbody.innerHTML = lista.map(i => {
+    tbody.innerHTML = sorted.map(i => {
         // insumos cargados de BD llevan i.proveedor directamente (VARCHAR)
         const provNombre = i.proveedor ?? (proveedores.find(p => p.id === i.proveedorId)?.nombre ?? '—');
         return `<tr class="border-b border-gray-100 hover:bg-gray-50 text-sm">
@@ -1573,11 +1965,15 @@ function renderHerramientas() { filtrarHerramientas(); }
 
 function renderHerramientasConDatos(lista) {
     const tbody = document.getElementById('herramientas-tbody');
-    if (!lista.length) {
+    const numKeys = ['renta_semanal'];
+    const sorted  = sortLista(lista, herramientasSort.key, numKeys.includes(herramientasSort.key) ? 'num' : 'str');
+    if (herramientasSort.dir === 'desc') sorted.reverse();
+    actualizarIndicadores('herramientas', herramientasSort, ['nombre', 'proveedor', 'renta_semanal']);
+    if (!sorted.length) {
         tbody.innerHTML = '<tr><td colspan="5" class="px-4 py-8 text-center text-gray-400">No se encontraron herramientas.</td></tr>';
         return;
     }
-    tbody.innerHTML = lista.map(h => {
+    tbody.innerHTML = sorted.map(h => {
         // Soporta datos de BD (id_herramienta / proveedor / renta_semanal)
         const idHra      = h.id_herramienta ?? h.id;
         const provNombre = h.proveedor ?? (proveedores.find(p => p.id === h.proveedorId)?.nombre ?? '—');
@@ -1794,6 +2190,7 @@ function editEmpleado(id) {
     document.getElementById('empleado-telefono').value  = e.telefono;
     document.getElementById('empleado-email').value     = e.email;
     document.getElementById('empleado-direccion').value = e.direccion;
+    updateSupervisoresSelect(e.supervisorId || '');
     document.getElementById('empleado-modal-title').textContent = 'Editar Empleado';
     document.getElementById('empleado-form').querySelectorAll('.hide-on-edit').forEach(el => { el.style.display = 'none'; });
     openModal('empleado-modal');
@@ -1812,10 +2209,11 @@ function editCliente(id) {
 
 function editProveedor(id) {
     const p = proveedores.find(pr => String(pr.id) === String(id));
-    document.getElementById('proveedor-id').value       = p.id;
-    document.getElementById('proveedor-nombre').value   = p.nombre;
-    document.getElementById('proveedor-telefono').value = p.telefono;
-    document.getElementById('proveedor-email').value    = p.email;
+    document.getElementById('proveedor-id').value        = p.id;
+    document.getElementById('proveedor-nombre').value    = p.nombre;
+    document.getElementById('proveedor-telefono').value  = p.telefono  ?? '';
+    document.getElementById('proveedor-email').value     = p.email     ?? '';
+    document.getElementById('proveedor-direccion').value = p.direccion ?? '';
     document.getElementById('proveedor-modal-title').textContent = 'Editar Proveedor';
     openModal('proveedor-modal');
 }
@@ -1861,13 +2259,24 @@ function openSubModal(modalId, id) {
         document.getElementById('sub-empleado-busqueda').value    = '';
         _hideSubEmpleadoPreview(true);
         document.getElementById('sub-empleado-sugerencias').classList.add('hidden');
-        limpiarErroresForm([['sub-empleado-busqueda', 'sub-empleado-busqueda-err']]);
+        limpiarErroresForm([
+            ['sub-empleado-busqueda',     'sub-empleado-busqueda-err'],
+            ['sub-empleado-fechaInicio',  'sub-empleado-fechaInicio-err'],
+            ['sub-empleado-fechaTermino', 'sub-empleado-fechaTermino-err'],
+        ]);
         document.getElementById('sub-empleado-modal-title').textContent = 'Agregar Empleado a Obra';
     } else if (modalId === 'sub-recurso-modal') {
         document.getElementById('sub-recurso-obra-id').value = currentObraId;
         document.getElementById('sub-recurso-form').reset();
-        limpiarErroresForm([['sub-recurso-nombre', 'sub-recurso-nombre-err']]);
-        // Mostrar campos del tipo por defecto (Insumo)
+        limpiarErroresForm([
+            ['sub-recurso-nombre',       'sub-recurso-nombre-err'],
+            ['sub-recurso-cantidad',     'sub-recurso-cantidad-err'],
+            ['sub-recurso-kilometraje',  'sub-recurso-kilometraje-err'],
+            ['sub-recurso-fecha-inicio', 'sub-recurso-fecha-inicio-err'],
+            ['sub-recurso-fecha-termino','sub-recurso-fecha-termino-err'],
+            ['sub-recurso-cantidad-herr','sub-recurso-cantidad-herr-err'],
+        ]);
+        // Mostrar campos del tipo por defecto (Insumo) y poblar select
         document.getElementById('sub-recurso-tipo').value = 'Insumo';
         switchSubRecursoTipo();
     } else if (modalId === 'sub-pago-modal') {
@@ -1893,13 +2302,21 @@ function openSubModal(modalId, id) {
 
 document.getElementById('sub-empleado-form').addEventListener('submit', function(e) {
     e.preventDefault();
-    const idEmpleado = document.getElementById('sub-empleado-id-empleado').value;
+    const idEmpleado    = document.getElementById('sub-empleado-id-empleado').value;
+    const fechaInicio   = document.getElementById('sub-empleado-fechaInicio').value;
+    const fechaTermino  = document.getElementById('sub-empleado-fechaTermino').value;
+    let valido = true;
 
-    if (!idEmpleado) {
-        marcarError('sub-empleado-busqueda', 'sub-empleado-busqueda-err');
-        return;
-    }
-    limpiarError('sub-empleado-busqueda', 'sub-empleado-busqueda-err');
+    if (!idEmpleado) { marcarError('sub-empleado-busqueda',     'sub-empleado-busqueda-err');     valido = false; }
+    else              { limpiarError('sub-empleado-busqueda',    'sub-empleado-busqueda-err'); }
+
+    if (!fechaInicio)  { marcarError('sub-empleado-fechaInicio',  'sub-empleado-fechaInicio-err');  valido = false; }
+    else               { limpiarError('sub-empleado-fechaInicio', 'sub-empleado-fechaInicio-err'); }
+
+    if (!fechaTermino) { marcarError('sub-empleado-fechaTermino',  'sub-empleado-fechaTermino-err'); valido = false; }
+    else               { limpiarError('sub-empleado-fechaTermino', 'sub-empleado-fechaTermino-err'); }
+
+    if (!valido) return;
 
     fetch('php/guardar_empleado_obra.php', { method: 'POST', body: new FormData(this) })
         .then(r => r.json())
@@ -1916,18 +2333,38 @@ document.getElementById('sub-empleado-form').addEventListener('submit', function
 
 document.getElementById('sub-recurso-form').addEventListener('submit', function(e) {
     e.preventDefault();
-    const nombre = document.getElementById('sub-recurso-nombre').value.trim();
+    const nombre = document.getElementById('sub-recurso-nombre').value;
+    const tipo   = document.getElementById('sub-recurso-tipo').value;
+    let valido = true;
 
-    if (!nombre) { marcarError('sub-recurso-nombre', 'sub-recurso-nombre-err'); return; }
-    limpiarError('sub-recurso-nombre', 'sub-recurso-nombre-err');
+    if (!nombre) { marcarError('sub-recurso-nombre', 'sub-recurso-nombre-err'); valido = false; }
+    else          { limpiarError('sub-recurso-nombre', 'sub-recurso-nombre-err'); }
 
-    // Copiar campos de herramienta al campo unificado si aplica
-    const tipo = document.getElementById('sub-recurso-tipo').value;
+    if (tipo === 'Insumo') {
+        const cantidad = parseFloat(document.getElementById('sub-recurso-cantidad').value);
+        if (!cantidad || cantidad <= 0) { marcarError('sub-recurso-cantidad', 'sub-recurso-cantidad-err'); valido = false; }
+        else                            { limpiarError('sub-recurso-cantidad', 'sub-recurso-cantidad-err'); }
+    } else if (tipo === 'Servicio') {
+        const km = parseFloat(document.getElementById('sub-recurso-kilometraje').value);
+        if (!km || km <= 0) { marcarError('sub-recurso-kilometraje', 'sub-recurso-kilometraje-err'); valido = false; }
+        else                 { limpiarError('sub-recurso-kilometraje', 'sub-recurso-kilometraje-err'); }
+    } else if (tipo === 'Herramienta') {
+        const fi      = document.getElementById('sub-recurso-fecha-inicio').value;
+        const ft      = document.getElementById('sub-recurso-fecha-termino').value;
+        const cantH   = parseInt(document.getElementById('sub-recurso-cantidad-herr').value);
+        if (!fi)              { marcarError('sub-recurso-fecha-inicio',  'sub-recurso-fecha-inicio-err');  valido = false; }
+        else                   { limpiarError('sub-recurso-fecha-inicio', 'sub-recurso-fecha-inicio-err'); }
+        if (!ft)              { marcarError('sub-recurso-fecha-termino',  'sub-recurso-fecha-termino-err'); valido = false; }
+        else                   { limpiarError('sub-recurso-fecha-termino','sub-recurso-fecha-termino-err'); }
+        if (!cantH || cantH < 1) { marcarError('sub-recurso-cantidad-herr', 'sub-recurso-cantidad-herr-err'); valido = false; }
+        else                      { limpiarError('sub-recurso-cantidad-herr','sub-recurso-cantidad-herr-err'); }
+    }
+
+    if (!valido) return;
+
+    // Renombrar el campo de cantidad de herramienta para que coincida con lo que espera el PHP
     if (tipo === 'Herramienta') {
-        // El input cantidad_herr no tiene name=cantidad_total; lo enviamos aparte.
-        // cantidad_total no existe para herramientas pero la PHP espera el nombre cantidad_total.
-        const cantEl = document.getElementById('sub-recurso-cantidad-herr');
-        cantEl.name = 'cantidad_total';
+        document.getElementById('sub-recurso-cantidad-herr').name = 'cantidad_total';
     }
 
     const btn = document.getElementById('sub-recurso-submit-btn');
@@ -2006,8 +2443,9 @@ function filtrarSugerenciasEmpleado() {
     }
 
     const coincidencias = empleados.filter(e =>
-        sinAcentos(e.nombre.toLowerCase()).includes(texto) ||
-        e.id.toLowerCase().includes(texto)
+        e.puesto !== 'Administrador' &&
+        (sinAcentos(e.nombre.toLowerCase()).includes(texto) ||
+        e.id.toLowerCase().includes(texto))
     ).slice(0, 8);
 
     if (!coincidencias.length) {
@@ -2017,7 +2455,7 @@ function filtrarSugerenciasEmpleado() {
             `<li class="px-4 py-2.5 text-sm cursor-pointer hover:bg-yellow-50 flex items-center justify-between gap-3 border-b border-gray-50 last:border-0"
                 onmousedown="seleccionarSubEmpleado('${e.id}')">
                 <span class="font-medium text-black">${e.nombre}</span>
-                <span class="text-xs text-gray-400 shrink-0">${e.puesto}&nbsp;·&nbsp;<span class="font-mono">${e.id}</span></span>
+                <span class="text-xs text-gray-600 shrink-0">${e.puesto}&nbsp;·&nbsp;<span class="font-mono">${e.email}</span></span>
             </li>`
         ).join('');
     }
@@ -2036,7 +2474,7 @@ function seleccionarSubEmpleado(id) {
     document.getElementById('sub-empleado-sugerencias').classList.add('hidden');
     document.getElementById('sub-empleado-preview-nombre').textContent = e.nombre;
     document.getElementById('sub-empleado-preview-puesto').textContent = e.puesto;
-    document.getElementById('sub-empleado-preview-id').textContent     = e.id;
+    document.getElementById('sub-empleado-preview-email').textContent   = e.email;
     _showSubEmpleadoPreview();
     limpiarError('sub-empleado-busqueda', 'sub-empleado-busqueda-err');
 }
@@ -2093,7 +2531,7 @@ function updateObrasSelect(selectedId) {
     const select = document.getElementById('empleado-obra');
     if (!select) return;
     select.innerHTML = '<option value="">Sin asignación</option>' +
-        obras.map(o => `<option value="${o.id}" ${selectedId == o.id ? 'selected' : ''}>${o.nombre}</option>`).join('');
+        obrasCatalogo.map(o => `<option value="${o.id}" ${selectedId == o.id ? 'selected' : ''}>${o.nombre}</option>`).join('');
 }
 
 function updateProveedoresSelect(selectId, selectedId) {
@@ -2117,27 +2555,26 @@ function updateEmpleadosObraFilter() {
     if (!select) return;
     const current = select.value;
     select.innerHTML = '<option value="">Todas las obras</option><option value="sin-asignacion">Sin asignación</option>' +
-        obras.map(o => `<option value="${o.id}" ${current == o.id ? 'selected' : ''}>${o.nombre}</option>`).join('');
+        obrasCatalogo.map(o => `<option value="${o.id}" ${current == o.id ? 'selected' : ''}>${o.nombre}</option>`).join('');
 }
 
 // ============================================================
 // ===== INICIALIZACIÓN =====
 
 function cargarDatos() {
-    // Obras — se carga primero para que los selects de obras estén disponibles
-    fetch('php/get_obras_admin.php')
+    // Obras paginadas — lee ?page=N de la URL para mantener la posición al recargar
+    const initialPage = parseInt(new URLSearchParams(window.location.search).get('page')) || 1;
+    cargarObras(initialPage, '');
+
+    // Catálogo ligero (id + nombre) para selects de otras pestañas
+    fetch('php/get_obras_admin.php?modo=catalogo')
         .then(r => r.ok ? r.json() : Promise.reject(r.status))
         .then(data => {
-            obras = data;
-            renderObras();
+            obrasCatalogo = data;
             updateObrasSelect();
             updateEmpleadosObraFilter();
         })
-        .catch(() => {
-            renderObras();
-            updateObrasSelect();
-            updateEmpleadosObraFilter();
-        });
+        .catch(function () {});
 
     // Proveedores — se carga antes que insumos para que el select esté listo
     fetch('php/get_proveedores.php')
@@ -2197,19 +2634,52 @@ function switchSubRecursoTipo() {
     document.getElementById('sub-recurso-campos-insumo').style.display     = tipo === 'Insumo'      ? '' : 'none';
     document.getElementById('sub-recurso-campos-servicio').style.display   = tipo === 'Servicio'    ? '' : 'none';
     document.getElementById('sub-recurso-campos-herramienta').style.display= tipo === 'Herramienta' ? '' : 'none';
+
+    // Poblar el select de recurso con las opciones del tipo elegido
+    const sel = document.getElementById('sub-recurso-nombre');
+    sel.innerHTML = '<option value="">— Selecciona un recurso —</option>';
+
+    if (tipo === 'Herramienta') {
+        herramientas.forEach(h => {
+            const opt = document.createElement('option');
+            opt.value = h.nombre;
+            opt.textContent = `${h.nombre}  —  ${h.proveedor}`;
+            sel.appendChild(opt);
+        });
+    } else {
+        insumos.filter(i => i.tipo === tipo).forEach(i => {
+            const opt = document.createElement('option');
+            opt.value = i.nombre;
+            opt.textContent = `${i.nombre}  —  ${i.proveedor}`;
+            sel.appendChild(opt);
+        });
+    }
+
+    limpiarError('sub-recurso-nombre', 'sub-recurso-nombre-err');
 }
 
 function recargarObras(callback) {
-    fetch('php/get_obras_admin.php')
+    const buscar = document.getElementById('obras-search').value.trim();
+    const params = new URLSearchParams({ page: obrasPage, buscar: buscar });
+
+    // Refrescar catálogo para selects
+    fetch('php/get_obras_admin.php?modo=catalogo')
+        .then(r => r.ok ? r.json() : Promise.reject(r.status))
+        .then(data => { obrasCatalogo = data; updateObrasSelect(); updateEmpleadosObraFilter(); })
+        .catch(function () {});
+
+    // Recargar la página actual
+    fetch('php/get_obras_admin.php?' + params)
         .then(r => r.ok ? r.json() : Promise.reject(r.status))
         .then(data => {
-            obras = data;
-            renderObras();
-            updateObrasSelect();
-            updateEmpleadosObraFilter();
+            obras          = data.obras;
+            obrasPage      = data.page;
+            obrasTotalPags = data.pages;
+            obrasTotal     = data.total;
+            renderObrasConDatos(obras);
             if (callback) callback();
         })
-        .catch(() => { if (callback) callback(); });
+        .catch(function () { if (callback) callback(); });
 }
 
 function recargarEmpleados(callback) {
@@ -2272,13 +2742,16 @@ function recargarHerramientas(callback) {
 }
 
 // Verificar sesión de admin antes de cargar datos
-fetch('php/get_sesion.php')
-    .then(r => r.ok ? r.json() : Promise.reject(r.status))
-    .then(s => {
-        if (s.role !== 'admin') { location.replace('Login.html'); return; }
-        cargarDatos();
-    })
-    .catch(() => location.replace('Login.html'));
+window.addEventListener('pageshow', function(e) {
+    fetch('php/get_sesion.php', { cache: 'no-store' })
+        .then(r => r.ok ? r.json() : Promise.reject(r.status))
+        .then(s => {
+            if (s.role !== 'admin') { location.replace('Login.html'); return; }
+            if (s.name) document.getElementById('nombre-usuario').textContent = s.name;
+            if (!e.persisted) cargarDatos();
+        })
+        .catch(() => location.replace('Login.html'));
+});
 </script>
 </body>
 </html>

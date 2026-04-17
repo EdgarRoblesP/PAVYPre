@@ -191,43 +191,45 @@ function renderObras() {
     }).join('');
 }
 
-// Verificar sesión activa; redirigir a login si no hay sesión de cliente
-fetch('php/get_sesion.php')
-    .then(r => r.ok ? r.json() : Promise.reject(r.status))
-    .then(s => {
-        if (s.role !== 'cliente') { location.replace('Login.html'); return; }
-        if (s.name) document.getElementById('nombre-usuario').textContent = s.name;
-    })
-    .catch(() => location.replace('Login.html'));
+window.addEventListener('pageshow', function(e) {
+    fetch('php/get_sesion.php', { cache: 'no-store' })
+        .then(r => r.ok ? r.json() : Promise.reject(r.status))
+        .then(s => {
+            if (s.role !== 'cliente') { location.replace('Login.html'); return; }
+            if (s.name) document.getElementById('nombre-usuario').textContent = s.name;
+            if (e.persisted) return;
 
-// Cargar obras y pagos en paralelo, luego unirlos y renderizar
-Promise.all([
-    fetch('php/get_obras_cliente.php').then(r => { if (!r.ok) throw new Error(r.status); return r.json(); }),
-    fetch('php/get_historial_pagos.php').then(r => { if (!r.ok) throw new Error(r.status); return r.json(); })
-])
-.then(([obrasData, pagosData]) => {
-    // Agrupar pagos por id_obra
-    const pagosPorObra = {};
-    pagosData.forEach(p => {
-        if (!pagosPorObra[p.id_obra]) pagosPorObra[p.id_obra] = [];
-        pagosPorObra[p.id_obra].push(p);
-    });
+            // Cargar obras y pagos en paralelo, luego unirlos y renderizar
+            Promise.all([
+                fetch('php/get_obras_cliente.php').then(r => { if (!r.ok) throw new Error(r.status); return r.json(); }),
+                fetch('php/get_historial_pagos.php').then(r => { if (!r.ok) throw new Error(r.status); return r.json(); })
+            ])
+            .then(([obrasData, pagosData]) => {
+                // Agrupar pagos por id_obra
+                const pagosPorObra = {};
+                pagosData.forEach(p => {
+                    if (!pagosPorObra[p.id_obra]) pagosPorObra[p.id_obra] = [];
+                    pagosPorObra[p.id_obra].push(p);
+                });
 
-    // Adjuntar pagos a cada obra y calcular costoFinal
-    obras = obrasData.map(o => {
-        const pagos = pagosPorObra[o.id] || [];
-        return {
-            ...o,
-            pagos,
-            costoFinal: pagos.reduce((s, p) => s + p.monto, 0)
-        };
-    });
+                // Adjuntar pagos a cada obra y calcular costoFinal
+                obras = obrasData.map(o => {
+                    const pagos = pagosPorObra[o.id] || [];
+                    return {
+                        ...o,
+                        pagos,
+                        costoFinal: pagos.reduce((s, p) => s + p.monto, 0)
+                    };
+                });
 
-    renderObras();
-})
-.catch(() => {
-    document.getElementById('obras-container').innerHTML =
-        '<p class="text-center text-gray-500 py-12">No se pudieron cargar los datos. Intenta más tarde.</p>';
+                renderObras();
+            })
+            .catch(() => {
+                document.getElementById('obras-container').innerHTML =
+                    '<p class="text-center text-gray-500 py-12">No se pudieron cargar los datos. Intenta más tarde.</p>';
+            });
+        })
+        .catch(() => location.replace('Login.html'));
 });
 </script>
 </body>

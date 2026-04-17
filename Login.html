@@ -61,6 +61,10 @@
                     onclick="enviarLogin()"
                 >
 
+                <a href="RecuperarContrasena.html" class="block w-full text-center text-black text-lg underline hover:text-gray-700">
+                    ¿Olvidaste tu contraseña?
+                </a>
+
                 <a href="Home.html#inicio" class="block w-full text-center text-black text-lg underline hover:text-gray-700">
                     Volver al inicio
                 </a>
@@ -97,18 +101,29 @@
             document.loginForm.submit();
         }
 
-        // Esta función se ejecuta apenas carga la página
-        window.onload = function() {
-            // 1. Revisamos si la URL tiene el parámetro "error=auth"
-            const urlParams = new URLSearchParams(window.location.search);
-            
-            if (urlParams.get('error') === 'auth') {
-                // 2. Si existe el error, mostramos el recuadro rojo
-                const errorDiv = document.getElementById("error-message");
-                errorDiv.innerHTML = "El correo o la contraseña son incorrectos. Intente de nuevo.";
-                errorDiv.classList.remove("hidden");
-            }
-        };
+        // Al mostrar la página (carga inicial o retroceso con caché)
+        // redirigir al portal correspondiente si ya hay sesión activa.
+        window.addEventListener('pageshow', function() {
+            fetch('php/get_sesion.php', { cache: 'no-store' })
+                .then(r => r.ok ? r.json() : Promise.reject(r.status))
+                .then(s => {
+                    if      (s.role === 'admin')       location.replace('Admin.html');
+                    else if (s.role === 'colaborador') location.replace('Colaborador.html');
+                    else if (s.role === 'cliente')     location.replace('Cliente.html');
+                })
+                .catch(() => {
+                    // Sin sesión activa — mostrar mensajes de error de URL si aplica
+                    const urlParams = new URLSearchParams(window.location.search);
+                    const errorDiv  = document.getElementById("error-message");
+                    if (urlParams.get('error') === 'auth') {
+                        errorDiv.innerHTML = "El correo o la contraseña son incorrectos. Intente de nuevo.";
+                        errorDiv.classList.remove("hidden");
+                    } else if (urlParams.get('error') === 'auth_required') {
+                        errorDiv.innerHTML = "Tu sesión ha expirado. Inicia sesión de nuevo.";
+                        errorDiv.classList.remove("hidden");
+                    }
+                });
+        });
 
         // Extra: Lógica para el botón del ojo (Ver contraseña)
         document.getElementById('togglePassword').addEventListener('click', function() {

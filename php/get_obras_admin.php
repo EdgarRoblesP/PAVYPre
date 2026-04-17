@@ -1,8 +1,13 @@
 <?php
 /**
- * Devuelve todas las OBRAS con sus sub-arrays anidados:
- *   empleados, recursos (insumos + servicios), pagos.
- * Uso exclusivo del portal Admin (usuario DB: admin).
+ * Devuelve PV_OBRAS paginadas con sus sub-arrays anidados.
+ *
+ * Parámetros GET:
+ *   modo=catalogo  → devuelve solo [{id, nombre}] de todas las obras (para selects)
+ *   page=N         → página a mostrar (default 1)
+ *   buscar=texto   → filtro parcial sobre ubicacion (default '')
+ *
+ * Respuesta normal: { total, page, pages, per_page, obras: [...] }
  */
 session_start();
 if (($_SESSION['user_role'] ?? '') !== 'admin') {
@@ -11,20 +16,90 @@ if (($_SESSION['user_role'] ?? '') !== 'admin') {
     exit;
 }
 
-require_once __DIR__ . '/db_admin.php';
+require_once __DIR__ . '/db.php';
 header('Content-Type: application/json');
 
-// ── 1. Lista base de obras ───────────────────────────────────
-$obras = $pdo->query(
-    'SELECT id_obra, ubicacion, fecha_inicio, fecha_fin,
-            presupuesto_inicial, utilidad_neta,
-            gasto_empleados, gasto_insumos, gasto_servicios, gasto_herramientas
-       FROM OBRAS
-      ORDER BY fecha_inicio DESC'
-)->fetchAll();
+$link = Conectarse();
 
-// ── 2. Enriquecer cada obra con sus sub-tablas ───────────────
-$stmtEmpl = $pdo->prepare(
+// ── Modo catálogo: id + nombre de todas las obras ────────────────────────────
+if (($_GET['modo'] ?? '') === 'catalogo') {
+    $result = mysqli_query($link, 'SELECT id_obra AS id, ubicacion AS nombre FROM PV_OBRAS ORDER BY ubicacion');
+    echo json_encode(array_map(function ($r) {
+        return ['id' => $r['id'], 'nombre' => $r['nombre']];
+    }, mysqli_fetch_all($result, MYSQLI_ASSOC)));
+    exit;
+}
+
+// ── Modo reporte: id + nombre + presupuesto + costoFinal ─────────────────────
+if (($_GET['modo'] ?? '') === 'reporte') {
+    $result = mysqli_query($link,
+        'SELECT id_obra, ubicacion, presupuesto_inicial,
+                gasto_empleados + gasto_insumos + gasto_servicios + gasto_herramientas AS costo_final
+           FROM PV_OBRAS
+          ORDER BY costo_final DESC'
+    );
+    echo json_encode(array_map(function ($r) {
+        return [
+            'id'                 => $r['id_obra'],
+            'nombre'             => $r['ubicacion'],
+            'presupuestoInicial' => (float)$r['presupuesto_inicial'],
+            'costoFinal'         => (float)$r['costo_final'],
+        ];
+    }, mysqli_fetch_all($result, MYSQLI_ASSOC)));
+    exit;
+}
+
+// ── Parámetros de paginación ─────────────────────────────────────────────────
+$per_page = 5;
+$page     = max(1, (int)($_GET['page']   ?? 1));
+$buscar   = trim($_GET['buscar'] ?? '');
+$offset   = ($page - 1) * $per_page;
+
+// ── Contar total de obras ────────────────────────────────────────────────────
+if ($buscar !== '') {
+    $like      = '%' . $buscar . '%';
+    $stmtCount = mysqli_prepare($link, 'SELECT COUNT(*) FROM PV_OBRAS WHERE ubicacion LIKE ?');
+    mysqli_bind_param($stmtCount, 's', $like);
+    mysqli_stmt_execute($stmtCount);
+    $total = (int) stmt_value($stmtCount);
+} else {
+    $total = (int) mysqli_fetch_row(mysqli_query($link, 'SELECT COUNT(*) FROM PV_OBRAS'))[0];
+}
+
+$pages  = max(1, (int)ceil($total / $per_page));
+$page   = min($page, $pages);
+$offset = ($page - 1) * $per_page;
+
+// ── Lista base de obras con LIMIT / OFFSET ───────────────────────────────────
+if ($buscar !== '') {
+    $like      = '%' . $buscar . '%';
+    $stmtObras = mysqli_prepare($link,
+        "SELECT id_obra, ubicacion, fecha_inicio, fecha_fin,
+                presupuesto_inicial, utilidad_neta,
+                gasto_empleados, gasto_insumos, gasto_servicios, gasto_herramientas
+           FROM PV_OBRAS
+          WHERE ubicacion LIKE ?
+          ORDER BY fecha_inicio DESC
+          LIMIT $per_page OFFSET $offset"
+    );
+    mysqli_bind_param($stmtObras, 's', $like);
+} else {
+    $stmtObras = mysqli_prepare($link,
+        "SELECT id_obra, ubicacion, fecha_inicio, fecha_fin,
+                presupuesto_inicial, utilidad_neta,
+                gasto_empleados, gasto_insumos, gasto_servicios, gasto_herramientas
+           FROM PV_OBRAS
+          ORDER BY fecha_inicio DESC
+          LIMIT $per_page OFFSET $offset"
+    );
+}
+mysqli_stmt_execute($stmtObras);
+$obras = stmt_rows($stmtObras);
+
+// ── Preparar consultas de sub-tablas (bind_param usa referencia) ─────────────
+$loopId = '';
+
+$stmtEmpl = mysqli_prepare($link,
     'SELECT e.nombre      AS nombreEmpleado,
             e.puesto,
             te.fecha_adicion  AS fechaInicio,
@@ -33,17 +108,18 @@ $stmtEmpl = $pdo->prepare(
                 e.salario * (DATEDIFF(COALESCE(te.fecha_termino, o.fecha_fin, NOW()), te.fecha_adicion) / 7),
                 2
             ) AS costoTotal
-       FROM TRABAJOS_EMPLEADOS te
-       JOIN EMPLEADOS e ON te.id_empleado = e.id_empleado
-       JOIN OBRAS      o ON te.id_obra    = o.id_obra
+       FROM PV_TRABAJOS_EMPLEADOS te
+       JOIN PV_EMPLEADOS e ON te.id_empleado = e.id_empleado
+       JOIN PV_OBRAS      o ON te.id_obra    = o.id_obra
       WHERE te.id_obra = ?
       ORDER BY te.fecha_adicion'
 );
+mysqli_bind_param($stmtEmpl, 's', $loopId);
 
-$stmtHerram = $pdo->prepare(
+$stmtHerram = mysqli_prepare($link,
     'SELECT uh.id_herramienta                                       AS catalogId,
             h.nombre,
-            h.proveedor,
+            p.nombre                                               AS proveedor,
             h.renta_semanal,
             uh.fecha_adicion                                        AS fechaInicio,
             uh.fecha_termino                                        AS fechaTermino,
@@ -56,137 +132,145 @@ $stmtHerram = $pdo->prepare(
                 * uh.cantidad,
                 2
             )                                                       AS subtotal
-       FROM USOS_HERRAMIENTAS uh
-       JOIN HERRAMIENTAS h ON uh.id_herramienta = h.id_herramienta
-       JOIN OBRAS         o ON uh.id_obra        = o.id_obra
+       FROM PV_USOS_HERRAMIENTAS uh
+       JOIN PV_HERRAMIENTAS h  ON uh.id_herramienta = h.id_herramienta
+       JOIN PV_PROVEEDORES  p  ON h.proveedor_id    = p.id
+       JOIN PV_OBRAS         o ON uh.id_obra        = o.id_obra
       WHERE uh.id_obra = ?
       ORDER BY h.nombre'
 );
+mysqli_bind_param($stmtHerram, 's', $loopId);
 
-$stmtInsumos = $pdo->prepare(
+$stmtInsumos = mysqli_prepare($link,
     'SELECT i.id_insumo                                          AS catalogId,
             i.tipo_material                                      AS nombre,
-            i.proveedor,
+            p.nombre                                             AS proveedor,
             i.costo_unitario,
             SUM(ei.cantidad)                                     AS cantidadTotal,
             ROUND(i.costo_unitario * SUM(ei.cantidad), 2)        AS subtotal
-       FROM EMPLEOS_INSUMOS ei
-       JOIN INSUMOS i ON ei.id_insumo = i.id_insumo
+       FROM PV_EMPLEOS_INSUMOS ei
+       JOIN PV_INSUMOS     i ON ei.id_insumo   = i.id_insumo
+       JOIN PV_PROVEEDORES p ON i.proveedor_id = p.id
       WHERE ei.id_obra = ?
-      GROUP BY i.id_insumo, i.tipo_material, i.proveedor, i.costo_unitario
+      GROUP BY i.id_insumo, i.tipo_material, p.nombre, i.costo_unitario
       ORDER BY i.tipo_material'
 );
+mysqli_bind_param($stmtInsumos, 's', $loopId);
 
-$stmtServicios = $pdo->prepare(
+$stmtServicios = mysqli_prepare($link,
     'SELECT s.id_servicio                                        AS catalogId,
             s.tipo_traslado                                      AS nombre,
-            s.proveedor,
+            p.nombre                                             AS proveedor,
             s.costo_kilometro,
             ROUND(SUM(rs.kilometraje), 2)                        AS kilometrajeTotal,
             ROUND(s.costo_kilometro * SUM(rs.kilometraje), 2)   AS subtotal
-       FROM REQUERIMIENTOS_SERVICIOS rs
-       JOIN SERVICIOS s ON rs.id_servicio = s.id_servicio
+       FROM PV_REQUERIMIENTOS_SERVICIOS rs
+       JOIN PV_SERVICIOS    s ON rs.id_servicio  = s.id_servicio
+       JOIN PV_PROVEEDORES  p ON s.proveedor_id  = p.id
       WHERE rs.id_obra = ?
-      GROUP BY s.id_servicio, s.tipo_traslado, s.proveedor, s.costo_kilometro
+      GROUP BY s.id_servicio, s.tipo_traslado, p.nombre, s.costo_kilometro
       ORDER BY s.tipo_traslado'
 );
+mysqli_bind_param($stmtServicios, 's', $loopId);
 
-$stmtPagos = $pdo->prepare(
+$stmtPagos = mysqli_prepare($link,
     'SELECT fecha_pago  AS fechaPago,
             monto,
             tipo_pago   AS tipoPago
-       FROM COBROS
+       FROM PV_COBROS
       WHERE id_obra = ?
       ORDER BY fecha_pago'
 );
+mysqli_bind_param($stmtPagos, 's', $loopId);
 
+// ── Enriquecer cada obra con sus sub-tablas ──────────────────────────────────
 $resultado = [];
 foreach ($obras as $o) {
-    $id = $o['id_obra'];
+    $loopId = $o['id_obra'];
 
-    // Empleados
-    $stmtEmpl->execute([$id]);
+    mysqli_stmt_execute($stmtEmpl);
     $empleados = array_map(function ($e) {
         return [
             'nombreEmpleado' => $e['nombreEmpleado'],
             'puesto'         => $e['puesto'],
-            'fechaInicio'    => $e['fechaInicio'] ? substr($e['fechaInicio'], 0, 10) : '',
+            'fechaInicio'    => $e['fechaInicio']  ? substr($e['fechaInicio'],  0, 10) : '',
             'fechaTermino'   => $e['fechaTermino'] ? substr($e['fechaTermino'], 0, 10) : '',
             'costoTotal'     => (float)$e['costoTotal'],
         ];
-    }, $stmtEmpl->fetchAll());
+    }, stmt_rows($stmtEmpl));
 
-    // Recursos: herramientas
-    $stmtHerram->execute([$id]);
+    mysqli_stmt_execute($stmtHerram);
     $herramientasObra = array_map(function ($h) {
         return [
-            'catalogId'       => $h['catalogId'],
-            'nombre'          => $h['nombre'],
-            'proveedor'       => $h['proveedor'],
-            'rentaSemanal'    => (float)$h['renta_semanal'],
-            'fechaInicio'     => $h['fechaInicio']  ? substr($h['fechaInicio'],  0, 10) : '',
-            'fechaTermino'    => $h['fechaTermino'] ? substr($h['fechaTermino'], 0, 10) : '',
-            'dias'            => (int)$h['dias'],
-            'cantidadUnidades'=> (int)$h['cantidad'],
-            'subtotal'        => (float)$h['subtotal'],
+            'catalogId'        => $h['catalogId'],
+            'nombre'           => $h['nombre'],
+            'proveedor'        => $h['proveedor'],
+            'rentaSemanal'     => (float)$h['renta_semanal'],
+            'fechaInicio'      => $h['fechaInicio']  ? substr($h['fechaInicio'],  0, 10) : '',
+            'fechaTermino'     => $h['fechaTermino'] ? substr($h['fechaTermino'], 0, 10) : '',
+            'dias'             => (int)$h['dias'],
+            'cantidadUnidades' => (int)$h['cantidad'],
+            'subtotal'         => (float)$h['subtotal'],
         ];
-    }, $stmtHerram->fetchAll());
+    }, stmt_rows($stmtHerram));
 
-    // Recursos: insumos
-    $stmtInsumos->execute([$id]);
+    mysqli_stmt_execute($stmtInsumos);
     $insumos = array_map(function ($r) {
         return [
-            'catalogId'    => $r['catalogId'],
-            'nombre'       => $r['nombre'],
-            'proveedor'    => $r['proveedor'],
-            'costoUnitario'=> (float)$r['costo_unitario'],
-            'cantidadTotal'=> (float)$r['cantidadTotal'],
-            'subtotal'     => (float)$r['subtotal'],
+            'catalogId'     => $r['catalogId'],
+            'nombre'        => $r['nombre'],
+            'proveedor'     => $r['proveedor'],
+            'costoUnitario' => (float)$r['costo_unitario'],
+            'cantidadTotal' => (float)$r['cantidadTotal'],
+            'subtotal'      => (float)$r['subtotal'],
         ];
-    }, $stmtInsumos->fetchAll());
+    }, stmt_rows($stmtInsumos));
 
-    // Recursos: servicios
-    $stmtServicios->execute([$id]);
+    mysqli_stmt_execute($stmtServicios);
     $servicios = array_map(function ($r) {
         return [
-            'catalogId'      => $r['catalogId'],
-            'nombre'         => $r['nombre'],
-            'proveedor'      => $r['proveedor'],
-            'costoKm'        => (float)$r['costo_kilometro'],
-            'kilometrajeTotal'=> (float)$r['kilometrajeTotal'],
-            'subtotal'       => (float)$r['subtotal'],
+            'catalogId'        => $r['catalogId'],
+            'nombre'           => $r['nombre'],
+            'proveedor'        => $r['proveedor'],
+            'costoKm'          => (float)$r['costo_kilometro'],
+            'kilometrajeTotal' => (float)$r['kilometrajeTotal'],
+            'subtotal'         => (float)$r['subtotal'],
         ];
-    }, $stmtServicios->fetchAll());
+    }, stmt_rows($stmtServicios));
 
-    // Pagos
-    $stmtPagos->execute([$id]);
+    mysqli_stmt_execute($stmtPagos);
     $pagos = array_map(function ($p) {
         return [
             'fechaPago' => substr($p['fechaPago'], 0, 10),
             'monto'     => (float)$p['monto'],
             'tipoPago'  => $p['tipoPago'],
         ];
-    }, $stmtPagos->fetchAll());
+    }, stmt_rows($stmtPagos));
 
-    // Costo final = suma dinámica de los 4 gastos almacenados en OBRAS
     $costoFinal = (float)$o['gasto_empleados']
                 + (float)$o['gasto_insumos']
                 + (float)$o['gasto_servicios']
                 + (float)$o['gasto_herramientas'];
 
     $resultado[] = [
-        'id'                => $id,
-        'nombre'            => $o['ubicacion'],
-        'fechaInicio'       => $o['fecha_inicio'] ? substr($o['fecha_inicio'], 0, 10) : '',
-        'fechaTermino'      => $o['fecha_fin']    ? substr($o['fecha_fin'],    0, 10) : '',
-        'presupuestoInicial'=> (float)$o['presupuesto_inicial'],
-        'costoFinal'        => $costoFinal,
-        'empleados'         => $empleados,
-        'herramientas'      => $herramientasObra,
-        'insumos'           => $insumos,
-        'servicios'         => $servicios,
-        'pagos'             => $pagos,
+        'id'                 => $loopId,
+        'nombre'             => $o['ubicacion'],
+        'fechaInicio'        => $o['fecha_inicio'] ? substr($o['fecha_inicio'], 0, 10) : '',
+        'fechaTermino'       => $o['fecha_fin']    ? substr($o['fecha_fin'],    0, 10) : '',
+        'presupuestoInicial' => (float)$o['presupuesto_inicial'],
+        'costoFinal'         => $costoFinal,
+        'empleados'          => $empleados,
+        'herramientas'       => $herramientasObra,
+        'insumos'            => $insumos,
+        'servicios'          => $servicios,
+        'pagos'              => $pagos,
     ];
 }
 
-echo json_encode($resultado);
+echo json_encode([
+    'total'    => $total,
+    'page'     => $page,
+    'pages'    => $pages,
+    'per_page' => $per_page,
+    'obras'    => $resultado,
+]);

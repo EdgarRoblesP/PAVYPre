@@ -1,9 +1,6 @@
 <?php
 /**
  * Devuelve todos los cobros del cliente autenticado.
- * Filtrado por id_cliente de sesión; la clave foránea de COBROS
- * garantiza que cada cobro pertenece a una obra del cliente.
- * Usa la conexión de solo lectura (usuario: cliente).
  */
 session_start();
 if (($_SESSION['user_role'] ?? '') !== 'cliente') {
@@ -12,22 +9,24 @@ if (($_SESSION['user_role'] ?? '') !== 'cliente') {
     exit;
 }
 
-require_once __DIR__ . '/db_cliente.php';
+require_once __DIR__ . '/db.php';
 header('Content-Type: application/json');
 
+$link      = Conectarse();
 $idCliente = $_SESSION['user_id'];
 
-$stmt = $pdo->prepare(
+$stmt = mysqli_prepare($link,
     'SELECT id_obra,
             fecha_pago,
             monto,
             tipo_pago AS tipoPago
-       FROM COBROS
+       FROM PV_COBROS
       WHERE id_cliente = ?
       ORDER BY id_obra, fecha_pago ASC'
 );
-$stmt->execute([$idCliente]);
-$rows = $stmt->fetchAll();
+mysqli_bind_param($stmt, 's', $idCliente);
+mysqli_stmt_execute($stmt);
+$rows = stmt_rows($stmt);
 
 $pagos = array_map(function ($r) {
     return [

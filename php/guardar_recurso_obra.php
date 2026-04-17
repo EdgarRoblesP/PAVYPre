@@ -1,7 +1,6 @@
 <?php
 /**
  * Registra un recurso (Insumo, Servicio o Herramienta) en una obra.
- * Después de la inserción recalcula las columnas gasto_* en OBRAS.
  *
  * POST común:     obra_id, tipo_recurso (Insumo|Servicio|Herramienta), nombre_recurso
  * POST Insumo:    cantidad_total
@@ -15,14 +14,14 @@ if (($_SESSION['user_role'] ?? '') !== 'admin') {
     exit;
 }
 
-require_once __DIR__ . '/db_admin.php';
+require_once __DIR__ . '/db.php';
 require_once __DIR__ . '/recalcular_gastos_obra.php';
-
 header('Content-Type: application/json');
 
-$obraId  = trim($_POST['obra_id']      ?? '');
-$tipo    = trim($_POST['tipo_recurso'] ?? 'Insumo');
-$nombre  = trim($_POST['nombre_recurso'] ?? '');
+$link   = Conectarse();
+$obraId = trim($_POST['obra_id']        ?? '');
+$tipo   = trim($_POST['tipo_recurso']   ?? 'Insumo');
+$nombre = trim($_POST['nombre_recurso'] ?? '');
 
 if (!$obraId || !$nombre) {
     http_response_code(400);
@@ -31,9 +30,10 @@ if (!$obraId || !$nombre) {
 }
 
 // Obtener id_cliente de la obra
-$stmtDis = $pdo->prepare('SELECT id_cliente FROM DISPOSICIONES WHERE id_obra = ? LIMIT 1');
-$stmtDis->execute([$obraId]);
-$dis = $stmtDis->fetch();
+$stmtDis = mysqli_prepare($link, 'SELECT id_cliente FROM PV_DISPOSICIONES WHERE id_obra = ? LIMIT 1');
+mysqli_bind_param($stmtDis, 's', $obraId);
+mysqli_stmt_execute($stmtDis);
+$dis = stmt_row($stmtDis);
 
 if (!$dis) {
     http_response_code(404);
@@ -46,59 +46,65 @@ if ($tipo === 'Herramienta') {
     $fechaInicio  = $_POST['fecha_inicio']  ?: date('Y-m-d');
     $fechaTermino = $_POST['fecha_termino'] ?: null;
 
-    $stmtH = $pdo->prepare('SELECT id_herramienta FROM HERRAMIENTAS WHERE nombre = ? LIMIT 1');
-    $stmtH->execute([$nombre]);
-    $herr = $stmtH->fetch();
+    $stmtH = mysqli_prepare($link, 'SELECT id_herramienta FROM PV_HERRAMIENTAS WHERE nombre = ? LIMIT 1');
+    mysqli_bind_param($stmtH, 's', $nombre);
+    mysqli_stmt_execute($stmtH);
+    $herr = stmt_row($stmtH);
     if (!$herr) {
         http_response_code(404);
         echo json_encode(['error' => 'Herramienta no encontrada en el catálogo.']);
         exit;
     }
-    $stmt = $pdo->prepare(
-        'INSERT IGNORE INTO USOS_HERRAMIENTAS
+    $stmt = mysqli_prepare($link,
+        'INSERT IGNORE INTO PV_USOS_HERRAMIENTAS
              (id_herramienta, id_cliente, id_obra, fecha_adicion, fecha_termino, cantidad)
          VALUES (?, ?, ?, ?, ?, ?)'
     );
-    $stmt->execute([$herr['id_herramienta'], $dis['id_cliente'], $obraId,
-                    $fechaInicio, $fechaTermino, $cantidad]);
+    mysqli_bind_param($stmt, 'sssssi', $herr['id_herramienta'], $dis['id_cliente'], $obraId,
+                                       $fechaInicio, $fechaTermino, $cantidad);
+    mysqli_stmt_execute($stmt);
 
 } elseif ($tipo === 'Servicio') {
     $kilometraje = (float)($_POST['kilometraje'] ?? 0);
 
-    $stmtSrv = $pdo->prepare('SELECT id_servicio FROM SERVICIOS WHERE tipo_traslado = ? LIMIT 1');
-    $stmtSrv->execute([$nombre]);
-    $srv = $stmtSrv->fetch();
+    $stmtSrv = mysqli_prepare($link, 'SELECT id_servicio FROM PV_SERVICIOS WHERE tipo_traslado = ? LIMIT 1');
+    mysqli_bind_param($stmtSrv, 's', $nombre);
+    mysqli_stmt_execute($stmtSrv);
+    $srv = stmt_row($stmtSrv);
     if (!$srv) {
         http_response_code(404);
         echo json_encode(['error' => 'Servicio no encontrado en el catálogo.']);
         exit;
     }
-    $stmt = $pdo->prepare(
-        'INSERT INTO REQUERIMIENTOS_SERVICIOS
+    $stmt = mysqli_prepare($link,
+        'INSERT INTO PV_REQUERIMIENTOS_SERVICIOS
              (id_servicio, id_cliente, id_obra, kilometraje)
          VALUES (?, ?, ?, ?)'
     );
-    $stmt->execute([$srv['id_servicio'], $dis['id_cliente'], $obraId, $kilometraje]);
+    mysqli_bind_param($stmt, 'sssd', $srv['id_servicio'], $dis['id_cliente'], $obraId, $kilometraje);
+    mysqli_stmt_execute($stmt);
 
 } else {
     // Insumo
     $cantidad = (int)($_POST['cantidad_total'] ?? 0);
 
-    $stmtIns = $pdo->prepare('SELECT id_insumo FROM INSUMOS WHERE tipo_material = ? LIMIT 1');
-    $stmtIns->execute([$nombre]);
-    $ins = $stmtIns->fetch();
+    $stmtIns = mysqli_prepare($link, 'SELECT id_insumo FROM PV_INSUMOS WHERE tipo_material = ? LIMIT 1');
+    mysqli_bind_param($stmtIns, 's', $nombre);
+    mysqli_stmt_execute($stmtIns);
+    $ins = stmt_row($stmtIns);
     if (!$ins) {
         http_response_code(404);
         echo json_encode(['error' => 'Insumo no encontrado en el catálogo.']);
         exit;
     }
-    $stmt = $pdo->prepare(
-        'INSERT IGNORE INTO EMPLEOS_INSUMOS
+    $stmt = mysqli_prepare($link,
+        'INSERT IGNORE INTO PV_EMPLEOS_INSUMOS
              (id_insumo, id_cliente, id_obra, cantidad)
          VALUES (?, ?, ?, ?)'
     );
-    $stmt->execute([$ins['id_insumo'], $dis['id_cliente'], $obraId, $cantidad]);
+    mysqli_bind_param($stmt, 'sssi', $ins['id_insumo'], $dis['id_cliente'], $obraId, $cantidad);
+    mysqli_stmt_execute($stmt);
 }
 
-recalcularGastosObra($pdo, $obraId);
+recalcularGastosObra($link, $obraId);
 echo json_encode(['success' => true]);

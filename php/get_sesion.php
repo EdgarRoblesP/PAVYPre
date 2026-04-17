@@ -1,7 +1,6 @@
 <?php
 /**
  * Devuelve los datos de la sesión activa.
- * Usado por los portales para mostrar el nombre y email del usuario en el header/perfil.
  */
 session_start();
 header('Content-Type: application/json');
@@ -12,20 +11,25 @@ if (empty($_SESSION['user_role'])) {
     exit;
 }
 
-$role = $_SESSION['user_role'];
-$id   = $_SESSION['user_id']   ?? null;
-$name = $_SESSION['user_name'] ?? '';
+$role  = $_SESSION['user_role'];
+$id    = $_SESSION['user_id']   ?? null;
+$name  = $_SESSION['user_name'] ?? '';
 $email = '';
 
-if ($role === 'colaborador' || $role === 'cliente') {
-    require_once __DIR__ . '/db_admin.php';
-    if ($role === 'colaborador') {
-        $s = $pdo->prepare('SELECT email FROM EMPLEADOS WHERE id_empleado = ? LIMIT 1');
-    } else {
-        $s = $pdo->prepare('SELECT email FROM CLIENTES WHERE id_cliente = ? LIMIT 1');
-    }
-    $s->execute([$id]);
-    $row   = $s->fetch();
+require_once __DIR__ . '/db.php';
+$link = Conectarse();
+
+if ($role === 'admin' || $role === 'colaborador') {
+    $s = mysqli_prepare($link, 'SELECT email FROM PV_EMPLEADOS WHERE id_empleado = ? LIMIT 1');
+    mysqli_bind_param($s, 's', $id);
+    mysqli_stmt_execute($s);
+    $row   = stmt_row($s);
+    $email = $row ? ($row['email'] ?? '') : '';
+} elseif ($role === 'cliente') {
+    $s = mysqli_prepare($link, 'SELECT email FROM PV_CLIENTES WHERE id_cliente = ? LIMIT 1');
+    mysqli_bind_param($s, 's', $id);
+    mysqli_stmt_execute($s);
+    $row   = stmt_row($s);
     $email = $row ? ($row['email'] ?? '') : '';
 }
 

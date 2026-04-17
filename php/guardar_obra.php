@@ -1,9 +1,9 @@
 <?php
 /**
- * Guarda (INSERT o UPDATE) un registro en OBRAS.
+ * Guarda (INSERT o UPDATE) un registro en PV_OBRAS.
  * POST: id (vacío = nuevo), nombre, fecha_inicio, fecha_termino,
  *       presupuesto_inicial, cliente_id (solo en INSERT)
- * Al crear, también inserta el registro en DISPOSICIONES.
+ * Al crear, también inserta el registro en PV_DISPOSICIONES.
  */
 session_start();
 if (($_SESSION['user_role'] ?? '') !== 'admin') {
@@ -11,16 +11,16 @@ if (($_SESSION['user_role'] ?? '') !== 'admin') {
     echo json_encode(['error' => 'Acceso no autorizado.']);
     exit;
 }
-require_once __DIR__ . '/db_admin.php';
-
+require_once __DIR__ . '/db.php';
 header('Content-Type: application/json');
 
-$id                 = trim($_POST['id'] ?? '');
-$nombre             = trim($_POST['nombre'] ?? '');
-$fecha_inicio       = $_POST['fecha_inicio'] ?? null;
-$fecha_termino      = $_POST['fecha_termino'] ?? null;
-$presupuesto        = (float)($_POST['presupuesto_inicial'] ?? 0);
-$cliente_id         = trim($_POST['cliente_id'] ?? '');
+$link          = Conectarse();
+$id            = trim($_POST['id']                  ?? '');
+$nombre        = trim($_POST['nombre']              ?? '');
+$fecha_inicio  = $_POST['fecha_inicio']             ?? null;
+$fecha_termino = $_POST['fecha_termino']            ?? null;
+$presupuesto   = (float)($_POST['presupuesto_inicial'] ?? 0);
+$cliente_id    = trim($_POST['cliente_id']          ?? '');
 
 if (!$nombre) {
     http_response_code(400);
@@ -30,8 +30,9 @@ if (!$nombre) {
 
 if ($id) {
     // Edición: solo se actualiza el nombre
-    $stmt = $pdo->prepare('UPDATE OBRAS SET ubicacion = ? WHERE id_obra = ?');
-    $stmt->execute([$nombre, $id]);
+    $stmt = mysqli_prepare($link, 'UPDATE PV_OBRAS SET ubicacion = ? WHERE id_obra = ?');
+    mysqli_bind_param($stmt, 'ss', $nombre, $id);
+    mysqli_stmt_execute($stmt);
 } else {
     if (!$fecha_inicio) {
         http_response_code(400);
@@ -44,25 +45,40 @@ if ($id) {
         exit;
     }
 
-    $nuevoId = strtoupper(substr(uniqid(), -6));
+    $t1 = 'PV_OBRAS'; $t2 = 'id_obra'; $t3 = 'OBR';
+    $stmtSp = mysqli_prepare($link, 'CALL sp_generar_id(?, ?, ?, @nuevo_id)');
+    mysqli_bind_param($stmtSp, 'sss', $t1, $t2, $t3);
+    mysqli_stmt_execute($stmtSp);
+    mysqli_stmt_close($stmtSp);
+    $res     = mysqli_query($link, 'SELECT @nuevo_id');
+    $nuevoId = mysqli_fetch_row($res)[0];
 
-    $pdo->beginTransaction();
-    try {
-        $stmt = $pdo->prepare('INSERT INTO OBRAS (id_obra, ubicacion, presupuesto_inicial, utilidad_neta, gasto_empleados, gasto_insumos, gasto_servicios, gasto_herramientas, fecha_inicio, fecha_fin) VALUES (?, ?, ?, 0, 0, 0, 0, 0, ?, ?)');
-        $stmt->execute([
-            $nuevoId,
-            $nombre,
-            $presupuesto,
-            $fecha_inicio,
-            $fecha_termino ?: null
-        ]);
+    $fechaTermVal = $fecha_termino ?: null;
 
-        $stmtDis = $pdo->prepare('INSERT INTO DISPOSICIONES (id_obra, id_cliente) VALUES (?, ?)');
-        $stmtDis->execute([$nuevoId, $cliente_id]);
+    mysqli_begin_transaction($link);
+    $ok = true;
 
-        $pdo->commit();
-    } catch (Exception $e) {
-        $pdo->rollBack();
+    $stmtObra = mysqli_prepare($link,
+        'INSERT INTO PV_OBRAS (id_obra, ubicacion, presupuesto_inicial, utilidad_neta, gasto_empleados, gasto_insumos, gasto_servicios, gasto_herramientas, fecha_inicio, fecha_fin)
+         VALUES (?, ?, ?, 0, 0, 0, 0, 0, ?, ?)'
+    );
+    mysqli_bind_param($stmtObra, 'ssdss', $nuevoId, $nombre, $presupuesto, $fecha_inicio, $fechaTermVal);
+    if (!mysqli_stmt_execute($stmtObra)) {
+        $ok = false;
+    }
+
+    if ($ok) {
+        $stmtDis = mysqli_prepare($link, 'INSERT INTO PV_DISPOSICIONES (id_obra, id_cliente) VALUES (?, ?)');
+        mysqli_bind_param($stmtDis, 'ss', $nuevoId, $cliente_id);
+        if (!mysqli_stmt_execute($stmtDis)) {
+            $ok = false;
+        }
+    }
+
+    if ($ok) {
+        mysqli_commit($link);
+    } else {
+        mysqli_rollback($link);
         http_response_code(500);
         echo json_encode(['error' => 'Error al registrar la obra y su disposición.']);
         exit;

@@ -1,7 +1,6 @@
 <?php
 /**
  * Devuelve las obras del cliente autenticado, con pagos anidados.
- * Usa la conexión de solo lectura (usuario: cliente).
  */
 session_start();
 if (($_SESSION['user_role'] ?? '') !== 'cliente') {
@@ -10,27 +9,27 @@ if (($_SESSION['user_role'] ?? '') !== 'cliente') {
     exit;
 }
 
-require_once __DIR__ . '/db_cliente.php';
+require_once __DIR__ . '/db.php';
 header('Content-Type: application/json');
 
+$link      = Conectarse();
 $idCliente = $_SESSION['user_id'];
 
-// ── Obras del cliente ────────────────────────────────────────
-$stmt = $pdo->prepare(
+$stmt = mysqli_prepare($link,
     'SELECT o.id_obra,
             o.ubicacion,
             o.fecha_inicio,
             o.fecha_fin,
             o.presupuesto_inicial
-       FROM OBRAS o
-       JOIN DISPOSICIONES d ON o.id_obra = d.id_obra
+       FROM PV_OBRAS o
+       JOIN PV_DISPOSICIONES d ON o.id_obra = d.id_obra
       WHERE d.id_cliente = ?
       ORDER BY o.fecha_inicio DESC'
 );
-$stmt->execute([$idCliente]);
-$obras = $stmt->fetchAll();
+mysqli_bind_param($stmt, 's', $idCliente);
+mysqli_stmt_execute($stmt);
+$obras = stmt_rows($stmt);
 
-// ── Serializar obras (sin pagos — los carga get_historial_pagos.php) ─────────
 $resultado = array_map(function ($o) {
     return [
         'id'                 => $o['id_obra'],

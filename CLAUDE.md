@@ -20,7 +20,7 @@ npx http-server
 
 | Page | Role | Purpose |
 |------|------|---------|
-| `Home.html` | Public | Landing page with company info and services |
+| `index.html` | Public | Landing page with company info and services |
 | `Login.html` | Public | Authentication form → redirects to role portal |
 | `Admin.html` | Admin | Main dashboard — CRUD for obras, empleados, clientes, proveedores + charts |
 | `Cliente.html` | Cliente | Read-only view of obra status and payment records |

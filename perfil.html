@@ -93,16 +93,15 @@ fetch('php/get_sesion.php')
     .then(r => r.json())
     .then(s => {
         if (s.error) { window.location.href = 'Login.html'; return; }
-        if (s.role === 'admin') { window.location.href = 'Admin.html'; return; }
 
         document.getElementById('perfil-nombre').textContent = s.name  || '—';
         document.getElementById('perfil-email').textContent  = s.email || '—';
 
-        const portal = s.role === 'cliente' ? 'Portal del Cliente' : 'Portal del Colaborador';
-        document.getElementById('header-portal').textContent = portal;
+        const portalMap = { admin: 'Panel de Administración', cliente: 'Portal del Cliente', colaborador: 'Portal del Colaborador' };
+        document.getElementById('header-portal').textContent = portalMap[s.role] || 'Mi Perfil';
 
-        const back = s.role === 'cliente' ? 'Cliente.html' : 'Colaborador.html';
-        document.getElementById('btn-volver').href = back;
+        const backMap = { admin: 'Admin.html', cliente: 'Cliente.html', colaborador: 'Colaborador.html' };
+        document.getElementById('btn-volver').href = backMap[s.role] || 'Login.html';
     })
     .catch(() => { window.location.href = 'Login.html'; });
 

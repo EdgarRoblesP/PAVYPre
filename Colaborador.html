@@ -43,6 +43,7 @@
 
         <!-- Obras List -->
         <div id="obras-container" class="space-y-6"></div>
+        <div id="obras-paginacion"></div>
 
         <!-- Summary Cards -->
         <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8" id="summary-cards"></div>
@@ -52,7 +53,9 @@
     </main>
 
 <script>
-let obras = [];
+let obras     = [];
+let obrasPage = 1;
+const PER_PAGE = 5;
 
 const fmt = (n) => new Intl.NumberFormat('es-MX', { style: 'currency', currency: 'MXN' }).format(n);
 const fmtDate = (d) => new Date(d + 'T12:00:00').toLocaleDateString('es-MX', { year: 'numeric', month: 'long', day: 'numeric' });
@@ -90,18 +93,22 @@ function renderSummary() {
 }
     */
 
-// Render obras
+// Render obras (página actual)
 function renderObras() {
-    document.getElementById('obras-container').innerHTML = obras.map(o => {
+    const totalPags = Math.max(1, Math.ceil(obras.length / PER_PAGE));
+    obrasPage       = Math.min(obrasPage, totalPags);
+    const inicio    = (obrasPage - 1) * PER_PAGE;
+    const pagina    = obras.slice(inicio, inicio + PER_PAGE);
+
+    document.getElementById('obras-container').innerHTML = pagina.map(o => {
         const semanas = calcSemanas(o.fechaInicio, o.fechaTermino);
-        const total = semanas * o.salarioSemanal;
-        const active = isActive(o.fechaTermino);
+        const total   = semanas * o.salarioSemanal;
+        const active  = isActive(o.fechaTermino);
         return `
         <div class="bg-white rounded-lg shadow-lg p-6">
             <div class="flex items-start justify-between flex-wrap gap-3 mb-4">
                 <div>
                     <h3 class="text-xl font-semibold text-black">${o.nombreObra}</h3>
-                    
                 </div>
                 <!--
                 <span class="px-3 py-1 rounded-full text-xs font-semibold ${active ? 'bg-yellow-100 text-yellow-800' : 'bg-gray-100 text-gray-600'}">
@@ -134,32 +141,77 @@ function renderObras() {
             </div>
         </div>`;
     }).join('');
+
+    renderPaginacion(totalPags);
 }
 
-// Verificar sesión activa; redirigir a login si no hay sesión de colaborador
-fetch('php/get_sesion.php')
-    .then(r => r.ok ? r.json() : Promise.reject(r.status))
-    .then(s => {
-        if (s.role !== 'colaborador') { location.replace('Login.html'); return; }
-        if (s.name) document.getElementById('nombre-usuario').textContent = s.name;
-    })
-    .catch(() => location.replace('Login.html'));
+function renderPaginacion(totalPags) {
+    const c = document.getElementById('obras-paginacion');
+    if (totalPags <= 1) { c.innerHTML = ''; return; }
 
-// Cargar obras desde BD
-fetch('php/get_obras_colaborador.php')
-    .then(r => {
-        if (!r.ok) throw new Error(r.status);
-        return r.json();
-    })
-    .then(data => {
-        obras = data;
-        renderObras();
-        // renderSummary();
-    })
-    .catch(() => {
-        document.getElementById('obras-container').innerHTML =
-            '<p class="text-center text-gray-500 py-12">No se pudieron cargar los datos. Intenta más tarde.</p>';
-    });
+    const desde = (obrasPage - 1) * PER_PAGE + 1;
+    const hasta  = Math.min(obrasPage * PER_PAGE, obras.length);
+
+    const btnBase   = 'px-3 py-1.5 text-sm rounded border transition-colors';
+    const btnActivo = btnBase + ' bg-black text-white border-black font-semibold';
+    const btnNormal = btnBase + ' border-gray-300 text-gray-600 hover:border-black hover:text-black';
+    const btnDis    = btnBase + ' border-gray-200 text-gray-300 cursor-not-allowed';
+
+    let botones = '';
+    const prevDis = obrasPage === 1;
+    botones += `<button onclick="irAPagina(${obrasPage - 1})" ${prevDis ? 'disabled' : ''}
+        class="${prevDis ? btnDis : btnNormal}">Anterior</button>`;
+
+    for (let i = 1; i <= totalPags; i++) {
+        botones += `<button onclick="irAPagina(${i})"
+            class="${i === obrasPage ? btnActivo : btnNormal}">${i}</button>`;
+    }
+
+    const nextDis = obrasPage === totalPags;
+    botones += `<button onclick="irAPagina(${obrasPage + 1})" ${nextDis ? 'disabled' : ''}
+        class="${nextDis ? btnDis : btnNormal}">Siguiente</button>`;
+
+    c.innerHTML = `
+        <div class="flex items-center justify-between flex-wrap gap-3 mt-10 pt-4 border-t border-gray-100">
+            <span class="text-sm text-gray-400">Mostrando ${desde}–${hasta} de ${obras.length} obra${obras.length !== 1 ? 's' : ''}</span>
+            <div class="flex items-center gap-1.5">${botones}</div>
+        </div>`;
+}
+
+function irAPagina(page) {
+    const totalPags = Math.max(1, Math.ceil(obras.length / PER_PAGE));
+    if (page < 1 || page > totalPags) return;
+    obrasPage = page;
+    renderObras();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+window.addEventListener('pageshow', function(e) {
+    fetch('php/get_sesion.php', { cache: 'no-store' })
+        .then(r => r.ok ? r.json() : Promise.reject(r.status))
+        .then(s => {
+            if (s.role !== 'colaborador') { location.replace('Login.html'); return; }
+            if (s.name) document.getElementById('nombre-usuario').textContent = s.name;
+            if (e.persisted) return;
+
+            // Cargar obras desde BD
+            fetch('php/get_obras_colaborador.php')
+                .then(r => {
+                    if (!r.ok) throw new Error(r.status);
+                    return r.json();
+                })
+                .then(data => {
+                    obras = data;
+                    renderObras();
+                    // renderSummary();
+                })
+                .catch(() => {
+                    document.getElementById('obras-container').innerHTML =
+                        '<p class="text-center text-gray-500 py-12">No se pudieron cargar los datos. Intenta más tarde.</p>';
+                });
+        })
+        .catch(() => location.replace('Login.html'));
+});
 </script>
 </body>
 </html>
