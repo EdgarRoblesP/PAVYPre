@@ -8,7 +8,16 @@ define('DB_PASS', 'DWeb_p2@26');
 define('DB_NAME', 'proydweb_p2026');
 
 function Conectarse() {
-    $link = @mysqli_connect("localhost", DB_USER, DB_PASS, DB_NAME);
+    // Intentamos obtener las variables de Railway, si no existen usamos los valores de tu TablePlus/Local
+    $host = getenv('MYSQLHOST')     ?: 'nozomi.proxy.rlwy.net'; 
+    $user = getenv('MYSQLUSER')     ?: 'root'; 
+    $pass = getenv('MYSQLPASSWORD') ?: 'SsQyBAOSQZaLSsChHbgdNTIelHbVYDlz'; // Pon la que copiaste de Railway
+    $db   = getenv('MYSQLDATABASE') ?: 'railway'; 
+    $port = (int)getenv('MYSQLPORT') ?: 3306; // El puerto que te de Railway (ej. 39281)
+
+    // Conexión usando las variables
+    $link = @mysqli_connect($host, $user, $pass, $db, $port);
+    
     return $link ? $link : false;
 }
 

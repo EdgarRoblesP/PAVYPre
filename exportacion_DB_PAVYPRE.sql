@@ -460,7 +460,7 @@ UNLOCK TABLES;
 /*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
 /*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
 /*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
-DELIMITER ;;
+/* DELIMITER ;; */
 CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_generar_id`(
       IN  p_tabla   VARCHAR(64),
       IN  p_columna VARCHAR(64),
@@ -482,7 +482,7 @@ BEGIN
       DEALLOCATE PREPARE _gen_stmt;
       SET p_id = CONCAT(p_prefijo, LPAD(CAST(@_gen_ultimo + 1 AS UNSIGNED), 3, '0'));
   END ;;
-DELIMITER ;
+/* DELIMITER ; */
 /*!50003 SET sql_mode              = @saved_sql_mode */ ;
 /*!50003 SET character_set_client  = @saved_cs_client */ ;
 /*!50003 SET character_set_results = @saved_cs_results */ ;
