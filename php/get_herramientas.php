@@ -22,7 +22,7 @@ if ($q !== '') {
           WHERE h.nombre LIKE ? OR p.nombre LIKE ?
           ORDER BY h.nombre ASC'
     );
-    mysqli_bind_param($stmt, 'ss', $like, $like);
+    mysqli_stmt_bind_param($stmt, 'ss', $like, $like);
     mysqli_stmt_execute($stmt);
     $herramientas = stmt_rows($stmt);
 } else {

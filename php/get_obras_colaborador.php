@@ -28,7 +28,7 @@ $stmt = mysqli_prepare($link,
       WHERE te.id_empleado = ?
       ORDER BY te.fecha_adicion DESC'
 );
-mysqli_bind_param($stmt, 's', $idEmpleado);
+mysqli_stmt_bind_param($stmt, 's', $idEmpleado);
 mysqli_stmt_execute($stmt);
 $rows = stmt_rows($stmt);
 

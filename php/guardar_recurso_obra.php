@@ -31,7 +31,7 @@ if (!$obraId || !$nombre) {
 
 // Obtener id_cliente de la obra
 $stmtDis = mysqli_prepare($link, 'SELECT id_cliente FROM pv_disposiciones WHERE id_obra = ? LIMIT 1');
-mysqli_bind_param($stmtDis, 's', $obraId);
+mysqli_stmt_bind_param($stmtDis, 's', $obraId);
 mysqli_stmt_execute($stmtDis);
 $dis = stmt_row($stmtDis);
 
@@ -47,7 +47,7 @@ if ($tipo === 'Herramienta') {
     $fechaTermino = $_POST['fecha_termino'] ?: null;
 
     $stmtH = mysqli_prepare($link, 'SELECT id_herramienta FROM pv_herramientas WHERE nombre = ? LIMIT 1');
-    mysqli_bind_param($stmtH, 's', $nombre);
+    mysqli_stmt_bind_param($stmtH, 's', $nombre);
     mysqli_stmt_execute($stmtH);
     $herr = stmt_row($stmtH);
     if (!$herr) {
@@ -60,7 +60,7 @@ if ($tipo === 'Herramienta') {
              (id_herramienta, id_cliente, id_obra, fecha_adicion, fecha_termino, cantidad)
          VALUES (?, ?, ?, ?, ?, ?)'
     );
-    mysqli_bind_param($stmt, 'sssssi', $herr['id_herramienta'], $dis['id_cliente'], $obraId,
+    mysqli_stmt_bind_param($stmt, 'sssssi', $herr['id_herramienta'], $dis['id_cliente'], $obraId,
                                        $fechaInicio, $fechaTermino, $cantidad);
     mysqli_stmt_execute($stmt);
 
@@ -68,7 +68,7 @@ if ($tipo === 'Herramienta') {
     $kilometraje = (float)($_POST['kilometraje'] ?? 0);
 
     $stmtSrv = mysqli_prepare($link, 'SELECT id_servicio FROM pv_servicios WHERE tipo_traslado = ? LIMIT 1');
-    mysqli_bind_param($stmtSrv, 's', $nombre);
+    mysqli_stmt_bind_param($stmtSrv, 's', $nombre);
     mysqli_stmt_execute($stmtSrv);
     $srv = stmt_row($stmtSrv);
     if (!$srv) {
@@ -81,7 +81,7 @@ if ($tipo === 'Herramienta') {
              (id_servicio, id_cliente, id_obra, kilometraje)
          VALUES (?, ?, ?, ?)'
     );
-    mysqli_bind_param($stmt, 'sssd', $srv['id_servicio'], $dis['id_cliente'], $obraId, $kilometraje);
+    mysqli_stmt_bind_param($stmt, 'sssd', $srv['id_servicio'], $dis['id_cliente'], $obraId, $kilometraje);
     mysqli_stmt_execute($stmt);
 
 } else {
@@ -89,7 +89,7 @@ if ($tipo === 'Herramienta') {
     $cantidad = (int)($_POST['cantidad_total'] ?? 0);
 
     $stmtIns = mysqli_prepare($link, 'SELECT id_insumo FROM pv_insumos WHERE tipo_material = ? LIMIT 1');
-    mysqli_bind_param($stmtIns, 's', $nombre);
+    mysqli_stmt_bind_param($stmtIns, 's', $nombre);
     mysqli_stmt_execute($stmtIns);
     $ins = stmt_row($stmtIns);
     if (!$ins) {
@@ -102,7 +102,7 @@ if ($tipo === 'Herramienta') {
              (id_insumo, id_cliente, id_obra, cantidad)
          VALUES (?, ?, ?, ?)'
     );
-    mysqli_bind_param($stmt, 'sssi', $ins['id_insumo'], $dis['id_cliente'], $obraId, $cantidad);
+    mysqli_stmt_bind_param($stmt, 'sssi', $ins['id_insumo'], $dis['id_cliente'], $obraId, $cantidad);
     mysqli_stmt_execute($stmt);
 }
 

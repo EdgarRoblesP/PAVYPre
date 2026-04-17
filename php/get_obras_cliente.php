@@ -26,7 +26,7 @@ $stmt = mysqli_prepare($link,
       WHERE d.id_cliente = ?
       ORDER BY o.fecha_inicio DESC'
 );
-mysqli_bind_param($stmt, 's', $idCliente);
+mysqli_stmt_bind_param($stmt, 's', $idCliente);
 mysqli_stmt_execute($stmt);
 $obras = stmt_rows($stmt);
 

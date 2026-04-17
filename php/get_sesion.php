@@ -21,13 +21,13 @@ $link = Conectarse();
 
 if ($role === 'admin' || $role === 'colaborador') {
     $s = mysqli_prepare($link, 'SELECT email FROM pv_empleados WHERE id_empleado = ? LIMIT 1');
-    mysqli_bind_param($s, 's', $id);
+    mysqli_stmt_bind_param($s, 's', $id);
     mysqli_stmt_execute($s);
     $row   = stmt_row($s);
     $email = $row ? ($row['email'] ?? '') : '';
 } elseif ($role === 'cliente') {
     $s = mysqli_prepare($link, 'SELECT email FROM pv_clientes WHERE id_cliente = ? LIMIT 1');
-    mysqli_bind_param($s, 's', $id);
+    mysqli_stmt_bind_param($s, 's', $id);
     mysqli_stmt_execute($s);
     $row   = stmt_row($s);
     $email = $row ? ($row['email'] ?? '') : '';

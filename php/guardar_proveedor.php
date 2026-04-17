@@ -31,13 +31,13 @@ if ($id) {
     $stmt = mysqli_prepare($link,
         'UPDATE pv_proveedores SET nombre = ?, telefono = ?, email = ?, direccion = ? WHERE id = ?'
     );
-    mysqli_bind_param($stmt, 'ssssi', $nombre, $telefono, $email, $direccion, $id);
+    mysqli_stmt_bind_param($stmt, 'ssssi', $nombre, $telefono, $email, $direccion, $id);
     mysqli_stmt_execute($stmt);
 } else {
     $stmt = mysqli_prepare($link,
         'INSERT INTO pv_proveedores (nombre, telefono, email, direccion) VALUES (?, ?, ?, ?)'
     );
-    mysqli_bind_param($stmt, 'ssss', $nombre, $telefono, $email, $direccion);
+    mysqli_stmt_bind_param($stmt, 'ssss', $nombre, $telefono, $email, $direccion);
     mysqli_stmt_execute($stmt);
     $id = (int) mysqli_insert_id($link);
 }

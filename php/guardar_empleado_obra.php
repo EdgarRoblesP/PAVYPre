@@ -31,7 +31,7 @@ if (!$fechaInicio) {
 
 // ── 1. Verificar que el empleado exista ──────────────────────
 $stmtEmpl = mysqli_prepare($link, 'SELECT id_empleado FROM pv_empleados WHERE id_empleado = ?');
-mysqli_bind_param($stmtEmpl, 's', $idEmpleado);
+mysqli_stmt_bind_param($stmtEmpl, 's', $idEmpleado);
 mysqli_stmt_execute($stmtEmpl);
 if (!stmt_row($stmtEmpl)) {
     http_response_code(404);
@@ -52,7 +52,7 @@ $stmtConflicto = mysqli_prepare($link,
         AND (te.fecha_termino IS NULL OR te.fecha_termino >= ?)
       LIMIT 1'
 );
-mysqli_bind_param($stmtConflicto, 'ssss', $idEmpleado, $obraId, $nuevoFin, $fechaInicio);
+mysqli_stmt_bind_param($stmtConflicto, 'ssss', $idEmpleado, $obraId, $nuevoFin, $fechaInicio);
 mysqli_stmt_execute($stmtConflicto);
 $conflicto = stmt_row($stmtConflicto);
 
@@ -66,7 +66,7 @@ if ($conflicto) {
 
 // ── 3. Obtener id_cliente de la disposición de la obra ───────
 $stmtDis = mysqli_prepare($link, 'SELECT id_cliente FROM pv_disposiciones WHERE id_obra = ? LIMIT 1');
-mysqli_bind_param($stmtDis, 's', $obraId);
+mysqli_stmt_bind_param($stmtDis, 's', $obraId);
 mysqli_stmt_execute($stmtDis);
 $dis = stmt_row($stmtDis);
 
@@ -83,7 +83,7 @@ $stmtIns = mysqli_prepare($link,
         (id_empleado, id_cliente, id_obra, fecha_adicion, fecha_termino)
      VALUES (?, ?, ?, ?, ?)'
 );
-mysqli_bind_param($stmtIns, 'sssss', $idEmpleado, $dis['id_cliente'], $obraId, $fechaInicio, $fechaTermVal);
+mysqli_stmt_bind_param($stmtIns, 'sssss', $idEmpleado, $dis['id_cliente'], $obraId, $fechaInicio, $fechaTermVal);
 mysqli_stmt_execute($stmtIns);
 
 recalcularGastosObra($link, $obraId);

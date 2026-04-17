@@ -33,7 +33,7 @@ if ($id) {
     $stmt = mysqli_prepare($link,
         'UPDATE pv_empleados SET nombre = ?, puesto = ?, salario = ?, telefono = ?, email = ?, direccion = ?, id_supervisor = ? WHERE id_empleado = ?'
     );
-    mysqli_bind_param($stmt, 'ssdsssss', $nombre, $puesto, $salario, $telefono, $email, $direccion, $idSupervisor, $id);
+    mysqli_stmt_bind_param($stmt, 'ssdsssss', $nombre, $puesto, $salario, $telefono, $email, $direccion, $idSupervisor, $id);
     mysqli_stmt_execute($stmt);
 } else {
     if (strlen($contrasena) < 8) {
@@ -43,7 +43,7 @@ if ($id) {
     }
     $t1 = 'pv_empleados'; $t2 = 'id_empleado'; $t3 = 'EMP';
     $stmtSp = mysqli_prepare($link, 'CALL sp_generar_id(?, ?, ?, @nuevo_id)');
-    mysqli_bind_param($stmtSp, 'sss', $t1, $t2, $t3);
+    mysqli_stmt_bind_param($stmtSp, 'sss', $t1, $t2, $t3);
     mysqli_stmt_execute($stmtSp);
     mysqli_stmt_close($stmtSp);
     $res     = mysqli_query($link, 'SELECT @nuevo_id');
@@ -52,7 +52,7 @@ if ($id) {
     $stmt    = mysqli_prepare($link,
         'INSERT INTO pv_empleados (id_empleado, nombre, puesto, telefono, direccion, email, salario, contrasena, id_supervisor) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)'
     );
-    mysqli_bind_param($stmt, 'ssssssdss', $nuevoId, $nombre, $puesto, $telefono, $direccion, $email, $salario, $hash, $idSupervisor);
+    mysqli_stmt_bind_param($stmt, 'ssssssdss', $nuevoId, $nombre, $puesto, $telefono, $direccion, $email, $salario, $hash, $idSupervisor);
     mysqli_stmt_execute($stmt);
 }
 

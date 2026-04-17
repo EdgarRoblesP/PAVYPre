@@ -25,7 +25,7 @@ $link = Conectarse();
 
 // ── 1. Empleados (Admin y Colaborador — pv_empleados) ───────────
 $stmt = mysqli_prepare($link, 'SELECT id_empleado, nombre, puesto, contrasena FROM pv_empleados WHERE email = ? LIMIT 1');
-mysqli_bind_param($stmt, 's', $email);
+mysqli_stmt_bind_param($stmt, 's', $email);
 mysqli_stmt_execute($stmt);
 $row = stmt_row($stmt);
 
@@ -47,7 +47,7 @@ if ($row && password_verify($formPassword, $row['contrasena'])) {
 
 // ── 2. Cliente (pv_clientes) ────────────────────────────────────
 $stmt = mysqli_prepare($link, 'SELECT id_cliente, nombre, contrasena FROM pv_clientes WHERE email = ? LIMIT 1');
-mysqli_bind_param($stmt, 's', $email);
+mysqli_stmt_bind_param($stmt, 's', $email);
 mysqli_stmt_execute($stmt);
 $row = stmt_row($stmt);
 

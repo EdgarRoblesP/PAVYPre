@@ -48,7 +48,7 @@ if ($role === 'admin' || $role === 'colaborador') {
 } else {
     $stmt = mysqli_prepare($link, 'SELECT contrasena FROM pv_clientes WHERE id_cliente = ? LIMIT 1');
 }
-mysqli_bind_param($stmt, 's', $id);
+mysqli_stmt_bind_param($stmt, 's', $id);
 mysqli_stmt_execute($stmt);
 $row = stmt_row($stmt);
 
@@ -66,7 +66,7 @@ if ($role === 'admin' || $role === 'colaborador') {
 } else {
     $upd = mysqli_prepare($link, 'UPDATE pv_clientes  SET contrasena = ? WHERE id_cliente  = ?');
 }
-mysqli_bind_param($upd, 'ss', $hash, $id);
+mysqli_stmt_bind_param($upd, 'ss', $hash, $id);
 mysqli_stmt_execute($upd);
 
 echo json_encode(['success' => true]);

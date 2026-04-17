@@ -24,7 +24,7 @@ $stmt = mysqli_prepare($link,
       WHERE id_cliente = ?
       ORDER BY id_obra, fecha_pago ASC'
 );
-mysqli_bind_param($stmt, 's', $idCliente);
+mysqli_stmt_bind_param($stmt, 's', $idCliente);
 mysqli_stmt_execute($stmt);
 $rows = stmt_rows($stmt);
 

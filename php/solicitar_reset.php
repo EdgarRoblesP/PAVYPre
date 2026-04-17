@@ -54,7 +54,7 @@ $tabla    = null;
 $userName = '';
 
 $s = mysqli_prepare($link, 'SELECT nombre FROM pv_empleados WHERE email = ? LIMIT 1');
-mysqli_bind_param($s, 's', $email);
+mysqli_stmt_bind_param($s, 's', $email);
 mysqli_stmt_execute($s);
 $row = stmt_row($s);
 if ($row) {
@@ -64,7 +64,7 @@ if ($row) {
 
 if (!$tabla) {
     $s = mysqli_prepare($link, 'SELECT nombre FROM pv_clientes WHERE email = ? LIMIT 1');
-    mysqli_bind_param($s, 's', $email);
+    mysqli_stmt_bind_param($s, 's', $email);
     mysqli_stmt_execute($s);
     $row = stmt_row($s);
     if ($row) {
@@ -80,7 +80,7 @@ if (!$tabla) {
 
 // ── Eliminar tokens previos no usados del mismo email ───────────────────────
 $del = mysqli_prepare($link, 'DELETE FROM pv_reset_tokens WHERE email = ?');
-mysqli_bind_param($del, 's', $email);
+mysqli_stmt_bind_param($del, 's', $email);
 mysqli_stmt_execute($del);
 
 // ── Generar token seguro ─────────────────────────────────────────────────────
@@ -88,7 +88,7 @@ $token     = bin2hex(random_bytes(32));
 $expiresAt = date('Y-m-d H:i:s', time() + 1800);
 
 $ins = mysqli_prepare($link, 'INSERT INTO pv_reset_tokens (email, token, expires_at) VALUES (?, ?, ?)');
-mysqli_bind_param($ins, 'sss', $email, $token, $expiresAt);
+mysqli_stmt_bind_param($ins, 'sss', $email, $token, $expiresAt);
 mysqli_stmt_execute($ins);
 
 // ── Construir enlace de recuperación ────────────────────────────────────────

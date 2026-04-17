@@ -59,7 +59,7 @@ $offset   = ($page - 1) * $per_page;
 if ($buscar !== '') {
     $like      = '%' . $buscar . '%';
     $stmtCount = mysqli_prepare($link, 'SELECT COUNT(*) FROM pv_obras WHERE ubicacion LIKE ?');
-    mysqli_bind_param($stmtCount, 's', $like);
+    mysqli_stmt_bind_param($stmtCount, 's', $like);
     mysqli_stmt_execute($stmtCount);
     $total = (int) stmt_value($stmtCount);
 } else {
@@ -82,7 +82,7 @@ if ($buscar !== '') {
           ORDER BY fecha_inicio DESC
           LIMIT $per_page OFFSET $offset"
     );
-    mysqli_bind_param($stmtObras, 's', $like);
+    mysqli_stmt_bind_param($stmtObras, 's', $like);
 } else {
     $stmtObras = mysqli_prepare($link,
         "SELECT id_obra, ubicacion, fecha_inicio, fecha_fin,
@@ -114,7 +114,7 @@ $stmtEmpl = mysqli_prepare($link,
       WHERE te.id_obra = ?
       ORDER BY te.fecha_adicion'
 );
-mysqli_bind_param($stmtEmpl, 's', $loopId);
+mysqli_stmt_bind_param($stmtEmpl, 's', $loopId);
 
 $stmtHerram = mysqli_prepare($link,
     'SELECT uh.id_herramienta                                       AS catalogId,
@@ -139,7 +139,7 @@ $stmtHerram = mysqli_prepare($link,
       WHERE uh.id_obra = ?
       ORDER BY h.nombre'
 );
-mysqli_bind_param($stmtHerram, 's', $loopId);
+mysqli_stmt_bind_param($stmtHerram, 's', $loopId);
 
 $stmtInsumos = mysqli_prepare($link,
     'SELECT i.id_insumo                                          AS catalogId,
@@ -155,7 +155,7 @@ $stmtInsumos = mysqli_prepare($link,
       GROUP BY i.id_insumo, i.tipo_material, p.nombre, i.costo_unitario
       ORDER BY i.tipo_material'
 );
-mysqli_bind_param($stmtInsumos, 's', $loopId);
+mysqli_stmt_bind_param($stmtInsumos, 's', $loopId);
 
 $stmtServicios = mysqli_prepare($link,
     'SELECT s.id_servicio                                        AS catalogId,
@@ -171,7 +171,7 @@ $stmtServicios = mysqli_prepare($link,
       GROUP BY s.id_servicio, s.tipo_traslado, p.nombre, s.costo_kilometro
       ORDER BY s.tipo_traslado'
 );
-mysqli_bind_param($stmtServicios, 's', $loopId);
+mysqli_stmt_bind_param($stmtServicios, 's', $loopId);
 
 $stmtPagos = mysqli_prepare($link,
     'SELECT fecha_pago  AS fechaPago,
@@ -181,7 +181,7 @@ $stmtPagos = mysqli_prepare($link,
       WHERE id_obra = ?
       ORDER BY fecha_pago'
 );
-mysqli_bind_param($stmtPagos, 's', $loopId);
+mysqli_stmt_bind_param($stmtPagos, 's', $loopId);
 
 // ── Enriquecer cada obra con sus sub-tablas ──────────────────────────────────
 $resultado = [];

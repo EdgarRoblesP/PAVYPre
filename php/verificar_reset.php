@@ -31,7 +31,7 @@ mysqli_query($link,
 $stmt = mysqli_prepare($link,
     'SELECT id, expires_at, used FROM pv_reset_tokens WHERE token = ? LIMIT 1'
 );
-mysqli_bind_param($stmt, 's', $token);
+mysqli_stmt_bind_param($stmt, 's', $token);
 mysqli_stmt_execute($stmt);
 $row = stmt_row($stmt);
 

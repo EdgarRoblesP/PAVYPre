@@ -32,7 +32,7 @@ if ($stmt === false) {
 } else {
     echo "mysqli_prepare pv_empleados: OK\n";
     $email = 'admin@pavypre.com';
-    mysqli_bind_param($stmt, 's', $email);
+    mysqli_stmt_bind_param($stmt, 's', $email);
     mysqli_stmt_execute($stmt);
     $row = stmt_row($stmt);
     echo "Fila para admin@pavypre.com: " . ($row ? json_encode($row, JSON_UNESCAPED_UNICODE) : "ninguna") . "\n";

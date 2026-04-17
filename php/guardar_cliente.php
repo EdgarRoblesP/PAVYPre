@@ -27,7 +27,7 @@ if (!$nombre) {
 
 if ($id) {
     $stmt = mysqli_prepare($link, 'UPDATE pv_clientes SET nombre = ?, telefono = ?, email = ? WHERE id_cliente = ?');
-    mysqli_bind_param($stmt, 'ssss', $nombre, $telefono, $email, $id);
+    mysqli_stmt_bind_param($stmt, 'ssss', $nombre, $telefono, $email, $id);
     mysqli_stmt_execute($stmt);
 } else {
     if (strlen($contrasena) < 8) {
@@ -37,7 +37,7 @@ if ($id) {
     }
     $t1 = 'pv_clientes'; $t2 = 'id_cliente'; $t3 = 'CLI';
     $stmtSp = mysqli_prepare($link, 'CALL sp_generar_id(?, ?, ?, @nuevo_id)');
-    mysqli_bind_param($stmtSp, 'sss', $t1, $t2, $t3);
+    mysqli_stmt_bind_param($stmtSp, 'sss', $t1, $t2, $t3);
     mysqli_stmt_execute($stmtSp);
     mysqli_stmt_close($stmtSp);
     $res     = mysqli_query($link, 'SELECT @nuevo_id');
@@ -45,7 +45,7 @@ if ($id) {
     $hash    = password_hash($contrasena, PASSWORD_ARGON2ID);
     $dir     = '';
     $stmt    = mysqli_prepare($link, 'INSERT INTO pv_clientes (id_cliente, nombre, telefono, direccion, email, contrasena) VALUES (?, ?, ?, ?, ?, ?)');
-    mysqli_bind_param($stmt, 'ssssss', $nuevoId, $nombre, $telefono, $dir, $email, $hash);
+    mysqli_stmt_bind_param($stmt, 'ssssss', $nuevoId, $nombre, $telefono, $dir, $email, $hash);
     mysqli_stmt_execute($stmt);
 }
 

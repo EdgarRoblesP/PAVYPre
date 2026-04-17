@@ -22,7 +22,7 @@ function recalcularGastosObra(mysqli $link, string $obraId): void
            JOIN pv_obras      o ON te.id_obra      = o.id_obra
           WHERE te.id_obra = ?'
     );
-    mysqli_bind_param($stmt, 's', $obraId);
+    mysqli_stmt_bind_param($stmt, 's', $obraId);
     mysqli_stmt_execute($stmt);
     $gastoEmpleados = (float) stmt_value($stmt);
 
@@ -33,7 +33,7 @@ function recalcularGastosObra(mysqli $link, string $obraId): void
            JOIN pv_insumos i ON ei.id_insumo = i.id_insumo
           WHERE ei.id_obra = ?'
     );
-    mysqli_bind_param($stmt, 's', $obraId);
+    mysqli_stmt_bind_param($stmt, 's', $obraId);
     mysqli_stmt_execute($stmt);
     $gastoInsumos = (float) stmt_value($stmt);
 
@@ -44,7 +44,7 @@ function recalcularGastosObra(mysqli $link, string $obraId): void
            JOIN pv_servicios s ON rs.id_servicio = s.id_servicio
           WHERE rs.id_obra = ?'
     );
-    mysqli_bind_param($stmt, 's', $obraId);
+    mysqli_stmt_bind_param($stmt, 's', $obraId);
     mysqli_stmt_execute($stmt);
     $gastoServicios = (float) stmt_value($stmt);
 
@@ -60,7 +60,7 @@ function recalcularGastosObra(mysqli $link, string $obraId): void
            JOIN pv_obras         o ON uh.id_obra        = o.id_obra
           WHERE uh.id_obra = ?'
     );
-    mysqli_bind_param($stmt, 's', $obraId);
+    mysqli_stmt_bind_param($stmt, 's', $obraId);
     mysqli_stmt_execute($stmt);
     $gastoHerramientas = (float) stmt_value($stmt);
 
@@ -73,6 +73,6 @@ function recalcularGastosObra(mysqli $link, string $obraId): void
                 gasto_herramientas = ?
           WHERE id_obra = ?'
     );
-    mysqli_bind_param($upd, 'dddds', $gastoEmpleados, $gastoInsumos, $gastoServicios, $gastoHerramientas, $obraId);
+    mysqli_stmt_bind_param($upd, 'dddds', $gastoEmpleados, $gastoInsumos, $gastoServicios, $gastoHerramientas, $obraId);
     mysqli_stmt_execute($upd);
 }

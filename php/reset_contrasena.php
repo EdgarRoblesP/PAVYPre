@@ -46,7 +46,7 @@ $link = Conectarse();
 $stmt = mysqli_prepare($link,
     'SELECT id, email, expires_at, used FROM pv_reset_tokens WHERE token = ? LIMIT 1'
 );
-mysqli_bind_param($stmt, 's', $token);
+mysqli_stmt_bind_param($stmt, 's', $token);
 mysqli_stmt_execute($stmt);
 $row = stmt_row($stmt);
 
@@ -75,7 +75,7 @@ $hash  = password_hash($nueva, PASSWORD_ARGON2ID);
 $actualizado = false;
 
 $upd = mysqli_prepare($link, 'UPDATE pv_empleados SET contrasena = ? WHERE email = ?');
-mysqli_bind_param($upd, 'ss', $hash, $email);
+mysqli_stmt_bind_param($upd, 'ss', $hash, $email);
 mysqli_stmt_execute($upd);
 if (mysqli_stmt_affected_rows($upd) > 0) {
     $actualizado = true;
@@ -83,7 +83,7 @@ if (mysqli_stmt_affected_rows($upd) > 0) {
 
 if (!$actualizado) {
     $upd = mysqli_prepare($link, 'UPDATE pv_clientes SET contrasena = ? WHERE email = ?');
-    mysqli_bind_param($upd, 'ss', $hash, $email);
+    mysqli_stmt_bind_param($upd, 'ss', $hash, $email);
     mysqli_stmt_execute($upd);
     if (mysqli_stmt_affected_rows($upd) > 0) {
         $actualizado = true;
@@ -99,7 +99,7 @@ if (!$actualizado) {
 // ── Marcar token como usado ──────────────────────────────────────────────────
 $tokenId = $row['id'];
 $upd     = mysqli_prepare($link, 'UPDATE pv_reset_tokens SET used = 1 WHERE id = ?');
-mysqli_bind_param($upd, 'i', $tokenId);
+mysqli_stmt_bind_param($upd, 'i', $tokenId);
 mysqli_stmt_execute($upd);
 
 echo json_encode(['success' => true]);
