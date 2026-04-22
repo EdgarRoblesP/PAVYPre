@@ -28,6 +28,29 @@ if (!$nombre) {
     exit;
 }
 
+if ($presupuesto < 0) {
+    http_response_code(400);
+    echo json_encode(['error' => 'El presupuesto no puede ser negativo.']);
+    exit;
+}
+
+$reDate = '/^\d{4}-\d{2}-\d{2}$/';
+if ($fecha_inicio && !preg_match($reDate, $fecha_inicio)) {
+    http_response_code(400);
+    echo json_encode(['error' => 'Formato de fecha de inicio inválido.']);
+    exit;
+}
+if ($fecha_termino && !preg_match($reDate, $fecha_termino)) {
+    http_response_code(400);
+    echo json_encode(['error' => 'Formato de fecha de término inválido.']);
+    exit;
+}
+if ($fecha_inicio && $fecha_termino && $fecha_termino <= $fecha_inicio) {
+    http_response_code(400);
+    echo json_encode(['error' => 'La fecha de término debe ser posterior a la de inicio.']);
+    exit;
+}
+
 if ($id) {
     // Edición: solo se actualiza el nombre
     $stmt = mysqli_prepare($link, 'UPDATE pv_obras SET ubicacion = ? WHERE id_obra = ?');
@@ -45,13 +68,7 @@ if ($id) {
         exit;
     }
 
-    $t1 = 'pv_obras'; $t2 = 'id_obra'; $t3 = 'OBR';
-    $stmtSp = mysqli_prepare($link, 'CALL sp_generar_id(?, ?, ?, @nuevo_id)');
-    mysqli_stmt_bind_param($stmtSp, 'sss', $t1, $t2, $t3);
-    mysqli_stmt_execute($stmtSp);
-    mysqli_stmt_close($stmtSp);
-    $res     = mysqli_query($link, 'SELECT @nuevo_id');
-    $nuevoId = mysqli_fetch_row($res)[0];
+    $nuevoId = generarId($link, 'pv_obras', 'id_obra', 'OBR');
 
     $fechaTermVal = $fecha_termino ?: null;
 

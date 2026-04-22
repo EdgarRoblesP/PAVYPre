@@ -6,6 +6,13 @@
  * Respuesta: array de objetos con:
  *   id_herramienta, nombre, proveedor_id, proveedor, renta_semanal, imagen
  */
+session_start();
+if (($_SESSION['user_role'] ?? '') !== 'admin') {
+    http_response_code(403);
+    header('Content-Type: application/json');
+    echo json_encode(['error' => 'Acceso no autorizado.']);
+    exit;
+}
 require_once __DIR__ . '/db.php';
 header('Content-Type: application/json');
 

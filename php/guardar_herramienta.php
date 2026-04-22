@@ -41,16 +41,27 @@ if ($provRow) {
     $proveedorId = (int) mysqli_insert_id($link);
 }
 
+if ($renta < 0) {
+    http_response_code(400);
+    echo json_encode(['error' => 'La renta semanal no puede ser negativa.']);
+    exit;
+}
+
 // Manejo de imagen
 $imagenPath = null;
+$extensionesPermitidas = ['jpg', 'jpeg', 'png', 'webp'];
 if (!empty($_FILES['imagen']['tmp_name']) && $_FILES['imagen']['error'] === UPLOAD_ERR_OK) {
+    $ext = strtolower(pathinfo($_FILES['imagen']['name'], PATHINFO_EXTENSION));
+    if (!in_array($ext, $extensionesPermitidas, true)) {
+        http_response_code(400);
+        echo json_encode(['error' => 'Formato de imagen no permitido. Usa JPG, PNG o WebP.']);
+        exit;
+    }
     $uploadDir = realpath(__DIR__ . '/..') . DIRECTORY_SEPARATOR . 'uploads' . DIRECTORY_SEPARATOR . 'herramientas' . DIRECTORY_SEPARATOR;
     if (!is_dir($uploadDir)) {
         mkdir($uploadDir, 0755, true);
     }
-    $ext      = strtolower(pathinfo($_FILES['imagen']['name'], PATHINFO_EXTENSION));
-    $filename = preg_replace('/[^a-z0-9_-]/i', '', pathinfo($_FILES['imagen']['name'], PATHINFO_FILENAME))
-                . '_' . time() . '.' . $ext;
+    $filename = bin2hex(random_bytes(8)) . '_' . time() . '.' . $ext;
     $destino  = $uploadDir . $filename;
     if (move_uploaded_file($_FILES['imagen']['tmp_name'], $destino)) {
         $imagenPath = 'uploads/herramientas/' . $filename;
@@ -86,13 +97,7 @@ if ($id) {
     }
     mysqli_stmt_execute($stmt);
 } else {
-    $t1 = 'pv_herramientas'; $t2 = 'id_herramienta'; $t3 = 'HER';
-    $stmtSp = mysqli_prepare($link, 'CALL sp_generar_id(?, ?, ?, @nuevo_id)');
-    mysqli_stmt_bind_param($stmtSp, 'sss', $t1, $t2, $t3);
-    mysqli_stmt_execute($stmtSp);
-    mysqli_stmt_close($stmtSp);
-    $res     = mysqli_query($link, 'SELECT @nuevo_id');
-    $nuevoId = mysqli_fetch_row($res)[0];
+    $nuevoId = generarId($link, 'pv_herramientas', 'id_herramienta', 'HER');
     $stmt    = mysqli_prepare($link,
         'INSERT INTO pv_herramientas (id_herramienta, nombre, proveedor_id, renta_semanal, imagen) VALUES (?, ?, ?, ?, ?)'
     );

@@ -15,7 +15,7 @@
     <header class="bg-black text-white shadow-lg ">
         <div class="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
             <div class="flex items-center gap-4">
-                <img src="img/logo.png" alt="PAVYPRE" class="h-12 w-auto object-contain" onerror="this.style.display='none'"/>
+                
                 <div>
                     <h1 class="text-2xl font-bold"><span class="text-[#FFC107]">PAVY</span>Pre</h1>
                     <p class="text-sm text-gray-400">Portal del Colaborador</p>
@@ -39,6 +39,7 @@
         <div class="mb-8">
             <h2 class="text-3xl font-semibold text-black mb-2">Mis Obras</h2>
             <p class="text-gray-500 text-sm">Historial de proyectos en los que has participado</p>
+            <div class="flex flex-wrap gap-6 mt-4" id="collab-info" style="display:none!important"></div>
         </div>
 
         <!-- Obras List -->
@@ -116,7 +117,7 @@ function renderObras() {
                 </span>
                 -->
             </div>
-            <div class="grid grid-cols-2 md:grid-cols-5 gap-4">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div>
                     <p class="text-xs text-gray-500 mb-1">Fecha de Inicio</p>
                     <p class="font-semibold text-sm text-black">${fmtDate(o.fechaInicio)}</p>
@@ -124,14 +125,6 @@ function renderObras() {
                 <div>
                     <p class="text-xs text-gray-500 mb-1">Fecha de Término</p>
                     <p class="font-semibold text-sm text-black">${fmtDate(o.fechaTermino)}</p>
-                </div>
-                <div>
-                    <p class="text-xs text-gray-500 mb-1">Puesto</p>
-                    <p class="font-semibold text-sm text-black">${o.puesto}</p>
-                </div>
-                <div>
-                    <p class="text-xs text-gray-500 mb-1">Salario Semanal</p>
-                    <p class="font-semibold text-[#FFC107] text-sm">${fmt(o.salarioSemanal)}</p>
                 </div>
                 <div class="bg-gray-50 rounded p-3 border-l-4 border-[#FFC107]">
                     <p class="text-xs text-gray-600 mb-1">Total Ganado</p>
@@ -203,6 +196,19 @@ window.addEventListener('pageshow', function(e) {
                 .then(data => {
                     obras = data;
                     renderObras();
+                    if (data.length) {
+                        const info = document.getElementById('collab-info');
+                        info.style.cssText = '';
+                        info.innerHTML = `
+                            <div>
+                                <p class="text-xs text-gray-500 mb-0.5">Puesto</p>
+                                <p class="font-semibold text-black">${data[0].puesto}</p>
+                            </div>
+                            <div>
+                                <p class="text-xs text-gray-500 mb-0.5">Salario Semanal</p>
+                                <p class="font-semibold text-[#FFC107]">${fmt(data[0].salarioSemanal)}</p>
+                            </div>`;
+                    }
                     // renderSummary();
                 })
                 .catch(() => {

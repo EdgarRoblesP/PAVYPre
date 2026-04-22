@@ -25,6 +25,12 @@ if (!$nombre) {
     exit;
 }
 
+if ($email !== '' && !filter_var($email, FILTER_VALIDATE_EMAIL)) {
+    http_response_code(400);
+    echo json_encode(['error' => 'El formato del correo electrónico no es válido.']);
+    exit;
+}
+
 if ($id) {
     $stmt = mysqli_prepare($link, 'UPDATE pv_clientes SET nombre = ?, telefono = ?, email = ? WHERE id_cliente = ?');
     mysqli_stmt_bind_param($stmt, 'ssss', $nombre, $telefono, $email, $id);
@@ -35,13 +41,7 @@ if ($id) {
         echo json_encode(['error' => 'La contraseña es obligatoria (mínimo 8 caracteres).']);
         exit;
     }
-    $t1 = 'pv_clientes'; $t2 = 'id_cliente'; $t3 = 'CLI';
-    $stmtSp = mysqli_prepare($link, 'CALL sp_generar_id(?, ?, ?, @nuevo_id)');
-    mysqli_stmt_bind_param($stmtSp, 'sss', $t1, $t2, $t3);
-    mysqli_stmt_execute($stmtSp);
-    mysqli_stmt_close($stmtSp);
-    $res     = mysqli_query($link, 'SELECT @nuevo_id');
-    $nuevoId = mysqli_fetch_row($res)[0];
+    $nuevoId = generarId($link, 'pv_clientes', 'id_cliente', 'CLI');
     $hash    = password_hash($contrasena, PASSWORD_ARGON2ID);
     $dir     = '';
     $stmt    = mysqli_prepare($link, 'INSERT INTO pv_clientes (id_cliente, nombre, telefono, direccion, email, contrasena) VALUES (?, ?, ?, ?, ?, ?)');

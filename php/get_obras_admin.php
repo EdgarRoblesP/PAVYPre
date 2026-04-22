@@ -247,10 +247,10 @@ foreach ($obras as $o) {
         ];
     }, stmt_rows($stmtPagos));
 
-    $costoFinal = (float)$o['gasto_empleados']
-                + (float)$o['gasto_insumos']
-                + (float)$o['gasto_servicios']
-                + (float)$o['gasto_herramientas'];
+    $costoFinal = array_sum(array_column($empleados,       'costoTotal'))
+                + array_sum(array_column($insumos,          'subtotal'))
+                + array_sum(array_column($servicios,        'subtotal'))
+                + array_sum(array_column($herramientasObra, 'subtotal'));
 
     $resultado[] = [
         'id'                 => $loopId,

@@ -21,8 +21,8 @@
         /* ── Grid de tarjetas proveedores ── */
         .grid-proveedores {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-            gap: 1rem;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 1.25rem;
         }
         .card-proveedor {
             position: relative;
@@ -30,7 +30,7 @@
             background: #fff;
             border: 1px solid #e5e7eb;
             border-radius: .75rem;
-            padding: 1rem 1.25rem;
+            padding: 1.4rem 1.6rem;
             box-shadow: 0 1px 3px rgba(0,0,0,.06);
             transition: box-shadow .2s, border-color .2s, transform .2s;
             cursor: pointer;
@@ -63,15 +63,15 @@
         .card-proveedor-nombre {
             display: block;
             font-weight: 700;
-            font-size: .95rem;
+            font-size: 1.05rem;
             color: #111;
-            margin-bottom: .3rem;
+            margin-bottom: .45rem;
         }
         .card-proveedor-contact {
-            font-size: .76rem;
+            font-size: .82rem;
             color: #374151;
-            margin-bottom: .45rem;
-            line-height: 1.55;
+            margin-bottom: .6rem;
+            line-height: 1.65;
         }
         .card-proveedor-contact .cp-row {
             display: flex;
@@ -84,23 +84,23 @@
             min-width: 4.5rem;
         }
         .card-proveedor-stats {
-            font-size: .75rem;
+            font-size: .78rem;
             color: #6b7280;
             display: flex;
             flex-wrap: wrap;
-            gap: .3rem;
+            gap: .4rem;
             align-items: center;
             border-top: 1px solid #f3f4f6;
-            padding-top: .4rem;
-            margin-top: .4rem;
+            padding-top: .55rem;
+            margin-top: .55rem;
         }
         .card-proveedor-stats .sep { color: #d1d5db; }
         .card-proveedor-stats .stat-badge {
             background: #f9fafb;
             border: 1px solid #e5e7eb;
             border-radius: .35rem;
-            padding: .1rem .45rem;
-            font-size: .72rem;
+            padding: .2rem .55rem;
+            font-size: .75rem;
         }
     </style>
     <link rel="icon" type="image/png" sizes="16x16" href="img/logo-16x16.png">
@@ -112,7 +112,7 @@
 <header class="bg-black text-white shadow-lg fixed top-0 left-0 right-0 z-40">
     <div class="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
         <div class="flex items-center gap-4">
-            <img src="img/logo.png" alt="PAVYPRE" class="h-12 w-auto object-contain" onerror="this.style.display='none'"/>
+            
             <div>
                 <h1 class="text-2xl font-bold"><span class="text-[#FFC107]">PAVY</span>Pre</h1>
                 <p class="text-sm text-gray-400">Panel de Administración</p>
@@ -153,6 +153,16 @@
                 class="tab-btn flex items-center gap-2 px-6 py-4 border-b-2 border-transparent text-gray-500 hover:text-black transition-colors whitespace-nowrap text-sm">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/></svg>
                 Proveedores
+            </button>
+            <button onclick="switchTab('insumos')" id="tab-insumos"
+                class="tab-btn flex items-center gap-2 px-6 py-4 border-b-2 border-transparent text-gray-500 hover:text-black transition-colors whitespace-nowrap text-sm">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"/></svg>
+                Insumos y Servicios
+            </button>
+            <button onclick="switchTab('herramientas')" id="tab-herramientas"
+                class="tab-btn flex items-center gap-2 px-6 py-4 border-b-2 border-transparent text-gray-500 hover:text-black transition-colors whitespace-nowrap text-sm">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                Herramientas
             </button>
         </div>
     </div>
@@ -311,34 +321,44 @@
 
     <!-- ==================== PROVEEDORES TAB ==================== -->
     <div id="tab-content-proveedores" class="tab-content">
-        <!-- Sección: Proveedores -->
         <div class="flex items-center justify-between mb-6 flex-wrap gap-3">
             <div>
-                <h2 class="text-3xl font-bold text-black">Proveedores, Insumos y Herramientas</h2>
-                <p class="text-gray-500 text-sm mt-1">Directorio de proveedores, insumos/servicios y herramientas disponibles</p>
+                <h2 class="text-3xl font-bold text-black">Proveedores</h2>
+                <p class="text-gray-500 text-sm mt-1">Directorio de proveedores registrados</p>
+            </div>
+            <button onclick="resetProveedorForm(); openModal('proveedor-modal')"
+                class="flex items-center gap-2 bg-[#FFC107] text-black px-5 py-2 rounded hover:bg-yellow-500 transition-colors font-semibold text-sm">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                Nuevo Proveedor
+            </button>
+        </div>
+        <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-4 mb-4 flex flex-wrap gap-3 items-center">
+            <div class="flex-1 min-w-[200px]">
+                <input id="proveedores-search" type="text" placeholder="Buscar proveedor..."
+                    oninput="filtrarProveedores()"
+                    class="w-full border-2 border-gray-200 rounded-lg px-4 py-2 text-sm focus:outline-none focus:border-[#FFC107]">
+            </div>
+            <button onclick="limpiarFiltrosProveedores()"
+                class="text-sm text-gray-400 hover:text-black transition-colors px-2 py-2">Limpiar filtros</button>
+            <div class="flex items-center gap-2 flex-wrap">
+                <span class="text-xs text-gray-400">Ordenar:</span>
+                <button onclick="sortProveedores('nombre')"            class="px-2.5 py-1 text-xs rounded border border-gray-200 text-gray-600 hover:border-black hover:text-black transition-colors">Nombre<span            id="si-proveedores-nombre"            class="ml-1 opacity-40">↕</span></button>
+                <button onclick="sortProveedores('totalInsumos')"      class="px-2.5 py-1 text-xs rounded border border-gray-200 text-gray-600 hover:border-black hover:text-black transition-colors">Insumos<span            id="si-proveedores-totalInsumos"      class="ml-1 opacity-40">↕</span></button>
+                <button onclick="sortProveedores('totalServicios')"    class="px-2.5 py-1 text-xs rounded border border-gray-200 text-gray-600 hover:border-black hover:text-black transition-colors">Servicios<span          id="si-proveedores-totalServicios"    class="ml-1 opacity-40">↕</span></button>
+                <button onclick="sortProveedores('totalHerramientas')" class="px-2.5 py-1 text-xs rounded border border-gray-200 text-gray-600 hover:border-black hover:text-black transition-colors">Herramientas<span id="si-proveedores-totalHerramientas" class="ml-1 opacity-40">↕</span></button>
             </div>
         </div>
+        <div id="grid-proveedores" class="grid-proveedores"></div>
+        <div id="proveedores-paginacion"></div>
+    </div>
 
-        <!-- Proveedores — acceso por modal -->
-        <div class="flex items-center justify-between mb-10 flex-wrap gap-3">
-            <h3 class="text-xl font-bold text-black">Proveedores</h3>
-            <div class="flex items-center gap-2">
-                <button onclick="openModal('lista-proveedores-modal')"
-                    class="flex items-center gap-2 bg-black text-white px-5 py-2 rounded hover:bg-gray-800 transition-colors font-semibold text-sm">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16"/></svg>
-                    Ver Proveedores
-                </button>
-                <button onclick="resetProveedorForm(); openModal('proveedor-modal')"
-                    class="flex items-center gap-2 bg-[#FFC107] text-black px-5 py-2 rounded hover:bg-yellow-500 transition-colors font-semibold text-sm">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
-                    Nuevo Proveedor
-                </button>
-            </div>
-        </div>
-
-        <!-- Tabla Insumos/Servicios -->
+    <!-- ==================== INSUMOS TAB ==================== -->
+    <div id="tab-content-insumos" class="tab-content">
         <div class="flex items-center justify-between mb-3 flex-wrap gap-3">
-            <h3 class="text-xl font-bold text-black">Insumos y Servicios</h3>
+            <div>
+                <h2 class="text-3xl font-bold text-black">Insumos y Servicios</h2>
+                <p class="text-gray-500 text-sm mt-1">Catálogo de insumos y servicios disponibles</p>
+            </div>
             <button onclick="resetInsumoForm(); openModal('insumo-modal')"
                 class="flex items-center gap-2 bg-[#FFC107] text-black px-5 py-2 rounded hover:bg-yellow-500 transition-colors font-semibold text-sm">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
@@ -359,9 +379,9 @@
                 <table class="w-full">
                     <thead class="bg-black text-white text-sm">
                         <tr>
-                            <th onclick="sortInsumos('nombre')"      class="px-4 py-3 text-left cursor-pointer hover:bg-gray-800 transition-colors select-none">Nombre<span id="si-insumos-nombre"      class="ml-1"></span></th>
-                            <th onclick="sortInsumos('tipo')"        class="px-4 py-3 text-left cursor-pointer hover:bg-gray-800 transition-colors select-none">Tipo<span id="si-insumos-tipo"        class="ml-1"></span></th>
-                            <th onclick="sortInsumos('proveedor')"   class="px-4 py-3 text-left cursor-pointer hover:bg-gray-800 transition-colors select-none">Proveedor<span id="si-insumos-proveedor"   class="ml-1"></span></th>
+                            <th onclick="sortInsumos('nombre')"        class="px-4 py-3 text-left cursor-pointer hover:bg-gray-800 transition-colors select-none">Nombre<span id="si-insumos-nombre" class="ml-1"></span></th>
+                            <th onclick="sortInsumos('tipo')"          class="px-4 py-3 text-left cursor-pointer hover:bg-gray-800 transition-colors select-none">Tipo<span id="si-insumos-tipo" class="ml-1"></span></th>
+                            <th onclick="sortInsumos('proveedor')"     class="px-4 py-3 text-left cursor-pointer hover:bg-gray-800 transition-colors select-none">Proveedor<span id="si-insumos-proveedor" class="ml-1"></span></th>
                             <th onclick="sortInsumos('costoUnitario')" class="px-4 py-3 text-right cursor-pointer hover:bg-gray-800 transition-colors select-none">Costo Unitario<span id="si-insumos-costoUnitario" class="ml-1"></span></th>
                             <th class="px-4 py-3 text-center">Editar</th>
                         </tr>
@@ -370,10 +390,16 @@
                 </table>
             </div>
         </div>
+        <div id="insumos-paginacion"></div>
+    </div>
 
-        <!-- Tabla Herramientas -->
-        <div class="flex items-center justify-between mt-10 mb-3 flex-wrap gap-3">
-            <h3 class="text-xl font-bold text-black">Herramientas</h3>
+    <!-- ==================== HERRAMIENTAS TAB ==================== -->
+    <div id="tab-content-herramientas" class="tab-content">
+        <div class="flex items-center justify-between mb-3 flex-wrap gap-3">
+            <div>
+                <h2 class="text-3xl font-bold text-black">Herramientas</h2>
+                <p class="text-gray-500 text-sm mt-1">Inventario de herramientas disponibles</p>
+            </div>
             <button onclick="resetHerramientaForm(); openModal('herramienta-modal')"
                 class="flex items-center gap-2 bg-[#FFC107] text-black px-5 py-2 rounded hover:bg-yellow-500 transition-colors font-semibold text-sm">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
@@ -395,8 +421,8 @@
                     <thead class="bg-black text-white text-sm">
                         <tr>
                             <th class="px-4 py-3 text-left">Imagen</th>
-                            <th onclick="sortHerramientas('nombre')"     class="px-4 py-3 text-left cursor-pointer hover:bg-gray-800 transition-colors select-none">Nombre<span id="si-herramientas-nombre"     class="ml-1"></span></th>
-                            <th onclick="sortHerramientas('proveedor')"  class="px-4 py-3 text-left cursor-pointer hover:bg-gray-800 transition-colors select-none">Proveedor<span id="si-herramientas-proveedor"  class="ml-1"></span></th>
+                            <th onclick="sortHerramientas('nombre')"        class="px-4 py-3 text-left cursor-pointer hover:bg-gray-800 transition-colors select-none">Nombre<span id="si-herramientas-nombre" class="ml-1"></span></th>
+                            <th onclick="sortHerramientas('proveedor')"     class="px-4 py-3 text-left cursor-pointer hover:bg-gray-800 transition-colors select-none">Proveedor<span id="si-herramientas-proveedor" class="ml-1"></span></th>
                             <th onclick="sortHerramientas('renta_semanal')" class="px-4 py-3 text-right cursor-pointer hover:bg-gray-800 transition-colors select-none">Renta por Semana<span id="si-herramientas-renta_semanal" class="ml-1"></span></th>
                             <th class="px-4 py-3 text-center">Editar</th>
                         </tr>
@@ -405,6 +431,7 @@
                 </table>
             </div>
         </div>
+        <div id="herramientas-paginacion"></div>
     </div>
 
 
@@ -595,26 +622,6 @@
     </div>
 </div>
 
-<!-- Modal: Lista de Proveedores -->
-<div id="lista-proveedores-modal" class="modal-overlay fixed inset-0 z-50 items-center justify-center bg-black bg-opacity-60 p-4">
-    <div class="bg-white rounded-xl shadow-2xl w-full max-w-3xl max-h-[80vh] flex flex-col">
-        <div class="bg-black text-white px-6 py-4 rounded-t-xl flex items-center justify-between flex-shrink-0">
-            <h3 class="text-lg font-bold">Proveedores</h3>
-            <button onclick="closeModal('lista-proveedores-modal')" class="text-gray-400 hover:text-white text-2xl leading-none">&times;</button>
-        </div>
-        <div class="p-6 overflow-y-auto">
-            <div class="flex items-center gap-2 mb-4 flex-wrap">
-                <span class="text-xs text-gray-400 mr-1">Ordenar:</span>
-                <button onclick="sortProveedores('nombre')"           class="px-2.5 py-1 text-xs rounded border border-gray-200 text-gray-600 hover:border-black hover:text-black transition-colors">Nombre<span           id="si-proveedores-nombre"           class="ml-1 opacity-40">↕</span></button>
-                <button onclick="sortProveedores('totalInsumos')"     class="px-2.5 py-1 text-xs rounded border border-gray-200 text-gray-600 hover:border-black hover:text-black transition-colors">Insumos<span           id="si-proveedores-totalInsumos"     class="ml-1 opacity-40">↕</span></button>
-                <button onclick="sortProveedores('totalServicios')"   class="px-2.5 py-1 text-xs rounded border border-gray-200 text-gray-600 hover:border-black hover:text-black transition-colors">Servicios<span         id="si-proveedores-totalServicios"   class="ml-1 opacity-40">↕</span></button>
-                <button onclick="sortProveedores('totalHerramientas')" class="px-2.5 py-1 text-xs rounded border border-gray-200 text-gray-600 hover:border-black hover:text-black transition-colors">Herramientas<span id="si-proveedores-totalHerramientas" class="ml-1 opacity-40">↕</span></button>
-            </div>
-            <div id="grid-proveedores" class="grid-proveedores"></div>
-            <div id="proveedores-paginacion"></div>
-        </div>
-    </div>
-</div>
 
 <!-- Modal: Nuevo / Editar Proveedor -->
 <div id="proveedor-modal" class="modal-overlay fixed inset-0 z-50 items-center justify-center bg-black bg-opacity-60 p-4">
@@ -964,9 +971,11 @@ let proveedoresPage      = 1;
 let proveedoresSort      = { key: 'nombre', dir: 'asc' };
 
 let insumosFiltrados     = [];
+let insumosPage          = 1;
 let insumosSort          = { key: 'nombre', dir: 'asc' };
 
 let herramientasFiltradas = [];
+let herramientasPage      = 1;
 let herramientasSort     = { key: 'nombre', dir: 'asc' };
 
 let empleados   = [];
@@ -1182,9 +1191,19 @@ function limpiarFiltrosClientes() {
 // FILTROS DE PROVEEDORES
 // ============================================================
 function filtrarProveedores() {
-    proveedoresFiltrados = proveedores.slice();
+    const input = document.getElementById('proveedores-search');
+    const texto = input ? input.value.toLowerCase().trim() : '';
+    proveedoresFiltrados = texto
+        ? proveedores.filter(p => sinAcentos(p.nombre.toLowerCase()).includes(sinAcentos(texto)))
+        : proveedores.slice();
     proveedoresPage = 1;
     renderProveedoresConDatos(proveedoresFiltrados);
+}
+
+function limpiarFiltrosProveedores() {
+    const input = document.getElementById('proveedores-search');
+    if (input) input.value = '';
+    filtrarProveedores();
 }
 
 // ============================================================
@@ -1193,6 +1212,7 @@ function filtrarProveedores() {
 function filtrarInsumos() {
     const texto = document.getElementById('insumos-search').value.toLowerCase().trim();
     insumosFiltrados = insumos.filter(i => sinAcentos(i.nombre.toLowerCase()).includes(sinAcentos(texto)));
+    insumosPage = 1;
     renderInsumosConDatos(insumosFiltrados);
 }
 
@@ -1207,6 +1227,7 @@ function limpiarFiltrosInsumos() {
 function filtrarHerramientas() {
     const texto = document.getElementById('herramientas-search').value.toLowerCase().trim();
     herramientasFiltradas = herramientas.filter(h => sinAcentos(h.nombre.toLowerCase()).includes(sinAcentos(texto)));
+    herramientasPage = 1;
     renderHerramientasConDatos(herramientasFiltradas);
 }
 
@@ -1805,12 +1826,14 @@ function sortProveedores(key) {
 function sortInsumos(key) {
     insumosSort.dir = insumosSort.key === key && insumosSort.dir === 'asc' ? 'desc' : 'asc';
     insumosSort.key = key;
+    insumosPage = 1;
     renderInsumosConDatos(insumosFiltrados);
 }
 
 function sortHerramientas(key) {
     herramientasSort.dir = herramientasSort.key === key && herramientasSort.dir === 'asc' ? 'desc' : 'asc';
     herramientasSort.key = key;
+    herramientasPage = 1;
     renderHerramientasConDatos(herramientasFiltradas);
 }
 
@@ -1890,7 +1913,7 @@ function renderClientesConDatos(lista) {
 function renderProveedores() { filtrarProveedores(); }
 
 function renderProveedoresConDatos(lista) {
-    const PER_PAGE = 10;
+    const PER_PAGE = 9;
     const numKeys  = ['totalInsumos', 'totalServicios', 'totalHerramientas'];
     const sorted   = sortLista(lista, proveedoresSort.key, numKeys.includes(proveedoresSort.key) ? 'num' : 'str');
     if (proveedoresSort.dir === 'desc') sorted.reverse();
@@ -1927,7 +1950,7 @@ function renderProveedoresConDatos(lista) {
 }
 
 function irAPaginaProveedores(page) {
-    const totalPags = Math.max(1, Math.ceil(proveedoresFiltrados.length / 10));
+    const totalPags = Math.max(1, Math.ceil(proveedoresFiltrados.length / 8));
     if (page < 1 || page > totalPags) return;
     proveedoresPage = page;
     renderProveedoresConDatos(proveedoresFiltrados);
@@ -1937,17 +1960,24 @@ function irAPaginaProveedores(page) {
 function renderInsumos() { filtrarInsumos(); }
 
 function renderInsumosConDatos(lista) {
+    const PER_PAGE = 10;
     const tbody = document.getElementById('insumos-tbody');
     const numKeys = ['costoUnitario'];
     const sorted  = sortLista(lista, insumosSort.key, numKeys.includes(insumosSort.key) ? 'num' : 'str');
     if (insumosSort.dir === 'desc') sorted.reverse();
     actualizarIndicadores('insumos', insumosSort, ['nombre', 'tipo', 'proveedor', 'costoUnitario']);
+
+    const totalPags = Math.max(1, Math.ceil(sorted.length / PER_PAGE));
+    insumosPage = Math.min(insumosPage, totalPags);
+    const inicio = (insumosPage - 1) * PER_PAGE;
+    const pagina = sorted.slice(inicio, inicio + PER_PAGE);
+
     if (!sorted.length) {
         tbody.innerHTML = '<tr><td colspan="5" class="px-4 py-8 text-center text-gray-400">No se encontraron insumos.</td></tr>';
+        renderPaginacionGeneric('insumos-paginacion', insumosPage, totalPags, sorted.length, PER_PAGE, 'irAPaginaInsumos');
         return;
     }
-    tbody.innerHTML = sorted.map(i => {
-        // insumos cargados de BD llevan i.proveedor directamente (VARCHAR)
+    tbody.innerHTML = pagina.map(i => {
         const provNombre = i.proveedor ?? (proveedores.find(p => p.id === i.proveedorId)?.nombre ?? '—');
         return `<tr class="border-b border-gray-100 hover:bg-gray-50 text-sm">
             <td class="px-4 py-3 font-semibold text-black">${i.nombre}</td>
@@ -1959,21 +1989,38 @@ function renderInsumosConDatos(lista) {
             </td>
         </tr>`;
     }).join('');
+    renderPaginacionGeneric('insumos-paginacion', insumosPage, totalPags, sorted.length, PER_PAGE, 'irAPaginaInsumos');
+}
+
+function irAPaginaInsumos(page) {
+    const totalPags = Math.max(1, Math.ceil(insumosFiltrados.length / 10));
+    if (page < 1 || page > totalPags) return;
+    insumosPage = page;
+    renderInsumosConDatos(insumosFiltrados);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
 function renderHerramientas() { filtrarHerramientas(); }
 
 function renderHerramientasConDatos(lista) {
+    const PER_PAGE = 10;
     const tbody = document.getElementById('herramientas-tbody');
     const numKeys = ['renta_semanal'];
     const sorted  = sortLista(lista, herramientasSort.key, numKeys.includes(herramientasSort.key) ? 'num' : 'str');
     if (herramientasSort.dir === 'desc') sorted.reverse();
     actualizarIndicadores('herramientas', herramientasSort, ['nombre', 'proveedor', 'renta_semanal']);
+
+    const totalPags = Math.max(1, Math.ceil(sorted.length / PER_PAGE));
+    herramientasPage = Math.min(herramientasPage, totalPags);
+    const inicio = (herramientasPage - 1) * PER_PAGE;
+    const pagina = sorted.slice(inicio, inicio + PER_PAGE);
+
     if (!sorted.length) {
         tbody.innerHTML = '<tr><td colspan="5" class="px-4 py-8 text-center text-gray-400">No se encontraron herramientas.</td></tr>';
+        renderPaginacionGeneric('herramientas-paginacion', herramientasPage, totalPags, sorted.length, PER_PAGE, 'irAPaginaHerramientas');
         return;
     }
-    tbody.innerHTML = sorted.map(h => {
+    tbody.innerHTML = pagina.map(h => {
         // Soporta datos de BD (id_herramienta / proveedor / renta_semanal)
         const idHra      = h.id_herramienta ?? h.id;
         const provNombre = h.proveedor ?? (proveedores.find(p => p.id === h.proveedorId)?.nombre ?? '—');
@@ -2001,6 +2048,15 @@ function renderHerramientasConDatos(lista) {
             </td>
         </tr>`;
     }).join('');
+    renderPaginacionGeneric('herramientas-paginacion', herramientasPage, totalPags, sorted.length, PER_PAGE, 'irAPaginaHerramientas');
+}
+
+function irAPaginaHerramientas(page) {
+    const totalPags = Math.max(1, Math.ceil(herramientasFiltradas.length / 10));
+    if (page < 1 || page > totalPags) return;
+    herramientasPage = page;
+    renderHerramientasConDatos(herramientasFiltradas);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
 // ============================================================

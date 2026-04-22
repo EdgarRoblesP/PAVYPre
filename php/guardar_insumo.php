@@ -25,6 +25,18 @@ if (!$nombre || !$proveedorNombre) {
     exit;
 }
 
+if (!in_array($tipo, ['Insumo', 'Servicio'], true)) {
+    http_response_code(400);
+    echo json_encode(['error' => 'El tipo debe ser Insumo o Servicio.']);
+    exit;
+}
+
+if ($costo < 0) {
+    http_response_code(400);
+    echo json_encode(['error' => 'El costo unitario no puede ser negativo.']);
+    exit;
+}
+
 // Obtener o crear el proveedor en pv_proveedores
 $stmtProv = mysqli_prepare($link, 'SELECT id FROM pv_proveedores WHERE nombre = ? LIMIT 1');
 mysqli_stmt_bind_param($stmtProv, 's', $proveedorNombre);
@@ -46,13 +58,7 @@ if ($tipo === 'Servicio') {
         mysqli_stmt_bind_param($stmt, 'sdis', $nombre, $costo, $proveedorId, $id);
         mysqli_stmt_execute($stmt);
     } else {
-        $t1 = 'pv_servicios'; $t2 = 'id_servicio'; $t3 = 'SRV';
-        $stmtSp = mysqli_prepare($link, 'CALL sp_generar_id(?, ?, ?, @nuevo_id)');
-        mysqli_stmt_bind_param($stmtSp, 'sss', $t1, $t2, $t3);
-        mysqli_stmt_execute($stmtSp);
-        mysqli_stmt_close($stmtSp);
-        $res     = mysqli_query($link, 'SELECT @nuevo_id');
-        $nuevoId = mysqli_fetch_row($res)[0];
+        $nuevoId = generarId($link, 'pv_servicios', 'id_servicio', 'SRV');
         $stmt    = mysqli_prepare($link, 'INSERT INTO pv_servicios (id_servicio, costo_kilometro, proveedor_id, tipo_traslado) VALUES (?, ?, ?, ?)');
         mysqli_stmt_bind_param($stmt, 'sdis', $nuevoId, $costo, $proveedorId, $nombre);
         mysqli_stmt_execute($stmt);
@@ -63,13 +69,7 @@ if ($tipo === 'Servicio') {
         mysqli_stmt_bind_param($stmt, 'sdis', $nombre, $costo, $proveedorId, $id);
         mysqli_stmt_execute($stmt);
     } else {
-        $t1 = 'pv_insumos'; $t2 = 'id_insumo'; $t3 = 'INS';
-        $stmtSp = mysqli_prepare($link, 'CALL sp_generar_id(?, ?, ?, @nuevo_id)');
-        mysqli_stmt_bind_param($stmtSp, 'sss', $t1, $t2, $t3);
-        mysqli_stmt_execute($stmtSp);
-        mysqli_stmt_close($stmtSp);
-        $res     = mysqli_query($link, 'SELECT @nuevo_id');
-        $nuevoId = mysqli_fetch_row($res)[0];
+        $nuevoId = generarId($link, 'pv_insumos', 'id_insumo', 'INS');
         $stmt    = mysqli_prepare($link, 'INSERT INTO pv_insumos (id_insumo, costo_unitario, proveedor_id, tipo_material) VALUES (?, ?, ?, ?)');
         mysqli_stmt_bind_param($stmt, 'sdis', $nuevoId, $costo, $proveedorId, $nombre);
         mysqli_stmt_execute($stmt);

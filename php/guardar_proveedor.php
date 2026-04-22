@@ -27,6 +27,12 @@ if (!$nombre) {
     exit;
 }
 
+if ($email !== null && !filter_var($email, FILTER_VALIDATE_EMAIL)) {
+    http_response_code(400);
+    echo json_encode(['error' => 'El formato del correo electrónico no es válido.']);
+    exit;
+}
+
 if ($id) {
     $stmt = mysqli_prepare($link,
         'UPDATE pv_proveedores SET nombre = ?, telefono = ?, email = ?, direccion = ? WHERE id = ?'
