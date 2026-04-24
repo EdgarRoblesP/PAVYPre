@@ -8,7 +8,7 @@ define('DB_PASS', 'DWeb_p2@26');
 define('DB_NAME', 'proydweb_p2026');
 
 // Conexión a la base de datos con Railway (descomenta si quieres usar Railway)
-/*
+
 function Conectarse() {
     $host = getenv('MYSQLHOST')     ?: 'nozomi.proxy.rlwy.net';
     $user = getenv('MYSQLUSER')     ?: 'root';
@@ -19,8 +19,8 @@ function Conectarse() {
     $link = @mysqli_connect($host, $user, $pass, $db, $port);
     return $link ? $link : false;
 }
-*/
 
+/*
 // Conexión a la base de datos con Proydweb
 function Conectarse() {
     mysqli_report(MYSQLI_REPORT_OFF);
@@ -28,6 +28,7 @@ function Conectarse() {
     if ($link) mysqli_set_charset($link, 'utf8mb4');
     return $link ? $link : false;
 }
+    */
 
 
 /**
