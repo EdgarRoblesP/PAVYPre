@@ -481,13 +481,13 @@
                 <div>
                     <label class="block text-sm font-semibold text-gray-700 mb-1">Fecha de Inicio *</label>
                     <input id="obra-fechaInicio" name="fecha_inicio" type="date" required
-                        class="w-full border-2 border-gray-200 rounded-lg px-4 py-2 focus:outline-none focus:border-[#FFC107] text-sm">
+                        class="w-full border-0 border-b-2 border-gray-200 rounded-none bg-transparent px-1 py-2 focus:outline-none focus:border-[#FFC107] text-sm transition-colors">
                     <p id="obra-fechaInicio-err" class="hidden text-red-500 text-xs mt-1">La fecha de inicio es obligatoria.</p>
                 </div>
                 <div>
                     <label class="block text-sm font-semibold text-gray-700 mb-1">Fecha de Término *</label>
                     <input id="obra-fechaTermino" name="fecha_termino" type="date" required
-                        class="w-full border-2 border-gray-200 rounded-lg px-4 py-2 focus:outline-none focus:border-[#FFC107] text-sm">
+                        class="w-full border-0 border-b-2 border-gray-200 rounded-none bg-transparent px-1 py-2 focus:outline-none focus:border-[#FFC107] text-sm transition-colors">
                     <p id="obra-fechaTermino-err" class="hidden text-red-500 text-xs mt-1">La fecha de término es obligatoria.</p>
                 </div>
             </div>
@@ -810,13 +810,13 @@
                 <div>
                     <label class="block text-sm font-semibold text-gray-700 mb-1">Fecha Inicio *</label>
                     <input id="sub-empleado-fechaInicio" name="fecha_inicio" type="date"
-                        class="w-full border-2 border-gray-200 rounded-lg px-4 py-2 focus:outline-none focus:border-[#FFC107] text-sm">
+                        class="w-full border-0 border-b-2 border-gray-200 rounded-none bg-transparent px-1 py-2 focus:outline-none focus:border-[#FFC107] text-sm transition-colors">
                     <p id="sub-empleado-fechaInicio-err" class="hidden text-red-500 text-xs mt-1">La fecha de inicio es obligatoria.</p>
                 </div>
                 <div>
                     <label class="block text-sm font-semibold text-gray-700 mb-1">Fecha Término *</label>
                     <input id="sub-empleado-fechaTermino" name="fecha_termino" type="date"
-                        class="w-full border-2 border-gray-200 rounded-lg px-4 py-2 focus:outline-none focus:border-[#FFC107] text-sm">
+                        class="w-full border-0 border-b-2 border-gray-200 rounded-none bg-transparent px-1 py-2 focus:outline-none focus:border-[#FFC107] text-sm transition-colors">
                     <p id="sub-empleado-fechaTermino-err" class="hidden text-red-500 text-xs mt-1">La fecha de término es obligatoria.</p>
                 </div>
             </div>
@@ -876,13 +876,13 @@
                     <div>
                         <label class="block text-sm font-semibold text-gray-700 mb-1">Fecha Inicio *</label>
                         <input id="sub-recurso-fecha-inicio" name="fecha_inicio" type="date"
-                            class="w-full border-2 border-gray-200 rounded-lg px-4 py-2 focus:outline-none focus:border-[#FFC107] text-sm">
+                            class="w-full border-0 border-b-2 border-gray-200 rounded-none bg-transparent px-1 py-2 focus:outline-none focus:border-[#FFC107] text-sm transition-colors">
                         <p id="sub-recurso-fecha-inicio-err" class="hidden text-red-500 text-xs mt-1">La fecha de inicio es obligatoria.</p>
                     </div>
                     <div>
                         <label class="block text-sm font-semibold text-gray-700 mb-1">Fecha Término *</label>
                         <input id="sub-recurso-fecha-termino" name="fecha_termino" type="date"
-                            class="w-full border-2 border-gray-200 rounded-lg px-4 py-2 focus:outline-none focus:border-[#FFC107] text-sm">
+                            class="w-full border-0 border-b-2 border-gray-200 rounded-none bg-transparent px-1 py-2 focus:outline-none focus:border-[#FFC107] text-sm transition-colors">
                         <p id="sub-recurso-fecha-termino-err" class="hidden text-red-500 text-xs mt-1">La fecha de término es obligatoria.</p>
                     </div>
                 </div>
@@ -915,7 +915,7 @@
             <div>
                 <label class="block text-sm font-semibold text-gray-700 mb-1">Fecha de Pago *</label>
                 <input id="sub-pago-fecha" name="fecha_pago" type="date"
-                    class="w-full border-2 border-gray-200 rounded-lg px-4 py-2 focus:outline-none focus:border-[#FFC107] text-sm">
+                    class="w-full border-0 border-b-2 border-gray-200 rounded-none bg-transparent px-1 py-2 focus:outline-none focus:border-[#FFC107] text-sm transition-colors">
                 <p id="sub-pago-fecha-err" class="hidden text-red-500 text-xs mt-1">La fecha de pago es obligatoria.</p>
             </div>
             <div>
@@ -2834,7 +2834,7 @@ class CustomSelect {
         const sel = this.select;
         const wrapper = document.createElement('div');
         wrapper.className = 'cs-wrapper';
-        wrapper.style.position = 'relative';
+        wrapper.style.cssText = 'position:relative;width:100%;';
         sel.parentNode.insertBefore(wrapper, sel);
         wrapper.appendChild(sel);
         sel.style.cssText = 'position:absolute;opacity:0;pointer-events:none;width:1px;height:1px';

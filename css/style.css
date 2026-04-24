@@ -120,7 +120,7 @@
 }
 
 /* ── Custom Select ── */
-.cs-wrapper { position: relative; }
+.cs-wrapper { position: relative; width: 100%; }
 
 .cs-trigger {
     display: flex;
