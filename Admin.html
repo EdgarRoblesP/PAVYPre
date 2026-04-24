@@ -208,8 +208,9 @@
                 
                 
                 <button onclick="limpiarFiltrosObras()"
-                    class="text-sm text-gray-400 hover:text-black transition-colors px-2 py-2">
-                    Limpiar filtros
+                    class="flex items-center justify-center w-8 h-8 rounded-lg text-gray-400 hover:text-gray-700 hover:bg-gray-100 transition-colors"
+                    title="Limpiar filtros">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
                 </button>
             </div>
 
@@ -249,8 +250,9 @@
                     class="w-full border-2 border-gray-200 rounded-lg px-4 py-2 text-sm focus:outline-none focus:border-[#FFC107]">
             </div>
             <button onclick="limpiarFiltrosEmpleados()"
-                class="text-sm text-gray-400 hover:text-black transition-colors px-2 py-2">
-                Limpiar filtros
+                class="flex items-center justify-center w-8 h-8 rounded-lg text-gray-400 hover:text-gray-700 hover:bg-gray-100 transition-colors"
+                title="Limpiar filtros">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
             </button>
         </div>
 
@@ -297,8 +299,9 @@
                     class="w-full border-2 border-gray-200 rounded-lg px-4 py-2 text-sm focus:outline-none focus:border-[#FFC107]">
             </div>
             <button onclick="limpiarFiltrosClientes()"
-                class="text-sm text-gray-400 hover:text-black transition-colors px-2 py-2">
-                Limpiar filtros
+                class="flex items-center justify-center w-8 h-8 rounded-lg text-gray-400 hover:text-gray-700 hover:bg-gray-100 transition-colors"
+                title="Limpiar filtros">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
             </button>
         </div>
 
@@ -339,7 +342,10 @@
                     class="w-full border-2 border-gray-200 rounded-lg px-4 py-2 text-sm focus:outline-none focus:border-[#FFC107]">
             </div>
             <button onclick="limpiarFiltrosProveedores()"
-                class="text-sm text-gray-400 hover:text-black transition-colors px-2 py-2">Limpiar filtros</button>
+                class="flex items-center justify-center w-8 h-8 rounded-lg text-gray-400 hover:text-gray-700 hover:bg-gray-100 transition-colors"
+                title="Limpiar filtros">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+            </button>
             <div class="flex items-center gap-2 flex-wrap">
                 <span class="text-xs text-gray-400">Ordenar:</span>
                 <button onclick="sortProveedores('nombre')"            class="px-2.5 py-1 text-xs rounded border border-gray-200 text-gray-600 hover:border-black hover:text-black transition-colors">Nombre<span            id="si-proveedores-nombre"            class="ml-1 opacity-40">↕</span></button>
@@ -372,7 +378,10 @@
                     class="w-full border-2 border-gray-200 rounded-lg px-4 py-2 text-sm focus:outline-none focus:border-[#FFC107]">
             </div>
             <button onclick="limpiarFiltrosInsumos()"
-                class="text-sm text-gray-400 hover:text-black transition-colors px-2 py-2">Limpiar filtros</button>
+                class="flex items-center justify-center w-8 h-8 rounded-lg text-gray-400 hover:text-gray-700 hover:bg-gray-100 transition-colors"
+                title="Limpiar filtros">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+            </button>
         </div>
         <div class="bg-white rounded-xl shadow-md overflow-hidden">
             <div class="overflow-x-auto">
@@ -413,7 +422,10 @@
                     class="w-full border-2 border-gray-200 rounded-lg px-4 py-2 text-sm focus:outline-none focus:border-[#FFC107]">
             </div>
             <button onclick="limpiarFiltrosHerramientas()"
-                class="text-sm text-gray-400 hover:text-black transition-colors px-2 py-2">Limpiar filtros</button>
+                class="flex items-center justify-center w-8 h-8 rounded-lg text-gray-400 hover:text-gray-700 hover:bg-gray-100 transition-colors"
+                title="Limpiar filtros">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+            </button>
         </div>
         <div class="bg-white rounded-xl shadow-md overflow-hidden">
             <div class="overflow-x-auto">
@@ -1008,18 +1020,24 @@ const estadoBadge = (e) => {
 // limpiarError(): restaura el borde gris y oculta el mensaje.
 // ============================================================
 function marcarError(inputId, errId) {
-    const input = document.getElementById(inputId);
-    const err   = document.getElementById(errId);
-    input.classList.remove('border-gray-200');
-    input.classList.add('border-red-400');
+    const input  = document.getElementById(inputId);
+    const err    = document.getElementById(errId);
+    const target = (input.tagName === 'SELECT')
+        ? (input.parentElement.querySelector('.cs-trigger') || input)
+        : input;
+    target.classList.remove('border-gray-200');
+    target.classList.add('border-red-400');
     err.classList.remove('hidden');
 }
 
 function limpiarError(inputId, errId) {
-    const input = document.getElementById(inputId);
-    const err   = document.getElementById(errId);
-    input.classList.remove('border-red-400');
-    input.classList.add('border-gray-200');
+    const input  = document.getElementById(inputId);
+    const err    = document.getElementById(errId);
+    const target = (input.tagName === 'SELECT')
+        ? (input.parentElement.querySelector('.cs-trigger') || input)
+        : input;
+    target.classList.remove('border-red-400');
+    target.classList.add('border-gray-200');
     err.classList.add('hidden');
 }
 
@@ -2796,6 +2814,118 @@ function recargarHerramientas(callback) {
         })
         .catch(() => { renderHerramientas(); if (callback) callback(); });
 }
+
+// ============================================================
+// CUSTOM SELECT — reemplaza <select> nativos con un dropdown
+// estilizado. Usa MutationObserver para sincronizar opciones
+// que se cargan dinámicamente (proveedores, supervisores, etc.)
+// ============================================================
+class CustomSelect {
+    constructor(selectEl) {
+        this.select = selectEl;
+        this._build();
+        this._attachObserver();
+    }
+
+    _build() {
+        const sel = this.select;
+        const wrapper = document.createElement('div');
+        wrapper.className = 'cs-wrapper';
+        sel.parentNode.insertBefore(wrapper, sel);
+        wrapper.appendChild(sel);
+        sel.style.cssText = 'position:absolute;opacity:0;pointer-events:none;width:1px;height:1px';
+        this.wrapper = wrapper;
+
+        const trigger = document.createElement('button');
+        trigger.type = 'button';
+        trigger.className = 'cs-trigger';
+        trigger.innerHTML =
+            '<span class="cs-label"></span>' +
+            '<svg class="cs-chevron" fill="none" stroke="currentColor" viewBox="0 0 24 24">' +
+            '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>' +
+            '</svg>';
+        wrapper.appendChild(trigger);
+        this.trigger = trigger;
+
+        const dropdown = document.createElement('div');
+        dropdown.className = 'cs-dropdown';
+        wrapper.appendChild(dropdown);
+        this.dropdown = dropdown;
+
+        trigger.addEventListener('click', (e) => {
+            e.stopPropagation();
+            this.toggle();
+        });
+        document.addEventListener('click', (e) => {
+            if (!wrapper.contains(e.target)) this.close();
+        });
+
+        this.refresh();
+    }
+
+    refresh() {
+        this.dropdown.innerHTML = '';
+        Array.from(this.select.options).forEach(opt => {
+            const item = document.createElement('div');
+            const isSelected = this.select.value === opt.value;
+            const isPlaceholder = opt.value === '';
+            item.className = 'cs-option' +
+                (isSelected   ? ' selected'      : '') +
+                (isPlaceholder ? ' cs-placeholder' : '');
+            item.textContent = opt.text;
+            item.dataset.value = opt.value;
+            item.addEventListener('click', () => {
+                this.select.value = opt.value;
+                this.select.dispatchEvent(new Event('change', { bubbles: true }));
+                this.close();
+                this.refresh();
+            });
+            this.dropdown.appendChild(item);
+        });
+        this._syncLabel();
+    }
+
+    _syncLabel() {
+        const idx = this.select.selectedIndex;
+        const opt = idx >= 0 ? this.select.options[idx] : null;
+        const label = this.trigger.querySelector('.cs-label');
+        if (opt) {
+            label.textContent = opt.text;
+            label.style.color = opt.value === '' ? '#9ca3af' : '';
+        } else {
+            label.textContent = '';
+        }
+    }
+
+    toggle() {
+        if (this.dropdown.classList.contains('open')) {
+            this.close();
+        } else {
+            document.querySelectorAll('.cs-dropdown.open').forEach(d => d.classList.remove('open'));
+            document.querySelectorAll('.cs-trigger.open').forEach(t => t.classList.remove('open'));
+            this.refresh();
+            this.dropdown.classList.add('open');
+            this.trigger.classList.add('open');
+        }
+    }
+
+    close() {
+        this.dropdown.classList.remove('open');
+        this.trigger.classList.remove('open');
+    }
+
+    _attachObserver() {
+        const obs = new MutationObserver(() => {
+            // setTimeout(0) allows .value assignment to run before refresh
+            setTimeout(() => this.refresh(), 0);
+        });
+        obs.observe(this.select, { childList: true });
+    }
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    document.querySelectorAll('select').forEach(sel => new CustomSelect(sel));
+});
 
 // Verificar sesión de admin antes de cargar datos
 window.addEventListener('pageshow', function(e) {

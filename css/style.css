@@ -119,6 +119,89 @@
   --color-sidebar-ring: var(--sidebar-ring);
 }
 
+/* ── Custom Select ── */
+.cs-wrapper { position: relative; }
+
+.cs-trigger {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    border: 2px solid #e5e7eb;
+    border-radius: 0.5rem;
+    padding: 0.5rem 1rem;
+    font-size: 0.875rem;
+    background: #fff;
+    cursor: pointer;
+    transition: border-color 0.15s;
+    text-align: left;
+    gap: 0.5rem;
+    min-height: 40px;
+    color: #111827;
+    line-height: 1.5;
+}
+.cs-trigger:focus,
+.cs-trigger.open {
+    outline: none;
+    border-color: #FFC107;
+}
+.cs-trigger .cs-label {
+    flex: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+.cs-trigger .cs-chevron {
+    flex-shrink: 0;
+    transition: transform 0.2s;
+    color: #9ca3af;
+    width: 1rem;
+    height: 1rem;
+}
+.cs-trigger.open .cs-chevron {
+    transform: rotate(180deg);
+}
+.cs-dropdown {
+    position: absolute;
+    top: calc(100% + 6px);
+    left: 0;
+    right: 0;
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.13);
+    border: 1px solid rgba(0, 0, 0, 0.07);
+    z-index: 9999;
+    display: none;
+    overflow: hidden;
+    max-height: 240px;
+    overflow-y: auto;
+}
+.cs-dropdown.open {
+    display: block;
+}
+.cs-option {
+    display: flex;
+    align-items: center;
+    padding: 10px 16px;
+    font-size: 0.875rem;
+    cursor: pointer;
+    transition: background 0.1s;
+    color: #111827;
+}
+.cs-option:hover {
+    background: #f5f5f5;
+}
+.cs-option.selected {
+    background: #f9fafb;
+    font-weight: 500;
+}
+.cs-option.cs-placeholder {
+    color: #9ca3af;
+}
+.cs-trigger.border-red-400 {
+    border-color: #f87171 !important;
+}
+
 @layer base {
   * {
     @apply border-border outline-ring/50;
