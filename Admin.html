@@ -2839,9 +2839,10 @@ class CustomSelect {
         const trigger = document.createElement('button');
         trigger.type = 'button';
         trigger.className = 'cs-trigger';
+        trigger.style.cssText = 'display:flex;align-items:center;justify-content:space-between;gap:0.5rem;';
         trigger.innerHTML =
-            '<span class="cs-label"></span>' +
-            '<svg class="cs-chevron" fill="none" stroke="currentColor" viewBox="0 0 24 24">' +
+            '<span class="cs-label" style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;"></span>' +
+            '<svg class="cs-chevron" width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="flex-shrink:0;transition:transform 0.2s;color:#9ca3af;">' +
             '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>' +
             '</svg>';
         wrapper.appendChild(trigger);
@@ -2849,6 +2850,7 @@ class CustomSelect {
 
         const dropdown = document.createElement('div');
         dropdown.className = 'cs-dropdown';
+        dropdown.style.cssText = 'position:absolute;top:calc(100% + 6px);left:0;right:0;background:#fff;border-radius:12px;box-shadow:0 8px 32px rgba(0,0,0,0.13);border:1px solid rgba(0,0,0,0.07);z-index:9999;display:none;overflow:hidden;max-height:240px;overflow-y:auto;';
         wrapper.appendChild(dropdown);
         this.dropdown = dropdown;
 
@@ -2869,11 +2871,13 @@ class CustomSelect {
             const item = document.createElement('div');
             const isSelected = this.select.value === opt.value;
             const isPlaceholder = opt.value === '';
-            item.className = 'cs-option' +
-                (isSelected   ? ' selected'      : '') +
-                (isPlaceholder ? ' cs-placeholder' : '');
+            item.style.cssText = 'display:flex;align-items:center;padding:10px 16px;font-size:0.875rem;cursor:pointer;color:' +
+                (isPlaceholder ? '#9ca3af' : '#111827') + ';' +
+                (isSelected ? 'background:#f9fafb;font-weight:500;' : '');
             item.textContent = opt.text;
             item.dataset.value = opt.value;
+            item.addEventListener('mouseenter', () => { item.style.background = '#f5f5f5'; });
+            item.addEventListener('mouseleave', () => { item.style.background = isSelected ? '#f9fafb' : ''; });
             item.addEventListener('click', () => {
                 this.select.value = opt.value;
                 this.select.dispatchEvent(new Event('change', { bubbles: true }));
@@ -2898,20 +2902,36 @@ class CustomSelect {
     }
 
     toggle() {
-        if (this.dropdown.classList.contains('open')) {
+        if (this.dropdown.style.display === 'block') {
             this.close();
         } else {
-            document.querySelectorAll('.cs-dropdown.open').forEach(d => d.classList.remove('open'));
-            document.querySelectorAll('.cs-trigger.open').forEach(t => t.classList.remove('open'));
+            document.querySelectorAll('.cs-dropdown').forEach(d => {
+                d.style.display = 'none';
+                d.classList.remove('open');
+            });
+            document.querySelectorAll('.cs-trigger.open').forEach(t => {
+                t.classList.remove('open');
+                const ch = t.querySelector('.cs-chevron');
+                if (ch) ch.style.transform = '';
+                t.style.borderColor = '';
+            });
             this.refresh();
+            this.dropdown.style.display = 'block';
             this.dropdown.classList.add('open');
             this.trigger.classList.add('open');
+            this.trigger.style.borderColor = '#FFC107';
+            const chevron = this.trigger.querySelector('.cs-chevron');
+            if (chevron) chevron.style.transform = 'rotate(180deg)';
         }
     }
 
     close() {
+        this.dropdown.style.display = 'none';
         this.dropdown.classList.remove('open');
         this.trigger.classList.remove('open');
+        this.trigger.style.borderColor = '';
+        const chevron = this.trigger.querySelector('.cs-chevron');
+        if (chevron) chevron.style.transform = '';
     }
 
     _attachObserver() {
