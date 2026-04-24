@@ -2831,6 +2831,7 @@ class CustomSelect {
         const sel = this.select;
         const wrapper = document.createElement('div');
         wrapper.className = 'cs-wrapper';
+        wrapper.style.position = 'relative';
         sel.parentNode.insertBefore(wrapper, sel);
         wrapper.appendChild(sel);
         sel.style.cssText = 'position:absolute;opacity:0;pointer-events:none;width:1px;height:1px';
@@ -2839,7 +2840,8 @@ class CustomSelect {
         const trigger = document.createElement('button');
         trigger.type = 'button';
         trigger.className = 'cs-trigger';
-        trigger.style.cssText = 'display:flex;align-items:center;justify-content:space-between;gap:0.5rem;';
+        // Fuente heredada + layout flex garantizados via inline style
+        trigger.style.cssText = 'display:flex;align-items:center;justify-content:space-between;gap:0.5rem;font-family:inherit;font-size:0.875rem;font-weight:400;';
         trigger.innerHTML =
             '<span class="cs-label" style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;"></span>' +
             '<svg class="cs-chevron" width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="flex-shrink:0;transition:transform 0.2s;color:#9ca3af;">' +
@@ -2848,21 +2850,32 @@ class CustomSelect {
         wrapper.appendChild(trigger);
         this.trigger = trigger;
 
+        // El dropdown va al <body> con position:fixed para escapar cualquier
+        // overflow:auto/hidden de modales o contenedores padre
         const dropdown = document.createElement('div');
         dropdown.className = 'cs-dropdown';
-        dropdown.style.cssText = 'position:absolute;top:calc(100% + 6px);left:0;right:0;background:#fff;border-radius:12px;box-shadow:0 8px 32px rgba(0,0,0,0.13);border:1px solid rgba(0,0,0,0.07);z-index:9999;display:none;overflow:hidden;max-height:240px;overflow-y:auto;';
-        wrapper.appendChild(dropdown);
+        dropdown.style.cssText = 'position:fixed;background:#fff;border-radius:12px;box-shadow:0 8px 32px rgba(0,0,0,0.13);border:1px solid rgba(0,0,0,0.07);z-index:99999;display:none;overflow:hidden;max-height:240px;overflow-y:auto;font-family:inherit;font-size:0.875rem;';
+        document.body.appendChild(dropdown);
         this.dropdown = dropdown;
 
         trigger.addEventListener('click', (e) => {
             e.stopPropagation();
             this.toggle();
         });
+        // Cerrar al hacer click fuera, comprobando tanto el wrapper como el dropdown
         document.addEventListener('click', (e) => {
-            if (!wrapper.contains(e.target)) this.close();
+            if (!wrapper.contains(e.target) && !dropdown.contains(e.target)) this.close();
         });
 
         this.refresh();
+    }
+
+    // Posiciona el dropdown fijo bajo el trigger usando coordenadas de viewport
+    _positionDropdown() {
+        const rect = this.trigger.getBoundingClientRect();
+        this.dropdown.style.top   = (rect.bottom + 6) + 'px';
+        this.dropdown.style.left  = rect.left + 'px';
+        this.dropdown.style.width = rect.width + 'px';
     }
 
     refresh() {
@@ -2871,7 +2884,7 @@ class CustomSelect {
             const item = document.createElement('div');
             const isSelected = this.select.value === opt.value;
             const isPlaceholder = opt.value === '';
-            item.style.cssText = 'display:flex;align-items:center;padding:10px 16px;font-size:0.875rem;cursor:pointer;color:' +
+            item.style.cssText = 'display:flex;align-items:center;padding:10px 16px;font-size:0.875rem;cursor:pointer;font-family:inherit;color:' +
                 (isPlaceholder ? '#9ca3af' : '#111827') + ';' +
                 (isSelected ? 'background:#f9fafb;font-weight:500;' : '');
             item.textContent = opt.text;
@@ -2895,7 +2908,7 @@ class CustomSelect {
         const label = this.trigger.querySelector('.cs-label');
         if (opt) {
             label.textContent = opt.text;
-            label.style.color = opt.value === '' ? '#9ca3af' : '';
+            label.style.color = opt.value === '' ? '#9ca3af' : '#111827';
         } else {
             label.textContent = '';
         }
@@ -2905,10 +2918,8 @@ class CustomSelect {
         if (this.dropdown.style.display === 'block') {
             this.close();
         } else {
-            document.querySelectorAll('.cs-dropdown').forEach(d => {
-                d.style.display = 'none';
-                d.classList.remove('open');
-            });
+            // Cerrar cualquier otro dropdown abierto
+            document.querySelectorAll('.cs-dropdown').forEach(d => { d.style.display = 'none'; });
             document.querySelectorAll('.cs-trigger.open').forEach(t => {
                 t.classList.remove('open');
                 const ch = t.querySelector('.cs-chevron');
@@ -2916,8 +2927,8 @@ class CustomSelect {
                 t.style.borderColor = '';
             });
             this.refresh();
+            this._positionDropdown();
             this.dropdown.style.display = 'block';
-            this.dropdown.classList.add('open');
             this.trigger.classList.add('open');
             this.trigger.style.borderColor = '#FFC107';
             const chevron = this.trigger.querySelector('.cs-chevron');
@@ -2927,7 +2938,6 @@ class CustomSelect {
 
     close() {
         this.dropdown.style.display = 'none';
-        this.dropdown.classList.remove('open');
         this.trigger.classList.remove('open');
         this.trigger.style.borderColor = '';
         const chevron = this.trigger.querySelector('.cs-chevron');
@@ -2936,7 +2946,6 @@ class CustomSelect {
 
     _attachObserver() {
         const obs = new MutationObserver(() => {
-            // setTimeout(0) allows .value assignment to run before refresh
             setTimeout(() => this.refresh(), 0);
         });
         obs.observe(this.select, { childList: true });
