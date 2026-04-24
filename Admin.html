@@ -1499,7 +1499,7 @@ function renderSubEmpleados(obra) {
                 <th class="px-3 py-2 text-left">Puesto</th>
             </tr></thead>
             <tbody>
-                ${obra.empleados.map(e => `<tr class="border-b border-gray-100 hover:bg-gray-50">
+                ${obra.empleados.map((e, idx) => `<tr class="border-b border-gray-100 ${idx % 2 === 0 ? 'hover:bg-gray-100' : 'bg-gray-50 hover:bg-gray-100'}">
                     <td class="px-3 py-3 font-medium">${e.nombreEmpleado}</td>
                     <td class="px-3 py-3 text-gray-500">${fmtDate(e.fechaInicio)}</td>
                     <td class="px-3 py-3 text-gray-500">${fmtDate(e.fechaTermino)}</td>
@@ -1544,7 +1544,7 @@ function renderSubRecursos(obra) {
                     <th class="px-3 py-2 text-right">Uds.</th>
                 </tr></thead>
                 <tbody>
-                    ${obra.herramientas.map(h => `<tr class="border-b border-gray-100 hover:bg-gray-50">
+                    ${obra.herramientas.map((h, idx) => `<tr class="border-b border-gray-100 ${idx % 2 === 0 ? 'hover:bg-gray-100' : 'bg-gray-50 hover:bg-gray-100'}">
                         <td class="px-3 py-3 font-medium">${h.nombre}</td>
                         <td class="px-3 py-3 text-gray-500">${h.proveedor}</td>
                         <td class="px-3 py-3 text-right text-gray-600">${fmt(h.rentaSemanal)}</td>
@@ -1577,7 +1577,7 @@ function renderSubRecursos(obra) {
                     <th class="px-3 py-2 text-right">Cantidad</th>
                 </tr></thead>
                 <tbody>
-                    ${obra.insumos.map(r => `<tr class="border-b border-gray-100 hover:bg-gray-50">
+                    ${obra.insumos.map((r, idx) => `<tr class="border-b border-gray-100 ${idx % 2 === 0 ? 'hover:bg-gray-100' : 'bg-gray-50 hover:bg-gray-100'}">
                         <td class="px-3 py-3 font-medium">${r.nombre}</td>
                         <td class="px-3 py-3 text-gray-500">${r.proveedor}</td>
                         <td class="px-3 py-3 text-right text-gray-600">${fmt(r.costoUnitario)}</td>
@@ -1607,7 +1607,7 @@ function renderSubRecursos(obra) {
                     <th class="px-3 py-2 text-right">km Totales</th>
                 </tr></thead>
                 <tbody>
-                    ${obra.servicios.map(r => `<tr class="border-b border-gray-100 hover:bg-gray-50">
+                    ${obra.servicios.map((r, idx) => `<tr class="border-b border-gray-100 ${idx % 2 === 0 ? 'hover:bg-gray-100' : 'bg-gray-50 hover:bg-gray-100'}">
                         <td class="px-3 py-3 font-medium">${r.nombre}</td>
                         <td class="px-3 py-3 text-gray-500">${r.proveedor}</td>
                         <td class="px-3 py-3 text-right text-gray-600">${fmt(r.costoKm)}</td>
@@ -1646,7 +1646,7 @@ function renderSubPagos(obra) {
                 <th class="px-3 py-2 text-right">Monto</th>
             </tr></thead>
             <tbody>
-                ${obra.pagos.map(p => `<tr class="border-b border-gray-100 hover:bg-gray-50">
+                ${obra.pagos.map((p, idx) => `<tr class="border-b border-gray-100 ${idx % 2 === 0 ? 'hover:bg-gray-100' : 'bg-gray-50 hover:bg-gray-100'}">
                     <td class="px-3 py-3">${fmtDate(p.fechaPago)}</td>
                     <td class="px-3 py-3 text-gray-500">${p.tipoPago}</td>
                     <td class="px-3 py-3 text-right text-[#FFC107] font-semibold">${fmt(p.monto)}</td>
@@ -1879,11 +1879,12 @@ function renderEmpleadosConDatos(lista) {
         renderPaginacionGeneric('empleados-paginacion', empleadosPage, totalPags, sorted.length, PER_PAGE, 'irAPaginaEmpleados');
         return;
     }
-    tbody.innerHTML = pagina.map(e => {
+    tbody.innerHTML = pagina.map((e, idx) => {
         const supervisorLabel = e.supervisorNombre
             ? `<span class="font-medium text-black">${e.supervisorNombre}</span>`
             : `<span class="text-gray-300">—</span>`;
-        return `<tr class="border-b border-gray-100 hover:bg-gray-50 text-sm">
+        const rowBg = idx % 2 === 0 ? 'hover:bg-gray-100' : 'bg-gray-50 hover:bg-gray-100';
+        return `<tr class="border-b border-gray-100 text-sm ${rowBg}">
             <td class="px-4 py-3 font-semibold text-black">${e.nombre}</td>
             <td class="px-4 py-3 text-gray-500">${e.puesto}</td>
             <td class="px-4 py-3 text-gray-500">${e.telefono}</td>
@@ -1918,7 +1919,7 @@ function renderClientesConDatos(lista) {
         tbody.innerHTML = '<tr><td colspan="4" class="px-4 py-8 text-center text-gray-400">No se encontraron clientes.</td></tr>';
         return;
     }
-    tbody.innerHTML = sorted.map(c => `<tr class="border-b border-gray-100 hover:bg-gray-50 text-sm">
+    tbody.innerHTML = sorted.map((c, idx) => `<tr class="border-b border-gray-100 text-sm ${idx % 2 === 0 ? 'hover:bg-gray-100' : 'bg-gray-50 hover:bg-gray-100'}">
         <td class="px-4 py-3 font-semibold text-black">${c.nombre}</td>
         <td class="px-4 py-3 text-gray-500">${c.telefono}</td>
         <td class="px-4 py-3 text-gray-500">${c.email}</td>
@@ -1995,9 +1996,10 @@ function renderInsumosConDatos(lista) {
         renderPaginacionGeneric('insumos-paginacion', insumosPage, totalPags, sorted.length, PER_PAGE, 'irAPaginaInsumos');
         return;
     }
-    tbody.innerHTML = pagina.map(i => {
+    tbody.innerHTML = pagina.map((i, idx) => {
         const provNombre = i.proveedor ?? (proveedores.find(p => p.id === i.proveedorId)?.nombre ?? '—');
-        return `<tr class="border-b border-gray-100 hover:bg-gray-50 text-sm">
+        const rowBg = idx % 2 === 0 ? 'hover:bg-gray-100' : 'bg-gray-50 hover:bg-gray-100';
+        return `<tr class="border-b border-gray-100 text-sm ${rowBg}">
             <td class="px-4 py-3 font-semibold text-black">${i.nombre}</td>
             <td class="px-4 py-3 text-gray-500">${i.tipo}</td>
             <td class="px-4 py-3 text-gray-500">${provNombre}</td>
@@ -2038,7 +2040,7 @@ function renderHerramientasConDatos(lista) {
         renderPaginacionGeneric('herramientas-paginacion', herramientasPage, totalPags, sorted.length, PER_PAGE, 'irAPaginaHerramientas');
         return;
     }
-    tbody.innerHTML = pagina.map(h => {
+    tbody.innerHTML = pagina.map((h, idx) => {
         // Soporta datos de BD (id_herramienta / proveedor / renta_semanal)
         const idHra      = h.id_herramienta ?? h.id;
         const provNombre = h.proveedor ?? (proveedores.find(p => p.id === h.proveedorId)?.nombre ?? '—');
@@ -2055,7 +2057,8 @@ function renderHerramientasConDatos(lista) {
                         0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
                  </svg>
                </div>`;
-        return `<tr class="border-b border-gray-100 hover:bg-gray-50 text-sm">
+        const rowBg = idx % 2 === 0 ? 'hover:bg-gray-100' : 'bg-gray-50 hover:bg-gray-100';
+        return `<tr class="border-b border-gray-100 text-sm ${rowBg}">
             <td class="px-4 py-3">${imgHtml}</td>
             <td class="px-4 py-3 font-semibold text-black">${h.nombre}</td>
             <td class="px-4 py-3 text-gray-500">${provNombre}</td>
