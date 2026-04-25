@@ -10,7 +10,6 @@
     <link rel="stylesheet" href="css/style.css">
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
     <style>
         .modal-overlay { display: none; }
         .modal-overlay.active { display: flex; }
@@ -96,130 +95,6 @@
             margin-top: .55rem;
         }
         .card-proveedor-stats .sep { color: #d1d5db; }
-        /* ── Flatpickr – tema dorado PAVYPRE ── */
-        .flatpickr-calendar {
-            z-index: 99999 !important;
-            border-radius: 14px !important;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.18) !important;
-            border: 1px solid rgba(0,0,0,0.08) !important;
-            overflow: hidden !important;
-            font-family: inherit !important;
-        }
-        .flatpickr-months {
-            background: #111827 !important;
-        }
-        .flatpickr-months .flatpickr-month {
-            background: #111827 !important;
-            color: #fff !important;
-            fill: #fff !important;
-            height: 44px !important;
-            line-height: 44px !important;
-        }
-        .flatpickr-weekdays {
-            background: #111827 !important;
-            padding-bottom: 6px !important;
-        }
-        span.flatpickr-weekday {
-            background: #111827 !important;
-            color: #9ca3af !important;
-            fill: #9ca3af !important;
-            font-size: 0.7rem !important;
-            font-weight: 700 !important;
-            text-transform: uppercase !important;
-        }
-        /* Mes + año: sin letter-spacing para que el año quepa */
-        .flatpickr-current-month {
-            font-size: 0.9rem !important;
-            font-weight: 700 !important;
-            width: 80% !important;
-            left: 10% !important;
-            padding-top: 12px !important;
-        }
-        .flatpickr-current-month .flatpickr-monthDropdown-months {
-            background: #111827 !important;
-            color: #fff !important;
-            text-transform: uppercase !important;
-            font-weight: 700 !important;
-            border: none !important;
-            outline: none !important;
-            -webkit-appearance: none !important;
-            appearance: none !important;
-            padding-right: 14px !important;
-        }
-        .flatpickr-current-month .flatpickr-monthDropdown-months option {
-            background: #111827 !important;
-            color: #fff !important;
-        }
-        /* Año – asegurar visibilidad y tamaño */
-        .flatpickr-current-month .numInputWrapper {
-            display: inline-block !important;
-            width: 6ch !important;
-            min-width: 52px !important;
-        }
-        .flatpickr-current-month input.cur-year {
-            color: #fff !important;
-            font-weight: 700 !important;
-            font-size: 0.9rem !important;
-            display: inline-block !important;
-            visibility: visible !important;
-            opacity: 1 !important;
-            background: transparent !important;
-        }
-        .flatpickr-current-month .numInputWrapper span.arrowUp::after { border-bottom-color: rgba(255,255,255,0.6) !important; }
-        .flatpickr-current-month .numInputWrapper span.arrowDown::after { border-top-color: rgba(255,255,255,0.6) !important; }
-        .flatpickr-months .flatpickr-prev-month svg,
-        .flatpickr-months .flatpickr-next-month svg { fill: #fff !important; }
-        .flatpickr-months .flatpickr-prev-month:hover svg,
-        .flatpickr-months .flatpickr-next-month:hover svg { fill: #FFC107 !important; }
-
-        /* Days grid */
-        .flatpickr-days { border: none !important; }
-        .dayContainer { padding: 6px 6px 8px !important; }
-
-        /* Celdas de día – cuadrado redondeado */
-        .flatpickr-day {
-            border-radius: 8px !important;
-            border: none !important;
-            height: 36px !important;
-            line-height: 36px !important;
-            font-size: 0.85rem !important;
-            color: #111827 !important;
-            max-width: 40px !important;
-        }
-        .flatpickr-day:hover:not(.selected):not(.disabled):not(.flatpickr-disabled) {
-            background: #FFF3CD !important;
-            border-color: transparent !important;
-        }
-        /* Hoy – borde dorado, cuadrado redondeado */
-        .flatpickr-day.today {
-            border: 2px solid #FFC107 !important;
-            border-radius: 8px !important;
-            color: #111827 !important;
-            font-weight: 600 !important;
-            background: transparent !important;
-        }
-        .flatpickr-day.today.selected {
-            background: #FFC107 !important;
-            border-color: #FFC107 !important;
-            color: #000 !important;
-        }
-        /* Seleccionado – cuadrado dorado redondeado (no círculo) */
-        .flatpickr-day.selected,
-        .flatpickr-day.selected:hover,
-        .flatpickr-day.startRange,
-        .flatpickr-day.endRange {
-            background: #FFC107 !important;
-            border-color: #FFC107 !important;
-            color: #000 !important;
-            font-weight: 700 !important;
-            border-radius: 8px !important;
-            box-shadow: none !important;
-        }
-        /* Días de meses adyacentes */
-        .flatpickr-day.prevMonthDay,
-        .flatpickr-day.nextMonthDay { color: #d1d5db !important; }
-        .flatpickr-day.disabled,
-        .flatpickr-day.flatpickr-disabled { color: #e5e7eb !important; }
 
         .card-proveedor-stats .stat-badge {
             background: #f9fafb;
@@ -2492,7 +2367,7 @@ function openSubModal(modalId, id) {
             const obra = obras.find(o => o.id === currentObraId);
             const p    = obra.pagos.find(pg => pg.id === id);
             document.getElementById('sub-pago-id').value    = p.id;
-            fpSetDate('sub-pago-fecha', p.fechaPago);
+            document.getElementById('sub-pago-fecha').value = p.fechaPago;
             document.getElementById('sub-pago-tipo').value  = p.tipoPago;
             document.getElementById('sub-pago-monto').value = p.monto;
             document.getElementById('sub-pago-modal-title').textContent = 'Editar Pago';
@@ -3096,51 +2971,6 @@ window.addEventListener('pageshow', function(e) {
         })
         .catch(() => location.replace('Login.html'));
 });
-</script>
-<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
-<script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/es.js"></script>
-<script>
-const _fpInstances = {};
-const _fpConfig = {
-    dateFormat: 'Y-m-d',
-    locale: 'es',
-    allowInput: true,
-    disableMobile: true,
-    onReady(_sel, _val, fp) {
-        const cal = fp.calendarContainer;
-        const monthSel = cal.querySelector('.flatpickr-monthDropdown-months');
-        if (monthSel) {
-            monthSel.style.textTransform = 'uppercase';
-            monthSel.style.background = '#111827';
-            monthSel.style.color = '#fff';
-            monthSel.style.border = 'none';
-            monthSel.style.outline = 'none';
-        }
-        const yearInput = cal.querySelector('input.cur-year');
-        if (yearInput) {
-            yearInput.style.color = '#fff';
-            yearInput.style.fontWeight = '700';
-            yearInput.style.background = 'transparent';
-        }
-    }
-};
-
-['obra-fechaInicio', 'obra-fechaTermino',
- 'sub-empleado-fechaInicio', 'sub-empleado-fechaTermino',
- 'sub-recurso-fecha-inicio', 'sub-recurso-fecha-termino',
- 'sub-pago-fecha'
-].forEach(id => {
-    const el = document.getElementById(id);
-    if (el) _fpInstances[id] = flatpickr(el, { ..._fpConfig });
-});
-
-document.getElementById('sub-pago-form').addEventListener('reset', () => {
-    if (_fpInstances['sub-pago-fecha']) _fpInstances['sub-pago-fecha'].clear();
-});
-
-function fpSetDate(id, value) {
-    if (_fpInstances[id]) _fpInstances[id].setDate(value, false);
-}
 </script>
 </body>
 </html>
