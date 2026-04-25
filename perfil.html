@@ -60,20 +60,38 @@
             <form id="pwd-form" class="space-y-4" novalidate>
                 <div>
                     <label class="block text-sm font-semibold text-gray-700 mb-1">Contraseña actual *</label>
-                    <input id="pwd-actual" name="contrasena_actual" type="password"
-                        class="w-full border-2 border-gray-200 rounded-lg px-4 py-2.5 focus:outline-none focus:border-[#FFC107] text-sm">
+                    <div class="relative">
+                        <input id="pwd-actual" name="contrasena_actual" type="password"
+                            class="w-full border-2 border-gray-200 rounded-lg px-4 py-2.5 pr-11 focus:outline-none focus:border-[#FFC107] text-sm">
+                        <button type="button" onclick="togglePwd('pwd-actual', this)"
+                            class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
+                            <img src="img/eye.svg" alt="Mostrar" class="w-5 h-5">
+                        </button>
+                    </div>
                     <p id="pwd-actual-err" class="hidden text-red-500 text-xs mt-1">Ingresa tu contraseña actual.</p>
                 </div>
                 <div>
                     <label class="block text-sm font-semibold text-gray-700 mb-1">Nueva contraseña * <span class="text-gray-400 font-normal">(mínimo 8 caracteres)</span></label>
-                    <input id="pwd-nueva" name="nueva_contrasena" type="password"
-                        class="w-full border-2 border-gray-200 rounded-lg px-4 py-2.5 focus:outline-none focus:border-[#FFC107] text-sm">
+                    <div class="relative">
+                        <input id="pwd-nueva" name="nueva_contrasena" type="password"
+                            class="w-full border-2 border-gray-200 rounded-lg px-4 py-2.5 pr-11 focus:outline-none focus:border-[#FFC107] text-sm">
+                        <button type="button" onclick="togglePwd('pwd-nueva', this)"
+                            class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
+                            <img src="img/eye.svg" alt="Mostrar" class="w-5 h-5">
+                        </button>
+                    </div>
                     <p id="pwd-nueva-err" class="hidden text-red-500 text-xs mt-1">La nueva contraseña debe tener al menos 8 caracteres.</p>
                 </div>
                 <div>
                     <label class="block text-sm font-semibold text-gray-700 mb-1">Confirmar nueva contraseña *</label>
-                    <input id="pwd-confirmar" name="confirmar_contrasena" type="password"
-                        class="w-full border-2 border-gray-200 rounded-lg px-4 py-2.5 focus:outline-none focus:border-[#FFC107] text-sm">
+                    <div class="relative">
+                        <input id="pwd-confirmar" name="confirmar_contrasena" type="password"
+                            class="w-full border-2 border-gray-200 rounded-lg px-4 py-2.5 pr-11 focus:outline-none focus:border-[#FFC107] text-sm">
+                        <button type="button" onclick="togglePwd('pwd-confirmar', this)"
+                            class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
+                            <img src="img/eye.svg" alt="Mostrar" class="w-5 h-5">
+                        </button>
+                    </div>
                     <p id="pwd-confirmar-err" class="hidden text-red-500 text-xs mt-1">Las contraseñas no coinciden.</p>
                 </div>
                 <div class="pt-1">
@@ -104,6 +122,16 @@ fetch('php/get_sesion.php')
         document.getElementById('btn-volver').href = backMap[s.role] || 'Login.html';
     })
     .catch(() => { window.location.href = 'Login.html'; });
+
+// ── Toggle visibilidad de contraseña ─────────────────────────
+function togglePwd(inputId, btn) {
+    const input = document.getElementById(inputId);
+    const isPassword = input.type === 'password';
+    input.type = isPassword ? 'text' : 'password';
+    btn.innerHTML = isPassword
+        ? '<img src="img/closedEye.svg" alt="Ocultar" class="w-5 h-5">'
+        : '<img src="img/eye.svg" alt="Mostrar" class="w-5 h-5">';
+}
 
 // ── Helpers de validación ─────────────────────────────────────
 function marcarErr(inputId, errId) {
