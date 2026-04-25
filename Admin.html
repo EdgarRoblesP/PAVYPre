@@ -107,16 +107,17 @@
         }
         .flatpickr-months {
             background: #111827 !important;
-            padding: 4px 0 !important;
         }
         .flatpickr-months .flatpickr-month {
             background: #111827 !important;
             color: #fff !important;
             fill: #fff !important;
+            height: 44px !important;
+            line-height: 44px !important;
         }
         .flatpickr-weekdays {
             background: #111827 !important;
-            padding-bottom: 8px !important;
+            padding-bottom: 6px !important;
         }
         span.flatpickr-weekday {
             background: #111827 !important;
@@ -125,22 +126,47 @@
             font-size: 0.7rem !important;
             font-weight: 700 !important;
             text-transform: uppercase !important;
-            letter-spacing: 0.05em !important;
         }
+        /* Mes + año: sin letter-spacing para que el año quepa */
         .flatpickr-current-month {
-            font-size: 0.92rem !important;
+            font-size: 0.9rem !important;
             font-weight: 700 !important;
-            letter-spacing: 0.04em !important;
+            width: 80% !important;
+            left: 10% !important;
+            padding-top: 12px !important;
         }
-        .flatpickr-current-month .flatpickr-monthDropdown-months,
-        .flatpickr-current-month .flatpickr-monthDropdown-months option {
+        .flatpickr-current-month .flatpickr-monthDropdown-months {
             background: #111827 !important;
             color: #fff !important;
             text-transform: uppercase !important;
             font-weight: 700 !important;
-            letter-spacing: 0.04em !important;
+            border: none !important;
+            outline: none !important;
+            -webkit-appearance: none !important;
+            appearance: none !important;
+            padding-right: 14px !important;
         }
-        .flatpickr-current-month input.cur-year { color: #fff !important; font-weight: 700 !important; }
+        .flatpickr-current-month .flatpickr-monthDropdown-months option {
+            background: #111827 !important;
+            color: #fff !important;
+        }
+        /* Año – asegurar visibilidad y tamaño */
+        .flatpickr-current-month .numInputWrapper {
+            display: inline-block !important;
+            width: 6ch !important;
+            min-width: 52px !important;
+        }
+        .flatpickr-current-month input.cur-year {
+            color: #fff !important;
+            font-weight: 700 !important;
+            font-size: 0.9rem !important;
+            display: inline-block !important;
+            visibility: visible !important;
+            opacity: 1 !important;
+            background: transparent !important;
+        }
+        .flatpickr-current-month .numInputWrapper span.arrowUp::after { border-bottom-color: rgba(255,255,255,0.6) !important; }
+        .flatpickr-current-month .numInputWrapper span.arrowDown::after { border-top-color: rgba(255,255,255,0.6) !important; }
         .flatpickr-months .flatpickr-prev-month svg,
         .flatpickr-months .flatpickr-next-month svg { fill: #fff !important; }
         .flatpickr-months .flatpickr-prev-month:hover svg,
@@ -3081,8 +3107,21 @@ const _fpConfig = {
     allowInput: true,
     disableMobile: true,
     onReady(_sel, _val, fp) {
-        const monthEl = fp.calendarContainer.querySelector('.flatpickr-monthDropdown-months');
-        if (monthEl) monthEl.style.textTransform = 'uppercase';
+        const cal = fp.calendarContainer;
+        const monthSel = cal.querySelector('.flatpickr-monthDropdown-months');
+        if (monthSel) {
+            monthSel.style.textTransform = 'uppercase';
+            monthSel.style.background = '#111827';
+            monthSel.style.color = '#fff';
+            monthSel.style.border = 'none';
+            monthSel.style.outline = 'none';
+        }
+        const yearInput = cal.querySelector('input.cur-year');
+        if (yearInput) {
+            yearInput.style.color = '#fff';
+            yearInput.style.fontWeight = '700';
+            yearInput.style.background = 'transparent';
+        }
     }
 };
 
