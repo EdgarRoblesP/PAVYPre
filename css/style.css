@@ -262,3 +262,56 @@
     line-height: 1.5;
   }
 }
+
+/* ── index.html – animaciones y navbar ── */
+
+html { scroll-behavior: smooth; }
+
+/* Animación de entrada al hacer scroll */
+.anim-ready {
+    opacity: 0;
+    transform: translateY(30px);
+    transition: opacity 0.65s ease, transform 0.65s ease;
+}
+.anim-ready.anim-in {
+    opacity: 1;
+    transform: translateY(0);
+}
+.anim-delay-1 { transition-delay: 0.12s; }
+.anim-delay-2 { transition-delay: 0.24s; }
+.anim-delay-3 { transition-delay: 0.36s; }
+
+/* Link activo del navbar */
+nav a.nav-active { color: #FFC107 !important; }
+
+/* Subrayado dorado deslizante en links del navbar (excluye botón Login) */
+nav a:not([href="Login.html"]) {
+    position: relative;
+    padding-bottom: 2px;
+}
+nav a:not([href="Login.html"])::after {
+    content: '';
+    position: absolute;
+    bottom: -3px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 0;
+    height: 2px;
+    background: #FFC107;
+    border-radius: 2px;
+    transition: width 0.3s ease;
+}
+nav a:not([href="Login.html"]):hover::after,
+nav a.nav-active:not([href="Login.html"])::after {
+    width: 100%;
+}
+
+/* Animación de presionado al hacer clic */
+@keyframes navPress {
+    0%   { transform: scale(1); }
+    35%  { transform: scale(0.88); }
+    100% { transform: scale(1); }
+}
+nav a.nav-pressing {
+    animation: navPress 0.22s ease forwards;
+}

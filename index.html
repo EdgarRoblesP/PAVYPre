@@ -10,24 +10,7 @@
 
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="icon" type="image/png" sizes="16x16" href="img/logo-16x16.png">
-    <style>
-        /* Animación de entrada al hacer scroll */
-        .anim-ready {
-            opacity: 0;
-            transform: translateY(30px);
-            transition: opacity 0.65s ease, transform 0.65s ease;
-        }
-        .anim-ready.anim-in {
-            opacity: 1;
-            transform: translateY(0);
-        }
-        .anim-delay-1 { transition-delay: 0.12s; }
-        .anim-delay-2 { transition-delay: 0.24s; }
-        .anim-delay-3 { transition-delay: 0.36s; }
 
-        /* Link activo del navbar */
-        nav a.nav-active { color: #FFC107 !important; }
-    </style>
 </head>
 <body data-spy="scroll">
 
@@ -72,7 +55,7 @@
                 href="Login.html"
                 class="bg-[#FFC107] text-black font-semibold px-6 py-2 rounded hover:bg-yellow-500 transition-colors"
               >
-                Iniciar sesión
+                Iniciar Sesión
               </a>
             </nav>
           </div>
@@ -310,6 +293,16 @@
         });
     }, { threshold: 0.4, rootMargin: '-80px 0px -35% 0px' });
     sections.forEach(s => navObserver.observe(s));
+
+    // Animación de presionado al hacer clic en enlace del navbar
+    document.querySelectorAll('nav a').forEach(link => {
+        link.addEventListener('click', function () {
+            this.classList.remove('nav-pressing');
+            void this.offsetWidth; // forzar reflow para reiniciar la animación
+            this.classList.add('nav-pressing');
+            this.addEventListener('animationend', () => this.classList.remove('nav-pressing'), { once: true });
+        });
+    });
 </script>
 </body>
 </html>
