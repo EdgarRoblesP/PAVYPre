@@ -87,13 +87,15 @@ function insertarEmpleado(
     string $telefono, string $direccion, string $email,
     float  $salario, ?string $supervisor, string $hash
 ): void {
-    // Verificar existencia
     $chk = mysqli_prepare($link,
         'SELECT COUNT(*) FROM pv_empleados WHERE id_empleado = ?'
     );
     mysqli_stmt_bind_param($chk, 's', $id);
     mysqli_stmt_execute($chk);
-    if ((int) stmt_value($chk) > 0) {
+    $existe = (int) stmt_value($chk) > 0;
+    mysqli_stmt_close($chk);
+
+    if ($existe) {
         echo "<p>⏭️  <strong>$id</strong> ($nombre) — ya existe, omitido.</p>";
         return;
     }
@@ -114,6 +116,7 @@ function insertarEmpleado(
         $err = mysqli_stmt_error($stmt);
         echo "<p style='color:red'>❌ <strong>$id</strong> ($nombre) — ERROR: $err</p>";
     }
+    mysqli_stmt_close($stmt);
 }
 
 // ════════════════════════════════════════════════════════
@@ -129,7 +132,10 @@ function insertarCliente(
     );
     mysqli_stmt_bind_param($chk, 's', $id);
     mysqli_stmt_execute($chk);
-    if ((int) stmt_value($chk) > 0) {
+    $existe = (int) stmt_value($chk) > 0;
+    mysqli_stmt_close($chk);
+
+    if ($existe) {
         echo "<p>⏭️  <strong>$id</strong> ($nombre) — ya existe, omitido.</p>";
         return;
     }
@@ -150,6 +156,7 @@ function insertarCliente(
         $err = mysqli_stmt_error($stmt);
         echo "<p style='color:red'>❌ <strong>$id</strong> ($nombre) — ERROR: $err</p>";
     }
+    mysqli_stmt_close($stmt);
 }
 
 // ════════════════════════════════════════════════════════
